@@ -37,7 +37,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       teleop_topic << "/teleop";
       robot_topic << "/robotInfo";
       
-      if(robot_id>0){
+      if(robot_id==0){
          // Setup custom master
          QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
                             +QString(ROS_MASTER_PORT);

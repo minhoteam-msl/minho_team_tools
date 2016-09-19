@@ -33,15 +33,15 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    std::stringstream robot_topic;
    if(real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
-      control_topic << "controlInfo";
-      teleop_topic << "teleop";
-      robot_topic << "robotInfo";
+      control_topic << "/controlInfo";
+      teleop_topic << "/teleop";
+      robot_topic << "/robotInfo";
             
       // Setup custom master
-      /*QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
+      QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
                          +QString(ROS_MASTER_PORT);
-      ROS_WARN("Robot IP: '%s'",robot_ip.toStdString().c_str());
-      setenv("ROS_MASTER_URI",robot_ip.toStdString().c_str(),1);*/
+      ROS_WARN("Robot Master IP: '%s'",robot_ip.toStdString().c_str());
+      setenv("ROS_MASTER_URI",robot_ip.toStdString().c_str(),1);
    } else {
       // Setup ROS Node and pusblishers/subscribers in REAL ROBOT
       control_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/controlInfo";

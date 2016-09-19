@@ -10,8 +10,8 @@ int main(int argc, char *argv[])
    }
    
    int robot_id = QString::fromLocal8Bit(argv[2]).toInt();
-   if(robot_id<=0 || robot_id>6){
-      ROS_ERROR("Must enter robot id correctly. Robot id's range from 1 to 6.");
+   if(robot_id<0 || robot_id>6){
+      ROS_ERROR("Must enter robot id correctly. Robot id's range from 1 to 6 and 0 to localhost.");
       exit(2);     
    }
    

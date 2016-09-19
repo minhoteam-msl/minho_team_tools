@@ -36,12 +36,15 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       control_topic << "/controlInfo";
       teleop_topic << "/teleop";
       robot_topic << "/robotInfo";
-            
-      // Setup custom master
-      QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
-                         +QString(ROS_MASTER_PORT);
-      ROS_WARN("Robot Master IP: '%s'",robot_ip.toStdString().c_str());
-      setenv("ROS_MASTER_URI",robot_ip.toStdString().c_str(),1);
+      
+      if(robot_id>0){
+         // Setup custom master
+         QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
+                            +QString(ROS_MASTER_PORT);
+         ROS_WARN("ROS_MASTER_URI: '%s'",robot_ip.toStdString().c_str());
+         setenv("ROS_MASTER_URI",robot_ip.toStdString().c_str(),1);
+      } else ROS_WARN("ROS_MASTER_URI is localhost");
+      
    } else {
       // Setup ROS Node and pusblishers/subscribers in REAL ROBOT
       control_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/controlInfo";

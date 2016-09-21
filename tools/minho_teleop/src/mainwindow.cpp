@@ -64,7 +64,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    spinner = new ros::AsyncSpinner(2);
    spinner->start();
 
-   _update_->start(30); // update teleop data to robot
+   _update_->start(100); // update teleop data to robot
 }
 
 MainWindow::~MainWindow()

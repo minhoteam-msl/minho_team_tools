@@ -64,7 +64,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    spinner = new ros::AsyncSpinner(2);
    spinner->start();
 
-   _update_->start(100); // update teleop data to robot
+   _update_->start(50); // update teleop data to robot
 }
 
 MainWindow::~MainWindow()
@@ -143,18 +143,18 @@ void MainWindow::updateThrusts()
 {
     if(teleop_activated_){
         if(thrust_activation_[0]) { thrust_[0] += 3; if(thrust_[0]>max_lin_) thrust_[0]=max_lin_; }
-        else { thrust_[0] -= 5; if(thrust_[0]<0) thrust_[0]=0; }
+        else { thrust_[0] -= 20; if(thrust_[0]<0) thrust_[0]=0; }
         if(thrust_activation_[1]) { thrust_[1] += 3; if(thrust_[1]>max_lin_) thrust_[1]=max_lin_; }
-        else { thrust_[1] -= 5; if(thrust_[1]<0) thrust_[1]=0; }
+        else { thrust_[1] -= 20; if(thrust_[1]<0) thrust_[1]=0; }
         if(thrust_activation_[2]) { thrust_[2] += 3; if(thrust_[2]>max_lin_) thrust_[2]=max_lin_; }
-        else { thrust_[2] -= 5; if(thrust_[2]<0) thrust_[2]=0; }
+        else { thrust_[2] -= 20; if(thrust_[2]<0) thrust_[2]=0; }
         if(thrust_activation_[3]) { thrust_[3] += 3; if(thrust_[3]>max_lin_) thrust_[3]=max_lin_; }
-        else { thrust_[3] -= 5; if(thrust_[3]<0) thrust_[3]=0; }
+        else { thrust_[3] -= 20; if(thrust_[3]<0) thrust_[3]=0; }
         if(thrust_activation_[4]) { thrust_[4] += 5; if(thrust_[4]>100) thrust_[4]=100; }
         if(thrust_activation_[5]) { thrust_[5] += 1; if(thrust_[5]>max_ang_) thrust_[5]=max_ang_; }
-        else { thrust_[5] -= 5; if(thrust_[5]<0) thrust_[5]=0; }
+        else { thrust_[5] -= 20; if(thrust_[5]<0) thrust_[5]=0; }
         if(thrust_activation_[6]) { thrust_[6] += 1; if(thrust_[6]>max_ang_) thrust_[6]=max_ang_; }
-        else { thrust_[6] -= 5; if(thrust_[6]<0) thrust_[6]=0; }
+        else { thrust_[6] -= 20; if(thrust_[6]<0) thrust_[6]=0; }
     }
 }
 

@@ -15,8 +15,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    thrust_activation_.resize(7);
    connect(_update_,SIGNAL(timeout()),this,SLOT(onUpdate()));
    connect(_update_,SIGNAL(timeout()),this,SLOT(updateThrusts()));
-   ui->hs_lin->setValue(50);
-   ui->hs_ang->setValue(50);
+   ui->hs_lin->setValue(30);
+   ui->hs_ang->setValue(30);
    ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
    ui->centralWidget->setFocusPolicy(Qt::StrongFocus);
    ui->lb_robot_name->setText(QString("Robot ")+QString::number(robot_id_));

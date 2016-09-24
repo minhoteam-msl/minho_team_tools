@@ -4,7 +4,7 @@ This repository holds the source code for the tool's package of RoboCup MSL's Mi
 
 The package will in future include:
 
- * Teleoperation of the platform
+ * Teleoperation of the platform - Working version available
  * Configuration of Control parameters
  * Configuration of Omnivision parameters
   

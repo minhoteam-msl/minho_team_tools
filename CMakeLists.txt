@@ -115,13 +115,13 @@ set(CMAKE_PREFIX_PATH ${CURRQTPREFIX})
 find_package(Qt5 COMPONENTS Core SerialPort Network REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
 set(QT_DIR ${CURRQTPREFIX}/include)
 include_directories(${QT_DIR} ${QT_DIR}/QtCore ${QT_DIR}/QtConcurrent ${QT_DIR}/QtDesigner ${QT_DIR}/QtDesignerComponents
 ${QT_DIR}/QtGui ${QT_DIR}/QtNetwork ${QT_DIR}/QtSerialPort ${QT_DIR}/QtWebSockets ${QT_DIR}/QtWidgets ${QT_DIR}/QtXml)
 set(qt_LIBRARIES libQt5SerialPort.so libQt5Core.so libQt5Widgets.so libQt5Network.so libQt5Gui.so libQt5Qml.so libQt5Quick.so)
 link_directories(${CURRQTPREFIX}/lib)
 add_definitions(-DQT_THREAD_SUPPORT)
-set(CMAKE_AUTOUIC ON)
 ######################################################################
 
 ## TELEOP ##

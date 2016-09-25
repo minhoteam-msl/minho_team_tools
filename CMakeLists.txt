@@ -126,7 +126,7 @@ set(CMAKE_AUTOUIC ON)
 
 ## TELEOP ##
 ######################################################################
-set(TELEOP_DIR ${PROJECT_DIRECTORY}/tools/minho_teleop)
+set(TELEOP_DIR ${PROJECT_DIRECTORY}/minho_teleop)
 set(teleop_MOC_H ${TELEOP_DIR}/include/mainwindow.h)
 qt5_wrap_cpp(teleop_CPP ${teleop_MOC_H})
 set(teleop_SRC ${TELEOP_DIR}/src/main.cpp ${TELEOP_DIR}/src/mainwindow.cpp ${TELEOP_DIR}/src/qrc_resources.cpp)

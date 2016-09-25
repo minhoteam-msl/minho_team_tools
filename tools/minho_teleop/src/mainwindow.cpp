@@ -212,6 +212,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
                 }
                 break;
             }
+            case Qt::Key_Escape:{
+              on_pushButton_2_clicked();
+              ros::shutdown(); 
+              exit(1);
+              break;
+            }
         }
     }
 }

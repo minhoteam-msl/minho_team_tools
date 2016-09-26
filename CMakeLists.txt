@@ -11,6 +11,8 @@ find_package(catkin REQUIRED COMPONENTS
 	sensor_msgs
 	genmsg	
 	minho_team_ros		
+	cv_bridge
+	image_transport
 )
 
 

@@ -329,7 +329,7 @@
          <widget class="QComboBox" name="combo_aqtype">
           <item>
            <property name="text">
-            <string>Original</string>
+            <string>Raw</string>
            </property>
           </item>
           <item>

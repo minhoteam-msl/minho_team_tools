@@ -140,8 +140,17 @@ target_link_libraries(minho_teleop ${catkin_LIBRARIES} ${qt_LIBRARIES})
 add_dependencies(minho_teleop minho_team_ros_generate_messages_cpp)
 ######################################################################
 
-
 ## VISION CALIB ##
 ######################################################################
 set(VISIONCALIB_DIR ${PROJECT_DIRECTORY}/vision_calib)
+set(visioncalib_MOC_H ${VISIONCALIB_DIR}/include/mainwindow.h)
+qt5_wrap_cpp(visioncalib_CPP ${visioncalib_MOC_H})
+set(visioncalib_SRC ${VISIONCALIB_DIR}/src/main.cpp ${VISIONCALIB_DIR}/src/mainwindow.cpp) 
+add_executable(vision_calib ${visioncalib_SRC} ${visioncalib_CPP}) 
+target_include_directories(vision_calib PUBLIC
+$<BUILD_INTERFACE:${VISIONCALIB_DIR}/include>)
+set_target_properties(vision_calib PROPERTIES COMPILE_FLAGS "-fPIC")
+target_compile_features(vision_calib PRIVATE cxx_range_for)
+target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES})
+add_dependencies(vision_calib minho_team_ros_generate_messages_cpp)
 

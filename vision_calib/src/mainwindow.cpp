@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include "ui_vision_calib.h"
 
 MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
     QMainWindow(parent),

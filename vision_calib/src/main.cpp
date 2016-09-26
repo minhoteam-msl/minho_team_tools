@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
    else ROS_INFO("Running Vision Calib for Robot %d in simulation.",robot_id);
 
    QApplication a(argc, argv);
-   Mainwindow w(robot_id,mode_real);
+   MainWindow w(robot_id,mode_real);
    w.show();
    return a.exec();
 }

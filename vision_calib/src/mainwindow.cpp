@@ -9,12 +9,15 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    setup();
    
    robot_id_ = robot_id;
-   requesting_on = false;
+   calibration_mode = false;
+   img_calib_timer = new QTimer();
    img_calib_ = new ImageCalibrator();
-   ui->lb_robot_name->setText(QString("Robot ")+QString::number(robot_id_));
+   ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+   ui->lb_robot_name->setText(QString("Calibration Mode for Robot ")+QString::number(robot_id_));
    connect(this,SIGNAL(addNewImage()),this,SLOT(addImageToScene()));
    ui->graphicsView->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
 	ui->graphicsView->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+	connect(img_calib_timer,SIGNAL(timeout()),this,SLOT(applyBinary()));
 	
    // Setup of ROS
    QString asd = "Vision_calib";
@@ -105,12 +108,24 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
          on_bt_grab_clicked();
          break;
       }
+      case Qt::Key_T:{ //turn class mode on or off
+         if(!calibration_mode){
+            calibration_mode = true;
+            ui->lb_robot_name->setStyleSheet("QLabel { color : green; }");
+            img_calib_timer->stop();
+         } else {
+            calibration_mode = false;
+            ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+            img_calib_timer->start(30);
+         }
+         break;
+      }
    }
 }
 void MainWindow::display_image(const sensor_msgs::ImageConstPtr& msg)
 {
    cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"bgr8");
-   Mat temp = recv_img->image;
+   temp = recv_img->image;
    image_ =  QImage( temp.data,
                  temp.cols, temp.rows,
                  static_cast<int>(temp.step),
@@ -119,6 +134,27 @@ void MainWindow::display_image(const sensor_msgs::ImageConstPtr& msg)
    emit addNewImage();
 }
 
+void MainWindow::addImageToScene()
+{
+   if(!calibration_mode){
+      scene_->clear();
+      scene_->addPixmap(QPixmap::fromImage(image_));
+   }
+}
+
+void MainWindow::applyBinary()
+{
+   //Process binary image
+   
+   //Display Image
+   image_ =  QImage( temp.data,
+                     temp.cols, temp.rows,
+                     static_cast<int>(temp.step),
+                     QImage::Format_RGB888 ); 
+   scene_->clear();
+   scene_->addPixmap(QPixmap::fromImage(image_));  
+}
+// BUTTONS
 void MainWindow::on_bt_grab_clicked()
 {
    bool multiple_send_request = ui->radio_multiple->isChecked();
@@ -135,9 +171,35 @@ void MainWindow::on_bt_stop_clicked()
    msg_.type = (int)pow(2,ui->combo_aqtype->currentIndex());
    imgreq_pub_.publish(msg_);
 }
-
-void MainWindow::addImageToScene()
+//SLIDEBARS
+void MainWindow::on_h_min_valueChanged(int value)
 {
-   scene_->clear();
-   scene_->addPixmap(QPixmap::fromImage(image_));
+   ui->lb_hmin->setText(QString::number(value));
 }
+
+void MainWindow::on_h_max_valueChanged(int value)
+{
+   ui->lb_hmax->setText(QString::number(value));
+}
+
+void MainWindow::on_s_min_valueChanged(int value)
+{
+   ui->lb_smin->setText(QString::number(value));
+}
+
+void MainWindow::on_s_max_valueChanged(int value)
+{
+   ui->lb_smax->setText(QString::number(value));
+}
+
+void MainWindow::on_v_min_valueChanged(int value)
+{
+   ui->lb_vmin->setText(QString::number(value));
+}
+
+void MainWindow::on_v_max_valueChanged(int value)
+{
+   ui->lb_vmax->setText(QString::number(value));
+}
+
+

@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QGraphicsScene>
+#include <QTimer>
 #include <QImage>
 #include <QPixmap>
 #include <QEvent>
@@ -38,21 +39,34 @@ private slots:
    void keyPressEvent(QKeyEvent *event);
    void display_image(const sensor_msgs::ImageConstPtr& msg);
    void addImageToScene();
+   void applyBinary();
+   // BUTTONS
    void on_bt_grab_clicked();
    void on_bt_stop_clicked();
+   //SLIDEBARS
+   void on_h_min_valueChanged(int value);
+   void on_h_max_valueChanged(int value);
+   void on_s_min_valueChanged(int value);
+   void on_s_max_valueChanged(int value);
+   void on_v_min_valueChanged(int value);
+   void on_v_max_valueChanged(int value);
+   
 private:
    Ui::MainWindow *ui;
    int robot_id_;
-   bool requesting_on;
-
+   bool calibration_mode;
+   QGraphicsScene *scene_;
+   ImageCalibrator *img_calib_;
+   Mat temp;
+   QTimer *img_calib_timer;
+   //ROS
    ros::Publisher imgreq_pub_;
    image_transport::ImageTransport *it_;
    image_transport::Subscriber image_sub_;
    ros::NodeHandle *_node_;
-   QGraphicsScene *scene_;
    imgRequest msg_;
    QImage image_;
-   ImageCalibrator *img_calib_;
+
 signals:
    void addNewImage();   
     

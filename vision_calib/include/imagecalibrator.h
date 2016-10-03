@@ -39,6 +39,7 @@ public:
     /* Other Variables and Lut Variables*/
     int YUVLookUpTable[256*256*256];
     int current_configuration[4][3][2];
+    void updateCurrentConfiguration(LABEL_t label, COMPONENT_t component, RANGE_t range, int value);
     /* Vision Variables */
     Mat element;
     Mat processed,buffer;

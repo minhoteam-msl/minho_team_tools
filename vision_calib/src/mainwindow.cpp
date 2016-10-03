@@ -175,31 +175,58 @@ void MainWindow::on_bt_stop_clicked()
 void MainWindow::on_h_min_valueChanged(int value)
 {
    ui->lb_hmin->setText(QString::number(value));
+   img_calib_->updateCurrentConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())
+                                          ,H
+                                          ,MIN
+                                          ,value);
+   
 }
 
 void MainWindow::on_h_max_valueChanged(int value)
 {
    ui->lb_hmax->setText(QString::number(value));
+   img_calib_->updateCurrentConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())
+                                          ,H
+                                          ,MAX
+                                          ,value);
 }
 
 void MainWindow::on_s_min_valueChanged(int value)
 {
    ui->lb_smin->setText(QString::number(value));
+   img_calib_->updateCurrentConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())
+                                          ,S
+                                          ,MIN
+                                          ,value);
+   
 }
 
 void MainWindow::on_s_max_valueChanged(int value)
 {
    ui->lb_smax->setText(QString::number(value));
+   img_calib_->updateCurrentConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())
+                                          ,S
+                                          ,MAX
+                                          ,value);
 }
 
 void MainWindow::on_v_min_valueChanged(int value)
 {
    ui->lb_vmin->setText(QString::number(value));
+   img_calib_->updateCurrentConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())
+                                          ,V
+                                          ,MIN
+                                          ,value);
 }
 
 void MainWindow::on_v_max_valueChanged(int value)
 {
    ui->lb_vmax->setText(QString::number(value));
+   img_calib_->updateCurrentConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())
+                                          ,V
+                                          ,MAX
+                                          ,value);
 }
+
 
 

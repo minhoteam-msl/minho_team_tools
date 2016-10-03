@@ -154,9 +154,9 @@ add_dependencies(minho_teleop minho_team_ros_generate_messages_cpp)
 ## VISION CALIB ##
 ######################################################################
 set(VISIONCALIB_DIR ${PROJECT_DIRECTORY}/vision_calib)
-set(visioncalib_MOC_H ${VISIONCALIB_DIR}/include/mainwindow.h)
+set(visioncalib_MOC_H ${VISIONCALIB_DIR}/include/mainwindow.h ${VISIONCALIB_DIR}/include/imagecalibrator.h)
 qt5_wrap_cpp(visioncalib_CPP ${visioncalib_MOC_H})
-set(visioncalib_SRC ${VISIONCALIB_DIR}/src/main.cpp ${VISIONCALIB_DIR}/src/mainwindow.cpp) 
+set(visioncalib_SRC ${VISIONCALIB_DIR}/src/main.cpp ${VISIONCALIB_DIR}/src/mainwindow.cpp ${VISIONCALIB_DIR}/src/imagecalibrator.cpp) 
 add_executable(vision_calib ${visioncalib_SRC} ${visioncalib_CPP}) 
 target_include_directories(vision_calib PUBLIC
 $<BUILD_INTERFACE:${VISIONCALIB_DIR}/include>)

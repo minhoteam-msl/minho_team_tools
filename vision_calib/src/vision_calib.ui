@@ -135,7 +135,7 @@
            <number>1</number>
           </property>
           <property name="maximum">
-           <number>30</number>
+           <number>20</number>
           </property>
           <property name="value">
            <number>10</number>
@@ -295,6 +295,12 @@
         </item>
         <item>
          <widget class="QSlider" name="v_max">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="value">
+           <number>255</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -400,6 +406,9 @@
         </item>
         <item>
          <widget class="QSlider" name="s_min">
+          <property name="maximum">
+           <number>255</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -457,6 +466,9 @@
         </item>
         <item>
          <widget class="QSlider" name="h_min">
+          <property name="maximum">
+           <number>180</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -534,6 +546,9 @@
         </item>
         <item>
          <widget class="QSlider" name="v_min">
+          <property name="maximum">
+           <number>255</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -591,6 +606,12 @@
         </item>
         <item>
          <widget class="QSlider" name="s_max">
+          <property name="maximum">
+           <number>255</number>
+          </property>
+          <property name="value">
+           <number>255</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -648,6 +669,12 @@
         </item>
         <item>
          <widget class="QSlider" name="h_max">
+          <property name="maximum">
+           <number>180</number>
+          </property>
+          <property name="value">
+           <number>180</number>
+          </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

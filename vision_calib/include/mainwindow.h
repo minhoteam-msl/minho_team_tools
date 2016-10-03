@@ -12,15 +12,10 @@
 #include "ros/ros.h"
 #include <iostream>
 #include <sstream>
-#include <boost/shared_ptr.hpp>
-#include <stdio.h>
-#include <stdlib.h>
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include "minho_team_ros/imgRequest.h"
+#include "imagecalibrator.h"
 using namespace ros;
 using namespace cv;
 using minho_team_ros::imgRequest;
@@ -40,6 +35,7 @@ public:
     ~MainWindow();
 private slots:
    void setup();
+   void keyPressEvent(QKeyEvent *event);
    void display_image(const sensor_msgs::ImageConstPtr& msg);
    void addImageToScene();
    void on_bt_grab_clicked();
@@ -56,6 +52,7 @@ private:
    QGraphicsScene *scene_;
    imgRequest msg_;
    QImage image_;
+   ImageCalibrator *img_calib_;
 signals:
    void addNewImage();   
     

@@ -10,6 +10,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    
    robot_id_ = robot_id;
    requesting_on = false;
+   img_calib_ = new ImageCalibrator();
    ui->lb_robot_name->setText(QString("Robot ")+QString::number(robot_id_));
    connect(this,SIGNAL(addNewImage()),this,SLOT(addImageToScene()));
    ui->graphicsView->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
@@ -62,6 +63,50 @@ void MainWindow::setup()
    ui->graphicsView->setScene(scene_); 
 }
    
+   
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+   switch(event->key()){
+      // Mode change
+      case Qt::Key_R:{ //change mode to raw
+         ui->combo_aqtype->setCurrentIndex(0);
+         break;
+      }
+      case Qt::Key_W:{ //change mode to world
+         ui->combo_aqtype->setCurrentIndex(2);
+         break;
+      }
+      case Qt::Key_S:{ //change mode to segmented
+         ui->combo_aqtype->setCurrentIndex(1);
+         break;
+      }
+      case Qt::Key_M:{ //change mode to map
+         ui->combo_aqtype->setCurrentIndex(3);
+         break;
+      }
+      case Qt::Key_F:{ //feed - multiple images
+         ui->radio_multiple->setChecked(true);
+         on_bt_grab_clicked();
+         break;
+      }
+      case Qt::Key_I:{ //increase fps
+         ui->spin_framerate->setValue(ui->spin_framerate->value()+1);
+         on_bt_grab_clicked();
+         break;
+      }
+      case Qt::Key_D:{ //decrease fps
+         ui->spin_framerate->setValue(ui->spin_framerate->value()-1);
+         on_bt_grab_clicked();
+         break;
+      }
+      case Qt::Key_G:{ //grab single image
+         // Single image
+         ui->radio_single->setChecked(true);
+         on_bt_grab_clicked();
+         break;
+      }
+   }
+}
 void MainWindow::display_image(const sensor_msgs::ImageConstPtr& msg)
 {
    cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"bgr8");

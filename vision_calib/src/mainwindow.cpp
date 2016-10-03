@@ -6,11 +6,15 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
     ui(new Ui::MainWindow)
 {
    ui->setupUi(this);
+   setup();
+   
    robot_id_ = robot_id;
    requesting_on = false;
-   ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
    ui->lb_robot_name->setText(QString("Robot ")+QString::number(robot_id_));
-   
+   connect(this,SIGNAL(addNewImage()),this,SLOT(addImageToScene()));
+   ui->graphicsView->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+	ui->graphicsView->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+	
    // Setup of ROS
    QString asd = "Vision_calib";
    asd.append(QString::number(robot_id));
@@ -44,8 +48,6 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    imgreq_pub_ = _node_->advertise<imgRequest>(imreq_topic.str().c_str(),100);
    //Initialize image_transport subscriber
    image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::display_image,this);
-   spinner = new ros::AsyncSpinner(2);
-   spinner->start();
 }
 
 MainWindow::~MainWindow()
@@ -54,7 +56,43 @@ MainWindow::~MainWindow()
    delete ui;
 }
 
+void MainWindow::setup()
+{
+   scene_ = new QGraphicsScene();
+   ui->graphicsView->setScene(scene_); 
+}
+   
 void MainWindow::display_image(const sensor_msgs::ImageConstPtr& msg)
 {
-   ROS_INFO("Received image");
+   cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"bgr8");
+   Mat temp = recv_img->image;
+   image_ =  QImage( temp.data,
+                 temp.cols, temp.rows,
+                 static_cast<int>(temp.step),
+                 QImage::Format_RGB888 );
+
+   emit addNewImage();
+}
+
+void MainWindow::on_bt_grab_clicked()
+{
+   bool multiple_send_request = ui->radio_multiple->isChecked();
+   msg_.is_multiple = multiple_send_request;
+   msg_.frequency = ui->spin_framerate->value();
+   msg_.type = (int)pow(2,ui->combo_aqtype->currentIndex());
+   imgreq_pub_.publish(msg_);
+}
+
+void MainWindow::on_bt_stop_clicked()
+{
+   msg_.is_multiple = false;
+   msg_.frequency = ui->spin_framerate->value();
+   msg_.type = (int)pow(2,ui->combo_aqtype->currentIndex());
+   imgreq_pub_.publish(msg_);
+}
+
+void MainWindow::addImageToScene()
+{
+   scene_->clear();
+   scene_->addPixmap(QPixmap::fromImage(image_));
 }

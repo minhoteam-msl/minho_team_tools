@@ -127,6 +127,15 @@ link_directories(${CURRQTPREFIX}/lib)
 add_definitions(-DQT_THREAD_SUPPORT)
 ######################################################################
 
+#Linking steps for OpenCV Libraries
+########################################
+include_directories(/usr/local/include/opencv /usr/local/include/opencv2)
+set (opencv_LIBRARIES libopencv_core.so libopencv_highgui.so libopencv_imgproc.so)
+link_directories(/usr/local/lib)
+link_directories(/usr/lib/x86_64-linux-gnu)
+########################################
+######################################################################
+
 ## TELEOP ##
 ######################################################################
 set(TELEOP_DIR ${PROJECT_DIRECTORY}/minho_teleop)
@@ -153,6 +162,6 @@ target_include_directories(vision_calib PUBLIC
 $<BUILD_INTERFACE:${VISIONCALIB_DIR}/include>)
 set_target_properties(vision_calib PROPERTIES COMPILE_FLAGS "-fPIC")
 target_compile_features(vision_calib PRIVATE cxx_range_for)
-target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES})
+target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES})
 add_dependencies(vision_calib minho_team_ros_generate_messages_cpp)
 

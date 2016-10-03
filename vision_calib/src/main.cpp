@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QApplication>
+ros::AsyncSpinner *spinner;
 
 int main(int argc, char *argv[])
 {
@@ -30,5 +31,8 @@ int main(int argc, char *argv[])
    QApplication a(argc, argv);
    MainWindow w(robot_id,mode_real);
    w.show();
+   
+   spinner = new ros::AsyncSpinner(2);
+   spinner->start();
    return a.exec();
 }

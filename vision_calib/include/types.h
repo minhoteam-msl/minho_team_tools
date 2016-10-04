@@ -45,7 +45,7 @@ typedef enum COMPONENT_t { H = 0, S, V} COMPONENT_t;
 typedef enum RANGE_t {MIN = 0, MAX} RANGE_t;
 
 typedef struct labelConfiguration{
-   int lb_calib[3][2];
+   int lb_calib[3][2] = {{0,180},{0,255},{0,255}};
 } labelConfiguration;
 
 typedef struct lutConfiguration{

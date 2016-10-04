@@ -64,6 +64,7 @@ void MainWindow::setup()
 {
    scene_ = new QGraphicsScene();
    ui->graphicsView->setScene(scene_); 
+   temp = Mat(480,480,CV_8UC3,Scalar(0,0,0));
 }
    
    
@@ -112,11 +113,11 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
          if(!calibration_mode){
             calibration_mode = true;
             ui->lb_robot_name->setStyleSheet("QLabel { color : green; }");
-            img_calib_timer->stop();
+            img_calib_timer->start(30);
          } else {
             calibration_mode = false;
             ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
-            img_calib_timer->start(30);
+            img_calib_timer->stop();
          }
          break;
       }
@@ -144,15 +145,17 @@ void MainWindow::addImageToScene()
 
 void MainWindow::applyBinary()
 {
+   LABEL_t label = static_cast<LABEL_t>(ui->combo_label->currentIndex());
    //Process binary image
-   
+   Mat binary = temp.clone();
+   img_calib_->getBinary(&binary,img_calib_->getLabelConfiguration(label));
    //Display Image
-   image_ =  QImage( temp.data,
-                     temp.cols, temp.rows,
-                     static_cast<int>(temp.step),
+   image_ =  QImage( binary.data,
+                     binary.cols, binary.rows,
+                     static_cast<int>(binary.step),
                      QImage::Format_RGB888 ); 
    scene_->clear();
-   scene_->addPixmap(QPixmap::fromImage(image_));  
+   scene_->addPixmap(QPixmap::fromImage(image_));
 }
 // BUTTONS
 void MainWindow::on_bt_grab_clicked()
@@ -236,12 +239,12 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
 }
 void MainWindow::loadValuesOnTrackbars(labelConfiguration labelconf)
 {
+   
    ui->h_min->setValue(labelconf.lb_calib[H][MIN]);
    ui->h_max->setValue(labelconf.lb_calib[H][MAX]);
    ui->s_min->setValue(labelconf.lb_calib[S][MIN]);
    ui->s_max->setValue(labelconf.lb_calib[S][MAX]);
    ui->v_min->setValue(labelconf.lb_calib[V][MIN]);
    ui->v_max->setValue(labelconf.lb_calib[V][MAX]);
-   
 }
 

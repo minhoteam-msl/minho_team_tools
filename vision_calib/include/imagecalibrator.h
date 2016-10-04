@@ -18,7 +18,7 @@ class ImageCalibrator
 public:
     ImageCalibrator();
     void variablesInitialization();
-    void getBinary(Mat *in, int ymin, int ymax, int umin, int umax, int vmin, int vmax); // Returns thresholded HSV image
+    void getBinary(Mat *in, labelConfiguration labelconf); // Returns thresholded HSV image
     void getSegmentedImage(Mat *buffer); // Returns buffer's segmented image
     void paintPixel(int x, int y, int classifier, Mat *buf); // Paints a certain pixel in the image
     hsv rgbtohsv(rgb in); // Converts rgb to hsv
@@ -34,6 +34,7 @@ public:
     Mat element;
     Mat processed,buffer;
     lutConfiguration lutconfig;
+    Mat pix;
 };
 
 #endif // IMAGECALIBRATOR_H

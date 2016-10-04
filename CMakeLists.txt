@@ -125,6 +125,7 @@ ${QT_DIR}/QtGui ${QT_DIR}/QtNetwork ${QT_DIR}/QtSerialPort ${QT_DIR}/QtWebSocket
 set(qt_LIBRARIES libQt5SerialPort.so libQt5Core.so libQt5Widgets.so libQt5Network.so libQt5Gui.so libQt5Qml.so libQt5Quick.so)
 link_directories(${CURRQTPREFIX}/lib)
 add_definitions(-DQT_THREAD_SUPPORT)
+set(CMAKE_BUILD_TYPE Debug)
 ######################################################################
 
 #Linking steps for OpenCV Libraries

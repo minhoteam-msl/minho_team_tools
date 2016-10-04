@@ -12,6 +12,7 @@ ImageCalibrator::ImageCalibrator()
 void ImageCalibrator::variablesInitialization()
 {
     processed = Mat(480,480,CV_8UC3,Scalar(0,0,0));
+    pix = Mat(1,1,CV_8UC3,Scalar(0,0,0));
     double morph_size = 1.5;
     element = getStructuringElement(2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 }
@@ -48,6 +49,9 @@ void ImageCalibrator::paintPixel(int x, int y, int classifier,Mat *buf)
 hsv ImageCalibrator::rgbtohsv(rgb in)
 {
     hsv temp;
+    /*pix.data[0] = in.r; pix.data[1] = in.g; pix.data[2] = in.b;
+    cvtColor(pix,pix,CV_BGR2HSV);
+    temp.h = pix.data[0]; temp.s = pix.data[1]; temp.v = pix.data[2];*/
     int min = 0, max = 0, delta = 0;
     if(in.r<in.g)min=in.r; else min=in.g;
     if(in.b<min)min=in.b;
@@ -78,7 +82,7 @@ hsv ImageCalibrator::rgbtohsv(rgb in)
         while( temp.h < 0 ) temp.h += 180;
     }
 
-    if(temp.h>160){
+    if(temp.h>160){ //wrap around
         temp.h = (int)(-0.11111*temp.h)+20;
     }
     return temp;
@@ -94,7 +98,7 @@ int ImageCalibrator::getClassifier(int x, int y, Mat *buffer)
 }
 
 // Returns binary image of the buffer, given YUV(or HSV) ranges
-void ImageCalibrator::getBinary(Mat *in,int ymin,int ymax, int umin, int umax, int vmin, int vmax)
+void ImageCalibrator::getBinary(Mat *in, labelConfiguration labelconf)
 {
     //Returns binary representation of a certain range
     Vec3b *pixel; // iterator to run through captured image
@@ -106,7 +110,7 @@ void ImageCalibrator::getBinary(Mat *in,int ymin,int ymax, int umin, int umax, i
             pix.r = pixel[j][2]; pix.g = pixel[j][1]; pix.b = pixel[j][0];
             pix2 = rgbtohsv(pix);
 
-            if((pix2.h>=ymin)&&(pix2.h<=ymax) && (pix2.s>=umin)&&(pix2.s<=umax) && (pix2.v>=vmin)&&(pix2.v<=vmax))
+            if((pix2.h>=labelconf.lb_calib[0][0])&&(pix2.h<=labelconf.lb_calib[0][1]) && (pix2.s>=labelconf.lb_calib[1][0])&&(pix2.s<=labelconf.lb_calib[1][1]) && (pix2.v>=labelconf.lb_calib[2][0])&&(pix2.v<=labelconf.lb_calib[2][1]))
             {
                 pixel[j][2] = 255;
                 pixel[j][1] = 255;

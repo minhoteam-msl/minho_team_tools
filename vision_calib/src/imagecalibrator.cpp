@@ -217,5 +217,10 @@ void ImageCalibrator::generateLookUpTable(int values[4][3][2])
 
 void ImageCalibrator::updateCurrentConfiguration(LABEL_t label, COMPONENT_t component, RANGE_t range, int value)
 {
-   current_configuration[label][component][range] = value;   
+   lutconfig.lut_calib[label].lb_calib[component][range] = value; 
+}
+
+labelConfiguration ImageCalibrator::getLabelConfiguration(LABEL_t label)
+{
+   return lutconfig.lut_calib[label];
 }

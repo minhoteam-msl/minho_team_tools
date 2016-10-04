@@ -227,6 +227,21 @@ void MainWindow::on_v_max_valueChanged(int value)
                                           ,MAX
                                           ,value);
 }
-
-
+//COMBOBOXES
+void MainWindow::on_combo_label_currentIndexChanged(int index)
+{
+   LABEL_t label = static_cast<LABEL_t>(index);
+   loadValuesOnTrackbars(img_calib_->getLabelConfiguration(label));
+   
+}
+void MainWindow::loadValuesOnTrackbars(labelConfiguration labelconf)
+{
+   ui->h_min->setValue(labelconf.lb_calib[H][MIN]);
+   ui->h_max->setValue(labelconf.lb_calib[H][MAX]);
+   ui->s_min->setValue(labelconf.lb_calib[S][MIN]);
+   ui->s_max->setValue(labelconf.lb_calib[S][MAX]);
+   ui->v_min->setValue(labelconf.lb_calib[V][MIN]);
+   ui->v_max->setValue(labelconf.lb_calib[V][MAX]);
+   
+}
 

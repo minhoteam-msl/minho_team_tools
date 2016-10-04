@@ -40,7 +40,7 @@ private slots:
    void display_image(const sensor_msgs::ImageConstPtr& msg);
    void addImageToScene();
    void applyBinary();
-   // BUTTONS
+   //BUTTONS
    void on_bt_grab_clicked();
    void on_bt_stop_clicked();
    //SLIDEBARS
@@ -50,7 +50,9 @@ private slots:
    void on_s_max_valueChanged(int value);
    void on_v_min_valueChanged(int value);
    void on_v_max_valueChanged(int value);
-   
+   //COMBOBOXES
+   void on_combo_label_currentIndexChanged(int index);
+   void loadValuesOnTrackbars(labelConfiguration labelconf);
 private:
    Ui::MainWindow *ui;
    int robot_id_;

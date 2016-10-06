@@ -727,7 +727,7 @@
     <item row="2" column="1">
      <layout class="QGridLayout" name="gridLayout_4">
       <item row="1" column="0">
-       <widget class="QPushButton" name="bt_setcol">
+       <widget class="QPushButton" name="bt_setlut">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -735,7 +735,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Send Color Label Calibration</string>
+         <string>Send Lut Calibration</string>
         </property>
        </widget>
       </item>

@@ -182,7 +182,7 @@ void MainWindow::on_bt_setdist_clicked()
 {
    QStringList pixValues = ui->line_pixdist->text().split(",");
    vector<short unsigned int> values; values.clear();
-   float targetValues = ui->spin_maxdist->value()/ui->spin_step->value();
+   int targetValues = ui->spin_maxdist->value()/ui->spin_step->value();
    bool bad_configuration = false;
    int bad_conf_type = 0;
    if(targetValues!=pixValues.size()) { 
@@ -192,8 +192,8 @@ void MainWindow::on_bt_setdist_clicked()
          values.push_back(pixValues[val].toInt());
          
       unsigned int i = 0;
-      while( ((i+1)<pixValues.size()) && !bad_configuration){
-         if(pixValues[i]>pixValues[i+1]){
+      while( ((i+1)<values.size()) && !bad_configuration){
+         if(values[i]>values[i+1]){
             bad_configuration = true; bad_conf_type = 2;
          }
          i++;  
@@ -202,6 +202,13 @@ void MainWindow::on_bt_setdist_clicked()
    
    if(bad_configuration){
       ROS_ERROR("Bad Distances configuration (%d)",bad_conf_type);
+      QString err;
+      if(bad_conf_type==1) err = "Wrong number of distance values.\n"
+      +QString::number(targetValues)+" arguments needed but "
+      +QString::number(pixValues.size())+" were provided";
+      else err = "Wrong sequence of distance values.";
+      QMessageBox::critical(NULL, QObject::tr("Bad Distances Configuration"),
+         QObject::tr(err.toStdString().c_str()));
    }else {
       ROS_INFO("Correct configuration sent!");
       mirrorConfig msg;
@@ -210,6 +217,10 @@ void MainWindow::on_bt_setdist_clicked()
       msg.pixel_distances = values;
       mirror_pub_.publish(msg);
    }
+}
+
+void MainWindow::on_bt_setlut_clicked()
+{
 }
 //SLIDEBARS
 void MainWindow::on_h_min_valueChanged(int value)

@@ -19,6 +19,8 @@
 #include "minho_team_ros/mirrorConfig.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
+#include <QMessageBox>
+
 using namespace ros;
 using namespace cv;
 using minho_team_ros::imgRequest;
@@ -47,6 +49,7 @@ private slots:
    void on_bt_grab_clicked();
    void on_bt_stop_clicked();
    void on_bt_setdist_clicked();
+   void on_bt_setlut_clicked();
    //SLIDEBARS
    void on_h_min_valueChanged(int value);
    void on_h_max_valueChanged(int value);

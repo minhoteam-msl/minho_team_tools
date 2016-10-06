@@ -24,11 +24,12 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    asd.append(QString::number(robot_id));
    std::stringstream imreq_topic;
    std::stringstream imgtrans_topic;
+   std::stringstream mirror_topic;
    if(real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
       imreq_topic << "/imgRequest";
       imgtrans_topic << "/camera";
-      
+      mirror_topic << "/mirrorConfig";
       if(robot_id>0){
          // Setup custom master
          QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
@@ -41,6 +42,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       // Setup ROS Node and pusblishers/subscribers in REAL ROBOT
       imreq_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/imgRequest";
       imgtrans_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/camera";
+      mirror_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/mirrorConfig";
    }
    
 
@@ -50,6 +52,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    _node_ = new ros::NodeHandle();
    it_ = new image_transport::ImageTransport(*_node_);
    imgreq_pub_ = _node_->advertise<imgRequest>(imreq_topic.str().c_str(),100);
+   mirror_pub_ = _node_->advertise<mirrorConfig>(mirror_topic.str().c_str(),100);
    //Initialize image_transport subscriber
    image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::display_image,this);
 }
@@ -173,6 +176,40 @@ void MainWindow::on_bt_stop_clicked()
    msg_.frequency = ui->spin_framerate->value();
    msg_.type = (int)pow(2,ui->combo_aqtype->currentIndex());
    imgreq_pub_.publish(msg_);
+}
+
+void MainWindow::on_bt_setdist_clicked()
+{
+   QStringList pixValues = ui->line_pixdist->text().split(",");
+   vector<short unsigned int> values; values.clear();
+   float targetValues = ui->spin_maxdist->value()/ui->spin_step->value();
+   bool bad_configuration = false;
+   int bad_conf_type = 0;
+   if(targetValues!=pixValues.size()) { 
+      bad_configuration = true; bad_conf_type = 1; 
+   } else {
+      for(unsigned int val=0;val<pixValues.size();val++)
+         values.push_back(pixValues[val].toInt());
+         
+      unsigned int i = 0;
+      while( ((i+1)<pixValues.size()) && !bad_configuration){
+         if(pixValues[i]>pixValues[i+1]){
+            bad_configuration = true; bad_conf_type = 2;
+         }
+         i++;  
+      }
+   }
+   
+   if(bad_configuration){
+      ROS_ERROR("Bad Distances configuration (%d)",bad_conf_type);
+   }else {
+      ROS_INFO("Correct configuration sent!");
+      mirrorConfig msg;
+      msg.max_distance = ui->spin_maxdist->value();
+      msg.step = ui->spin_step->value();
+      msg.pixel_distances = values;
+      mirror_pub_.publish(msg);
+   }
 }
 //SLIDEBARS
 void MainWindow::on_h_min_valueChanged(int value)

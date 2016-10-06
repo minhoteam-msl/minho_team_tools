@@ -16,10 +16,13 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include "minho_team_ros/imgRequest.h"
+#include "minho_team_ros/mirrorConfig.h"
 #include "imagecalibrator.h"
+#include <QKeyEvent>
 using namespace ros;
 using namespace cv;
 using minho_team_ros::imgRequest;
+using minho_team_ros::mirrorConfig;
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
 
@@ -43,6 +46,7 @@ private slots:
    //BUTTONS
    void on_bt_grab_clicked();
    void on_bt_stop_clicked();
+   void on_bt_setdist_clicked();
    //SLIDEBARS
    void on_h_min_valueChanged(int value);
    void on_h_max_valueChanged(int value);
@@ -63,6 +67,7 @@ private:
    QTimer *img_calib_timer;
    //ROS
    ros::Publisher imgreq_pub_;
+   ros::Publisher mirror_pub_;
    image_transport::ImageTransport *it_;
    image_transport::Subscriber image_sub_;
    ros::NodeHandle *_node_;

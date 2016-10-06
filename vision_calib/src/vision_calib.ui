@@ -835,7 +835,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="spin_space">
+         <widget class="QDoubleSpinBox" name="spin_step">
           <property name="font">
            <font>
             <pointsize>7</pointsize>
@@ -925,36 +925,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QPlainTextEdit" name="line_pixdist">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>300</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>7</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="plainText">
-           <string/>
-          </property>
-         </widget>
+         <widget class="QLineEdit" name="line_pixdist"/>
         </item>
        </layout>
       </item>

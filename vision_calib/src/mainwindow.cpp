@@ -25,11 +25,15 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    std::stringstream imreq_topic;
    std::stringstream imgtrans_topic;
    std::stringstream mirror_topic;
+   std::stringstream vision_topic;
+   
    if(real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
       imreq_topic << "/imgRequest";
       imgtrans_topic << "/camera";
       mirror_topic << "/mirrorConfig";
+      vision_topic << "/visionHSVConfig";
+      
       if(robot_id>0){
          // Setup custom master
          QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
@@ -43,6 +47,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       imreq_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/imgRequest";
       imgtrans_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/camera";
       mirror_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/mirrorConfig";
+      vision_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/visionHSVConfig";
    }
    
 
@@ -53,6 +58,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    it_ = new image_transport::ImageTransport(*_node_);
    imgreq_pub_ = _node_->advertise<imgRequest>(imreq_topic.str().c_str(),100);
    mirror_pub_ = _node_->advertise<mirrorConfig>(mirror_topic.str().c_str(),100);
+   vision_pub_ = _node_->advertise<visionHSVConfig>(vision_topic.str().c_str(),100);
    //Initialize image_transport subscriber
    image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::display_image,this);
 }
@@ -160,6 +166,20 @@ void MainWindow::applyBinary()
    scene_->clear();
    scene_->addPixmap(QPixmap::fromImage(image_));
 }
+
+label MainWindow::initLabelConfig(LABEL_t _label,labelConfiguration label_conf)
+{
+   label msg;
+   range h,s,v;
+   
+   h.min = label_conf.lb_calib[H][MIN]; h.max= label_conf.lb_calib[H][MAX];
+   s.min = label_conf.lb_calib[S][MIN]; s.max= label_conf.lb_calib[S][MAX];
+   v.min = label_conf.lb_calib[V][MIN]; v.max= label_conf.lb_calib[V][MAX];
+   
+   msg.classifier = (int)pow(2,(float)_label);
+   msg.H = h; msg.S = s; msg.V = v;
+   return msg;
+}
 // BUTTONS
 void MainWindow::on_bt_grab_clicked()
 {
@@ -201,7 +221,7 @@ void MainWindow::on_bt_setdist_clicked()
    }
    
    if(bad_configuration){
-      ROS_ERROR("Bad Distances configuration (%d)",bad_conf_type);
+      ROS_ERROR("Bad mirror configuration (%d)",bad_conf_type);
       QString err;
       if(bad_conf_type==1) err = "Wrong number of distance values.\n"
       +QString::number(targetValues)+" arguments needed but "
@@ -210,7 +230,7 @@ void MainWindow::on_bt_setdist_clicked()
       QMessageBox::critical(NULL, QObject::tr("Bad Distances Configuration"),
          QObject::tr(err.toStdString().c_str()));
    }else {
-      ROS_INFO("Correct configuration sent!");
+      ROS_INFO("Correct mirror configuration sent!");
       mirrorConfig msg;
       msg.max_distance = ui->spin_maxdist->value();
       msg.step = ui->spin_step->value();
@@ -221,6 +241,18 @@ void MainWindow::on_bt_setdist_clicked()
 
 void MainWindow::on_bt_setlut_clicked()
 {
+   labelConfiguration field_conf = img_calib_->getLabelConfiguration(FIELD);
+   labelConfiguration line_conf = img_calib_->getLabelConfiguration(LINE);
+   labelConfiguration ball_conf = img_calib_->getLabelConfiguration(BALL);
+   labelConfiguration obstacle_conf = img_calib_->getLabelConfiguration(OBSTACLE);
+   
+   visionHSVConfig msg;
+   msg.field = initLabelConfig(FIELD,field_conf);
+   msg.line = initLabelConfig(LINE,line_conf);
+   msg.ball = initLabelConfig(BALL,ball_conf);
+   msg.obstacle = initLabelConfig(OBSTACLE,obstacle_conf);
+   vision_pub_.publish(msg);
+   ROS_INFO("Correct vision configuration sent!");
 }
 //SLIDEBARS
 void MainWindow::on_h_min_valueChanged(int value)

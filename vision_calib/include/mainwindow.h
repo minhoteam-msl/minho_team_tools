@@ -17,6 +17,9 @@
 #include <cv_bridge/cv_bridge.h>
 #include "minho_team_ros/imgRequest.h"
 #include "minho_team_ros/mirrorConfig.h"
+#include "minho_team_ros/range.h"
+#include "minho_team_ros/label.h"
+#include "minho_team_ros/visionHSVConfig.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -25,6 +28,9 @@ using namespace ros;
 using namespace cv;
 using minho_team_ros::imgRequest;
 using minho_team_ros::mirrorConfig;
+using minho_team_ros::range;
+using minho_team_ros::label;
+using minho_team_ros::visionHSVConfig;
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
 
@@ -45,6 +51,7 @@ private slots:
    void display_image(const sensor_msgs::ImageConstPtr& msg);
    void addImageToScene();
    void applyBinary();
+   label initLabelConfig(LABEL_t _label,labelConfiguration label_conf);
    //BUTTONS
    void on_bt_grab_clicked();
    void on_bt_stop_clicked();
@@ -71,6 +78,7 @@ private:
    //ROS
    ros::Publisher imgreq_pub_;
    ros::Publisher mirror_pub_;
+   ros::Publisher vision_pub_;
    image_transport::ImageTransport *it_;
    image_transport::Subscriber image_sub_;
    ros::NodeHandle *_node_;

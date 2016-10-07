@@ -267,7 +267,7 @@
          </font>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Color Label Calibration:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Look Up Table Calibration:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -735,7 +735,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Send Lut Calibration</string>
+         <string>Send Look Up Table Calibration</string>
         </property>
        </widget>
       </item>

@@ -20,6 +20,7 @@
 #include "minho_team_ros/range.h"
 #include "minho_team_ros/label.h"
 #include "minho_team_ros/visionHSVConfig.h"
+#include "minho_team_ros/requestOmniVisionConf.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -31,6 +32,7 @@ using minho_team_ros::mirrorConfig;
 using minho_team_ros::range;
 using minho_team_ros::label;
 using minho_team_ros::visionHSVConfig;
+using minho_team_ros::requestOmniVisionConf;
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
 
@@ -79,6 +81,7 @@ private:
    ros::Publisher imgreq_pub_;
    ros::Publisher mirror_pub_;
    ros::Publisher vision_pub_;
+   ros::ServiceClient omniVisionConf;
    image_transport::ImageTransport *it_;
    image_transport::Subscriber image_sub_;
    ros::NodeHandle *_node_;

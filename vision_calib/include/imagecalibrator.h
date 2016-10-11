@@ -8,11 +8,14 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include "minho_team_ros/visionHSVConfig.h"
 #include "types.h"
 #include <iostream>
 
 using namespace std;
 using namespace cv;
+using minho_team_ros::visionHSVConfig;
+
 class ImageCalibrator
 {
 public:
@@ -22,6 +25,7 @@ public:
     hsv rgbtohsv(rgb in); // Converts rgb to hsv values' ranges
     /* Other Variables and Lut Variables*/
     void updateCurrentConfiguration(LABEL_t label, COMPONENT_t component, RANGE_t range, int value);
+    void lutConfigFromMsg(visionHSVConfig msg);
     labelConfiguration getLabelConfiguration(LABEL_t label);
     /* Vision Variables */
     Mat element;

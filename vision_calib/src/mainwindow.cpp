@@ -61,8 +61,29 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    imgreq_pub_ = _node_->advertise<imgRequest>(imreq_topic.str().c_str(),100);
    mirror_pub_ = _node_->advertise<mirrorConfig>(mirror_topic.str().c_str(),100);
    vision_pub_ = _node_->advertise<visionHSVConfig>(vision_topic.str().c_str(),100);
+   omniVisionConf = _node_->serviceClient<minho_team_ros::requestOmniVisionConf>("requestOmniVisionConf");
    //Initialize image_transport subscriber
    image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::display_image,this);
+   
+   
+   //Request Current Configuration
+   requestOmniVisionConf srv; 
+   srv.request.request_node_name = asd.toStdString();
+   if(omniVisionConf.call(srv)){
+      ROS_INFO("Retrieved configuration from target robot.");
+      //mirrorConfig
+      ui->spin_step->setValue(srv.response.mirrorConf.step);
+      ui->spin_maxdist->setValue(srv.response.mirrorConf.max_distance);
+      QString distances = "";
+      for(unsigned int i=0;i<srv.response.mirrorConf.pixel_distances.size();i++)
+         distances+=QString::number(srv.response.mirrorConf.pixel_distances[i])
+                  + QString(",");
+      distances.remove(distances.size()-1,1);
+      ui->line_pixdist->setText(distances);
+      img_calib_->lutConfigFromMsg(srv.response.visionConf);
+      loadValuesOnTrackbars(img_calib_->getLabelConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())));
+      
+   } else ROS_ERROR("Failed to retrieve configuration from target robot.");
 }
 
 MainWindow::~MainWindow()

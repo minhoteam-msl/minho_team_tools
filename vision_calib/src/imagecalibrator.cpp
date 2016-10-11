@@ -95,3 +95,36 @@ labelConfiguration ImageCalibrator::getLabelConfiguration(LABEL_t label)
 {
    return lutconfig.lut_calib[label];
 }
+
+void ImageCalibrator::lutConfigFromMsg(visionHSVConfig msg)
+{
+   //FIELD
+   lutconfig.lut_calib[FIELD].lb_calib[H][MIN] = msg.field.H.min;    
+   lutconfig.lut_calib[FIELD].lb_calib[H][MAX] = msg.field.H.max; 
+   lutconfig.lut_calib[FIELD].lb_calib[S][MIN] = msg.field.S.min; 
+   lutconfig.lut_calib[FIELD].lb_calib[S][MAX] = msg.field.S.max; 
+   lutconfig.lut_calib[FIELD].lb_calib[V][MIN] = msg.field.V.min; 
+   lutconfig.lut_calib[FIELD].lb_calib[V][MAX] = msg.field.V.max; 
+   //LINE
+   lutconfig.lut_calib[LINE].lb_calib[H][MIN] = msg.line.H.min;    
+   lutconfig.lut_calib[LINE].lb_calib[H][MAX] = msg.line.H.max; 
+   lutconfig.lut_calib[LINE].lb_calib[S][MIN] = msg.line.S.min; 
+   lutconfig.lut_calib[LINE].lb_calib[S][MAX] = msg.line.S.max; 
+   lutconfig.lut_calib[LINE].lb_calib[V][MIN] = msg.line.V.min; 
+   lutconfig.lut_calib[LINE].lb_calib[V][MAX] = msg.line.V.max; 
+   //BALL
+   lutconfig.lut_calib[BALL].lb_calib[H][MIN] = msg.ball.H.min;    
+   lutconfig.lut_calib[BALL].lb_calib[H][MAX] = msg.ball.H.max; 
+   lutconfig.lut_calib[BALL].lb_calib[S][MIN] = msg.ball.S.min; 
+   lutconfig.lut_calib[BALL].lb_calib[S][MAX] = msg.ball.S.max; 
+   lutconfig.lut_calib[BALL].lb_calib[V][MIN] = msg.ball.V.min; 
+   lutconfig.lut_calib[BALL].lb_calib[V][MAX] = msg.ball.V.max; 
+   //OBSTACLE
+   lutconfig.lut_calib[OBSTACLE].lb_calib[H][MIN] = msg.obstacle.H.min;    
+   lutconfig.lut_calib[OBSTACLE].lb_calib[H][MAX] = msg.obstacle.H.max; 
+   lutconfig.lut_calib[OBSTACLE].lb_calib[S][MIN] = msg.obstacle.S.min; 
+   lutconfig.lut_calib[OBSTACLE].lb_calib[S][MAX] = msg.obstacle.S.max; 
+   lutconfig.lut_calib[OBSTACLE].lb_calib[V][MIN] = msg.obstacle.V.min; 
+   lutconfig.lut_calib[OBSTACLE].lb_calib[V][MAX] = msg.obstacle.V.max; 
+     
+}

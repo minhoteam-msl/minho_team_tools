@@ -22,6 +22,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    // Setup of ROS
    QString asd = "Vision_calib";
    asd.append(QString::number(robot_id));
+   asd.append("_");
+   asd.append(QString::number(std::time(0)));
    std::stringstream imreq_topic;
    std::stringstream imgtrans_topic;
    std::stringstream mirror_topic;
@@ -128,6 +130,8 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
             img_calib_timer->stop();
          }
+         ui->combo_aqtype->setCurrentIndex(0); // Raw mode when
+         on_bt_grab_clicked();
          break;
       }
    }

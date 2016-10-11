@@ -319,7 +319,6 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
 }
 void MainWindow::loadValuesOnTrackbars(labelConfiguration labelconf)
 {
-   
    ui->h_min->setValue(labelconf.lb_calib[H][MIN]);
    ui->h_max->setValue(labelconf.lb_calib[H][MAX]);
    ui->s_min->setValue(labelconf.lb_calib[S][MIN]);

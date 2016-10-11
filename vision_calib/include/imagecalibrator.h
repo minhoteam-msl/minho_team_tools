@@ -19,15 +19,8 @@ public:
     ImageCalibrator();
     void variablesInitialization();
     void getBinary(Mat *in, labelConfiguration labelconf); // Returns thresholded HSV image
-    void getSegmentedImage(Mat *buffer); // Returns buffer's segmented image
-    void paintPixel(int x, int y, int classifier, Mat *buf); // Paints a certain pixel in the image
-    hsv rgbtohsv(rgb in); // Converts rgb to hsv
-    void resetLookUpTable();
-    void generateLookUpTable(int values[4][3][2]); // Generates look up table based on values' ranges
-    void updateLookUpTable(Mat *buffer, int x, int y, int label, int rad);
-    int getClassifier(int x,int y, Mat *buffer); // Returns classifier given a pixel and LUT configuration
+    hsv rgbtohsv(rgb in); // Converts rgb to hsv values' ranges
     /* Other Variables and Lut Variables*/
-    int YUVLookUpTable[256*256*256];
     void updateCurrentConfiguration(LABEL_t label, COMPONENT_t component, RANGE_t range, int value);
     labelConfiguration getLabelConfiguration(LABEL_t label);
     /* Vision Variables */

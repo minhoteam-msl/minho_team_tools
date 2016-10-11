@@ -192,19 +192,6 @@ void MainWindow::applyBinary()
    scene_->addPixmap(QPixmap::fromImage(image_));
 }
 
-label MainWindow::initLabelConfig(LABEL_t _label,labelConfiguration label_conf)
-{
-   label msg;
-   range h,s,v;
-   
-   h.min = label_conf.lb_calib[H][MIN]; h.max= label_conf.lb_calib[H][MAX];
-   s.min = label_conf.lb_calib[S][MIN]; s.max= label_conf.lb_calib[S][MAX];
-   v.min = label_conf.lb_calib[V][MIN]; v.max= label_conf.lb_calib[V][MAX];
-   
-   msg.classifier = (int)pow(2,(float)_label);
-   msg.H = h; msg.S = s; msg.V = v;
-   return msg;
-}
 // BUTTONS
 void MainWindow::on_bt_grab_clicked()
 {
@@ -266,17 +253,7 @@ void MainWindow::on_bt_setdist_clicked()
 
 void MainWindow::on_bt_setlut_clicked()
 {
-   labelConfiguration field_conf = img_calib_->getLabelConfiguration(FIELD);
-   labelConfiguration line_conf = img_calib_->getLabelConfiguration(LINE);
-   labelConfiguration ball_conf = img_calib_->getLabelConfiguration(BALL);
-   labelConfiguration obstacle_conf = img_calib_->getLabelConfiguration(OBSTACLE);
-   
-   visionHSVConfig msg;
-   msg.field = initLabelConfig(FIELD,field_conf);
-   msg.line = initLabelConfig(LINE,line_conf);
-   msg.ball = initLabelConfig(BALL,ball_conf);
-   msg.obstacle = initLabelConfig(OBSTACLE,obstacle_conf);
-   vision_pub_.publish(msg);
+   vision_pub_.publish(img_calib_->getLutConfiguration());
    ROS_INFO("Correct vision configuration sent!");
 }
 //SLIDEBARS
@@ -342,13 +319,13 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
    loadValuesOnTrackbars(img_calib_->getLabelConfiguration(label));
    
 }
-void MainWindow::loadValuesOnTrackbars(labelConfiguration labelconf)
+void MainWindow::loadValuesOnTrackbars(minho_team_ros::label labelconf)
 {
-   ui->h_min->setValue(labelconf.lb_calib[H][MIN]);
-   ui->h_max->setValue(labelconf.lb_calib[H][MAX]);
-   ui->s_min->setValue(labelconf.lb_calib[S][MIN]);
-   ui->s_max->setValue(labelconf.lb_calib[S][MAX]);
-   ui->v_min->setValue(labelconf.lb_calib[V][MIN]);
-   ui->v_max->setValue(labelconf.lb_calib[V][MAX]);
+   ui->h_min->setValue(labelconf.H.min);
+   ui->h_max->setValue(labelconf.H.max);
+   ui->s_min->setValue(labelconf.S.min);
+   ui->s_max->setValue(labelconf.S.max);
+   ui->v_min->setValue(labelconf.V.min);
+   ui->v_max->setValue(labelconf.V.max);
 }
 

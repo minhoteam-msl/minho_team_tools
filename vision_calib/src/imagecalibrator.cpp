@@ -11,7 +11,6 @@ ImageCalibrator::ImageCalibrator()
 void ImageCalibrator::variablesInitialization()
 {
     processed = Mat(480,480,CV_8UC3,Scalar(0,0,0));
-    pix = Mat(1,1,CV_8UC3,Scalar(0,0,0));
     double morph_size = 1.5;
     element = getStructuringElement(2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 }
@@ -60,7 +59,7 @@ hsv ImageCalibrator::rgbtohsv(rgb in)
     return temp;
 }
 // Returns binary image of the buffer, given YUV(or HSV) ranges
-void ImageCalibrator::getBinary(Mat *in, labelConfiguration labelconf)
+void ImageCalibrator::getBinary(Mat *in, minho_team_ros::label labelconf)
 {
     //Returns binary representation of a certain range
     Vec3b *pixel; // iterator to run through captured image
@@ -72,7 +71,9 @@ void ImageCalibrator::getBinary(Mat *in, labelConfiguration labelconf)
             pix.r = pixel[j][2]; pix.g = pixel[j][1]; pix.b = pixel[j][0];
             pix2 = rgbtohsv(pix);
 
-            if((pix2.h>=labelconf.lb_calib[0][0])&&(pix2.h<=labelconf.lb_calib[0][1]) && (pix2.s>=labelconf.lb_calib[1][0])&&(pix2.s<=labelconf.lb_calib[1][1]) && (pix2.v>=labelconf.lb_calib[2][0])&&(pix2.v<=labelconf.lb_calib[2][1]))
+            if((pix2.h>=labelconf.H.min)&&(pix2.h<=labelconf.H.max) &&
+            (pix2.s>=labelconf.S.min)&&(pix2.s<=labelconf.S.max) &&
+            (pix2.v>=labelconf.V.min)&&(pix2.v<=labelconf.V.max))
             {
                 pixel[j][2] = 255;
                 pixel[j][1] = 255;
@@ -88,43 +89,38 @@ void ImageCalibrator::getBinary(Mat *in, labelConfiguration labelconf)
 
 void ImageCalibrator::updateCurrentConfiguration(LABEL_t label, COMPONENT_t component, RANGE_t range, int value)
 {
-   lutconfig.lut_calib[label].lb_calib[component][range] = value; 
+   minho_team_ros::label *lb;
+   minho_team_ros::range *comp;
+   if(label==FIELD) lb = &lutconfig.field;
+   else if(label==LINE) lb = &lutconfig.line;
+   else if(label==BALL) lb = &lutconfig.ball;
+   else if(label==OBSTACLE) lb = &lutconfig.obstacle;
+   else return;
+   
+   if(component==H) comp = &lb->H;
+   else if(component==S) comp = &lb->S;
+   else if(component==V) comp = &lb->V;
+   else return;
+   
+   if(range==MIN) comp->min = value;
+   else if(range==MAX) comp->max = value;
+   else return;
+   
 }
 
-labelConfiguration ImageCalibrator::getLabelConfiguration(LABEL_t label)
+minho_team_ros::label ImageCalibrator::getLabelConfiguration(LABEL_t label)
 {
-   return lutconfig.lut_calib[label];
+   if(label==FIELD) return lutconfig.field;
+   else if(label==LINE) return lutconfig.line;
+   else if(label==BALL) return lutconfig.ball;
+   else return lutconfig.obstacle;
 }
 
+minho_team_ros::visionHSVConfig ImageCalibrator::getLutConfiguration()
+{
+   return lutconfig;
+}
 void ImageCalibrator::lutConfigFromMsg(visionHSVConfig msg)
 {
-   //FIELD
-   lutconfig.lut_calib[FIELD].lb_calib[H][MIN] = msg.field.H.min;    
-   lutconfig.lut_calib[FIELD].lb_calib[H][MAX] = msg.field.H.max; 
-   lutconfig.lut_calib[FIELD].lb_calib[S][MIN] = msg.field.S.min; 
-   lutconfig.lut_calib[FIELD].lb_calib[S][MAX] = msg.field.S.max; 
-   lutconfig.lut_calib[FIELD].lb_calib[V][MIN] = msg.field.V.min; 
-   lutconfig.lut_calib[FIELD].lb_calib[V][MAX] = msg.field.V.max; 
-   //LINE
-   lutconfig.lut_calib[LINE].lb_calib[H][MIN] = msg.line.H.min;    
-   lutconfig.lut_calib[LINE].lb_calib[H][MAX] = msg.line.H.max; 
-   lutconfig.lut_calib[LINE].lb_calib[S][MIN] = msg.line.S.min; 
-   lutconfig.lut_calib[LINE].lb_calib[S][MAX] = msg.line.S.max; 
-   lutconfig.lut_calib[LINE].lb_calib[V][MIN] = msg.line.V.min; 
-   lutconfig.lut_calib[LINE].lb_calib[V][MAX] = msg.line.V.max; 
-   //BALL
-   lutconfig.lut_calib[BALL].lb_calib[H][MIN] = msg.ball.H.min;    
-   lutconfig.lut_calib[BALL].lb_calib[H][MAX] = msg.ball.H.max; 
-   lutconfig.lut_calib[BALL].lb_calib[S][MIN] = msg.ball.S.min; 
-   lutconfig.lut_calib[BALL].lb_calib[S][MAX] = msg.ball.S.max; 
-   lutconfig.lut_calib[BALL].lb_calib[V][MIN] = msg.ball.V.min; 
-   lutconfig.lut_calib[BALL].lb_calib[V][MAX] = msg.ball.V.max; 
-   //OBSTACLE
-   lutconfig.lut_calib[OBSTACLE].lb_calib[H][MIN] = msg.obstacle.H.min;    
-   lutconfig.lut_calib[OBSTACLE].lb_calib[H][MAX] = msg.obstacle.H.max; 
-   lutconfig.lut_calib[OBSTACLE].lb_calib[S][MIN] = msg.obstacle.S.min; 
-   lutconfig.lut_calib[OBSTACLE].lb_calib[S][MAX] = msg.obstacle.S.max; 
-   lutconfig.lut_calib[OBSTACLE].lb_calib[V][MIN] = msg.obstacle.V.min; 
-   lutconfig.lut_calib[OBSTACLE].lb_calib[V][MAX] = msg.obstacle.V.max; 
-     
+   lutconfig = msg;     
 }

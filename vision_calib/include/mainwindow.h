@@ -16,10 +16,6 @@
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
 #include "minho_team_ros/imgRequest.h"
-#include "minho_team_ros/mirrorConfig.h"
-#include "minho_team_ros/range.h"
-#include "minho_team_ros/label.h"
-#include "minho_team_ros/visionHSVConfig.h"
 #include "minho_team_ros/requestOmniVisionConf.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
@@ -28,10 +24,6 @@
 using namespace ros;
 using namespace cv;
 using minho_team_ros::imgRequest;
-using minho_team_ros::mirrorConfig;
-using minho_team_ros::range;
-using minho_team_ros::label;
-using minho_team_ros::visionHSVConfig;
 using minho_team_ros::requestOmniVisionConf;
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
@@ -53,7 +45,6 @@ private slots:
    void display_image(const sensor_msgs::ImageConstPtr& msg);
    void addImageToScene();
    void applyBinary();
-   label initLabelConfig(LABEL_t _label,labelConfiguration label_conf);
    //BUTTONS
    void on_bt_grab_clicked();
    void on_bt_stop_clicked();
@@ -68,7 +59,7 @@ private slots:
    void on_v_max_valueChanged(int value);
    //COMBOBOXES
    void on_combo_label_currentIndexChanged(int index);
-   void loadValuesOnTrackbars(labelConfiguration labelconf);
+   void loadValuesOnTrackbars(minho_team_ros::label labelconf);
 private:
    Ui::MainWindow *ui;
    int robot_id_;

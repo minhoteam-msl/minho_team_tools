@@ -52,6 +52,7 @@ private slots:
    void on_bt_setdist_clicked();
    void on_bt_setlut_clicked();
    void on_bt_setimg_clicked();
+   void on_bt_screenshot_clicked();
    //SLIDEBARS
    void on_h_min_valueChanged(int value);
    void on_h_max_valueChanged(int value);

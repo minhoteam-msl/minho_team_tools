@@ -274,6 +274,17 @@ void MainWindow::on_bt_setimg_clicked()
    image_pub_.publish(img_calib_->getImageConfiguration());
    ROS_INFO("Correct image configuration sent!");
 }
+
+void MainWindow::on_bt_screenshot_clicked()
+{
+   QString path = QString(getenv("HOME"))+QString("/catkin_ws/src/minho_team_tools/vision_calib/screenshots/");
+   QString file = "Screenshot_";
+   file.append(QString::number(std::time(0))); 
+   file.append(".png");
+   path+=file;
+   ROS_INFO("Saved screenshot to %s",path.toStdString().c_str());
+   imwrite(path.toStdString().c_str(),temp);
+}
 //SLIDEBARS
 void MainWindow::on_h_min_valueChanged(int value)
 {

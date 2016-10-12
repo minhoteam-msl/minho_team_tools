@@ -103,6 +103,20 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="bt_screenshot">
+          <property name="font">
+           <font>
+            <pointsize>7</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>ScreenShot</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>

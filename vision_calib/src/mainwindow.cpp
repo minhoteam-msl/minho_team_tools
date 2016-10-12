@@ -9,7 +9,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    setup();
    
    robot_id_ = robot_id;
-   calibration_mode = false;
+   calibration_mode = draw_mode = false;
    img_calib_timer = new QTimer();
    interaction_timer = new QTimer();
    img_calib_ = new ImageCalibrator();
@@ -149,10 +149,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             calibration_mode = true;
             ui->lb_robot_name->setStyleSheet("QLabel { color : green; }");
             img_calib_timer->start(30);
+            interaction_timer->stop();
          } else {
             calibration_mode = false;
             ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
             img_calib_timer->stop();
+            interaction_timer->start(100);
          }
          ui->combo_aqtype->setCurrentIndex(0); // Raw mode when
          on_bt_grab_clicked();
@@ -174,7 +176,7 @@ void MainWindow::display_image(const sensor_msgs::ImageConstPtr& msg)
 
 void MainWindow::addImageToScene()
 {
-   if(!calibration_mode){
+   if(!calibration_mode && !draw_mode){
       scene_->clear();
       scene_->addPixmap(QPixmap::fromImage(image_));
    }
@@ -197,11 +199,19 @@ void MainWindow::applyBinary()
 
 void MainWindow::interactWithUser()
 {
-   if(ui->check_draw->isChecked()){
+   if(draw_mode){
+      if(ui->check_draw->isChecked()){
       //Draw cross
-   }   
-   
-   
+         Mat draw = temp.clone();
+         img_calib_->drawCenter(&draw);
+         image_ =  QImage( draw.data,
+                 draw.cols, draw.rows,
+                 static_cast<int>(draw.step),
+                 QImage::Format_RGB888 );
+         scene_->clear();
+         scene_->addPixmap(QPixmap::fromImage(image_));
+      }  
+   } 
 }
 
 // BUTTONS
@@ -285,6 +295,12 @@ void MainWindow::on_bt_screenshot_clicked()
    ROS_INFO("Saved screenshot to %s",path.toStdString().c_str());
    imwrite(path.toStdString().c_str(),temp);
 }
+
+void MainWindow::on_check_draw_clicked(bool state)
+{
+   draw_mode = state;
+}
+
 //SLIDEBARS
 void MainWindow::on_h_min_valueChanged(int value)
 {

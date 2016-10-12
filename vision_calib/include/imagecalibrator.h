@@ -15,6 +15,7 @@
 #include "minho_team_ros/imageConfig.h"
 #include "types.h"
 #include <iostream>
+#define TO_RAD (M_PI/180.0)
 
 using namespace std;
 using namespace cv;
@@ -36,6 +37,7 @@ public:
     void lutConfigFromMsg(visionHSVConfig msg);
     void mirrorConfigFromMsg(mirrorConfig msg);
     void imageConfigFromMsg(imageConfig msg);
+    void drawCenter(Mat *image);
     minho_team_ros::label getLabelConfiguration(LABEL_t label);
     minho_team_ros::visionHSVConfig getLutConfiguration();
     minho_team_ros::imageConfig getImageConfiguration();

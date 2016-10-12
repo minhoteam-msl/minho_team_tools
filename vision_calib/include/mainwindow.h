@@ -53,6 +53,7 @@ private slots:
    void on_bt_setlut_clicked();
    void on_bt_setimg_clicked();
    void on_bt_screenshot_clicked();
+   void on_check_draw_clicked(bool state);
    //SLIDEBARS
    void on_h_min_valueChanged(int value);
    void on_h_max_valueChanged(int value);
@@ -73,7 +74,7 @@ private slots:
 private:
    Ui::MainWindow *ui;
    int robot_id_;
-   bool calibration_mode;
+   bool calibration_mode,draw_mode;
    QGraphicsScene *scene_;
    ImageCalibrator *img_calib_;
    Mat temp;

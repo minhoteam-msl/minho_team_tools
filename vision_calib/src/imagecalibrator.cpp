@@ -120,7 +120,25 @@ minho_team_ros::visionHSVConfig ImageCalibrator::getLutConfiguration()
 {
    return lutconfig;
 }
+
+minho_team_ros::imageConfig ImageCalibrator::getImageConfiguration()
+{
+   return imageConf;
+}
+
 void ImageCalibrator::lutConfigFromMsg(visionHSVConfig msg)
 {
    lutconfig = msg;     
 }
+
+void ImageCalibrator::mirrorConfigFromMsg(mirrorConfig msg)
+{
+   mirrorConf = msg;
+}
+
+void ImageCalibrator::imageConfigFromMsg(imageConfig msg)
+{
+   imageConf = msg;
+}
+
+

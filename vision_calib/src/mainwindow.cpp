@@ -11,6 +11,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    robot_id_ = robot_id;
    calibration_mode = false;
    img_calib_timer = new QTimer();
+   interaction_timer = new QTimer();
    img_calib_ = new ImageCalibrator();
    ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
    ui->lb_robot_name->setText(QString("Calibration Mode for Robot ")+QString::number(robot_id_));
@@ -18,7 +19,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    ui->graphicsView->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
 	ui->graphicsView->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
 	connect(img_calib_timer,SIGNAL(timeout()),this,SLOT(applyBinary()));
-	
+	connect(interaction_timer,SIGNAL(timeout()),this,SLOT(interactWithUser()));
    // Setup of ROS
    QString asd = "Vision_calib";
    asd.append(QString::number(robot_id));
@@ -28,6 +29,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    std::stringstream imgtrans_topic;
    std::stringstream mirror_topic;
    std::stringstream vision_topic;
+   std::stringstream image_topic;
    
    if(real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
@@ -35,6 +37,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       imgtrans_topic << "/camera";
       mirror_topic << "/mirrorConfig";
       vision_topic << "/visionHSVConfig";
+      image_topic << "/imageConfig";
       
       if(robot_id>0){
          // Setup custom master
@@ -50,6 +53,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       imgtrans_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/camera";
       mirror_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/mirrorConfig";
       vision_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/visionHSVConfig";
+      image_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/imageConfig";
    }
    
 
@@ -61,6 +65,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    imgreq_pub_ = _node_->advertise<imgRequest>(imreq_topic.str().c_str(),100);
    mirror_pub_ = _node_->advertise<mirrorConfig>(mirror_topic.str().c_str(),100);
    vision_pub_ = _node_->advertise<visionHSVConfig>(vision_topic.str().c_str(),100);
+   image_pub_ = _node_->advertise<imageConfig>(image_topic.str().c_str(),100);
+   
    omniVisionConf = _node_->serviceClient<minho_team_ros::requestOmniVisionConf>("requestOmniVisionConf");
    //Initialize image_transport subscriber
    image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::display_image,this);
@@ -71,19 +77,16 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    srv.request.request_node_name = asd.toStdString();
    if(omniVisionConf.call(srv)){
       ROS_INFO("Retrieved configuration from target robot.");
-      //mirrorConfig
-      ui->spin_step->setValue(srv.response.mirrorConf.step);
-      ui->spin_maxdist->setValue(srv.response.mirrorConf.max_distance);
-      QString distances = "";
-      for(unsigned int i=0;i<srv.response.mirrorConf.pixel_distances.size();i++)
-         distances+=QString::number(srv.response.mirrorConf.pixel_distances[i])
-                  + QString(",");
-      distances.remove(distances.size()-1,1);
-      ui->line_pixdist->setText(distances);
+      img_calib_->mirrorConfigFromMsg(srv.response.mirrorConf);
       img_calib_->lutConfigFromMsg(srv.response.visionConf);
+      img_calib_->imageConfigFromMsg(srv.response.imageConf);
       loadValuesOnTrackbars(img_calib_->getLabelConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())));
+      loadMirrorValues(srv.response.mirrorConf);
+      loadImageValues(srv.response.imageConf);
       
    } else ROS_ERROR("Failed to retrieve configuration from target robot.");
+   
+   interaction_timer->start(100);
 }
 
 MainWindow::~MainWindow()
@@ -192,6 +195,15 @@ void MainWindow::applyBinary()
    scene_->addPixmap(QPixmap::fromImage(image_));
 }
 
+void MainWindow::interactWithUser()
+{
+   if(ui->check_draw->isChecked()){
+      //Draw cross
+   }   
+   
+   
+}
+
 // BUTTONS
 void MainWindow::on_bt_grab_clicked()
 {
@@ -256,6 +268,12 @@ void MainWindow::on_bt_setlut_clicked()
    vision_pub_.publish(img_calib_->getLutConfiguration());
    ROS_INFO("Correct vision configuration sent!");
 }
+
+void MainWindow::on_bt_setimg_clicked()
+{
+   image_pub_.publish(img_calib_->getImageConfiguration());
+   ROS_INFO("Correct image configuration sent!");
+}
 //SLIDEBARS
 void MainWindow::on_h_min_valueChanged(int value)
 {
@@ -312,6 +330,32 @@ void MainWindow::on_v_max_valueChanged(int value)
                                           ,MAX
                                           ,value);
 }
+//SPINBOXES
+void MainWindow::on_spin_tilt_valueChanged(int value)
+{
+   imageConfig msg;
+   msg.center_x = ui->spin_cx->value();
+   msg.center_y = ui->spin_cy->value();
+   msg.tilt = value;
+   img_calib_->imageConfigFromMsg(msg);
+}
+void MainWindow::on_spin_cx_valueChanged(int value)
+{
+   imageConfig msg;
+   msg.center_x = value;
+   msg.center_y = ui->spin_cy->value();
+   msg.tilt = ui->spin_tilt->value();
+   img_calib_->imageConfigFromMsg(msg);
+}
+void MainWindow::on_spin_cy_valueChanged(int value)
+{
+   imageConfig msg;
+   msg.center_x = ui->spin_cx->value();
+   msg.center_y = value;
+   msg.tilt = ui->spin_tilt->value();
+   img_calib_->imageConfigFromMsg(msg);
+}
+   
 //COMBOBOXES
 void MainWindow::on_combo_label_currentIndexChanged(int index)
 {
@@ -331,5 +375,26 @@ void MainWindow::loadValuesOnTrackbars(minho_team_ros::label labelconf)
    ui->s_max->setValue(labelconf.S.max);
    ui->v_min->setValue(labelconf.V.min);
    ui->v_max->setValue(labelconf.V.max);
+}
+
+void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
+{
+   //mirrorConfig
+   ui->spin_step->setValue(mirrorConf.step);
+   ui->spin_maxdist->setValue(mirrorConf.max_distance);
+   QString distances = "";
+   for(unsigned int i=0;i<mirrorConf.pixel_distances.size();i++)
+      distances+=QString::number(mirrorConf.pixel_distances[i])
+               + QString(",");
+   distances.remove(distances.size()-1,1);
+   ui->line_pixdist->setText(distances);
+}
+
+void MainWindow::loadImageValues(minho_team_ros::imageConfig imageConf)
+{
+   //mirrorConfig
+   ui->spin_tilt->setValue(imageConf.tilt);
+   ui->spin_cx->setValue(imageConf.center_x);
+   ui->spin_cy->setValue(imageConf.center_y);
 }
 

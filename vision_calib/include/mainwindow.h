@@ -45,11 +45,13 @@ private slots:
    void display_image(const sensor_msgs::ImageConstPtr& msg);
    void addImageToScene();
    void applyBinary();
+   void interactWithUser();
    //BUTTONS
    void on_bt_grab_clicked();
    void on_bt_stop_clicked();
    void on_bt_setdist_clicked();
    void on_bt_setlut_clicked();
+   void on_bt_setimg_clicked();
    //SLIDEBARS
    void on_h_min_valueChanged(int value);
    void on_h_max_valueChanged(int value);
@@ -57,10 +59,16 @@ private slots:
    void on_s_max_valueChanged(int value);
    void on_v_min_valueChanged(int value);
    void on_v_max_valueChanged(int value);
+   //SPINBOXES
+   void on_spin_tilt_valueChanged(int value);
+   void on_spin_cx_valueChanged(int value);
+   void on_spin_cy_valueChanged(int value);
    //COMBOBOXES
    void on_combo_label_currentIndexChanged(int index);
    void on_combo_aqtype_currentIndexChanged(int index);
    void loadValuesOnTrackbars(minho_team_ros::label labelconf);
+   void loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf);
+   void loadImageValues(minho_team_ros::imageConfig imageConf);
 private:
    Ui::MainWindow *ui;
    int robot_id_;
@@ -68,11 +76,12 @@ private:
    QGraphicsScene *scene_;
    ImageCalibrator *img_calib_;
    Mat temp;
-   QTimer *img_calib_timer;
+   QTimer *img_calib_timer, *interaction_timer;
    //ROS
    ros::Publisher imgreq_pub_;
    ros::Publisher mirror_pub_;
    ros::Publisher vision_pub_;
+   ros::Publisher image_pub_;
    ros::ServiceClient omniVisionConf;
    image_transport::ImageTransport *it_;
    image_transport::Subscriber image_sub_;

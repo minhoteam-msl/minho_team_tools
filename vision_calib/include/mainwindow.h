@@ -59,6 +59,7 @@ private slots:
    void on_v_max_valueChanged(int value);
    //COMBOBOXES
    void on_combo_label_currentIndexChanged(int index);
+   void on_combo_aqtype_currentIndexChanged(int index);
    void loadValuesOnTrackbars(minho_team_ros::label labelconf);
 private:
    Ui::MainWindow *ui;

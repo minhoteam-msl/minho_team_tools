@@ -319,6 +319,10 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
    loadValuesOnTrackbars(img_calib_->getLabelConfiguration(label));
    
 }
+void MainWindow::on_combo_aqtype_currentIndexChanged(int index)
+{
+   on_bt_grab_clicked();   
+}
 void MainWindow::loadValuesOnTrackbars(minho_team_ros::label labelconf)
 {
    ui->h_min->setValue(labelconf.H.min);

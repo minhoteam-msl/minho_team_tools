@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 #include "ui_teleop.h"
 
+/// \brief class constructor that connects signals and slots and creates ROS publishers and
+/// subscribers. Given robot_id and real_robot defines the names of the topics
+/// \params [in] : robot_id -> id [0-6] of the robot to be used
+///                real_robot -> defines if a real robot is being used or a simulated one
 MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -67,6 +71,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    _update_->start(50); // update teleop data to robot
 }
 
+/// \brief class destructor, that sends teleop off message on close
 MainWindow::~MainWindow()
 {
     on_pushButton_2_clicked();
@@ -74,6 +79,8 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+/// \brief button slot function to turn on teleop for defined robot. Sends a teleop 
+/// message over ROS enabling teleop
 void MainWindow::on_pushButton_clicked()
 {
     teleop_activated_ = true;
@@ -85,6 +92,8 @@ void MainWindow::on_pushButton_clicked()
     if(teleop_pub_) teleop_pub_.publish(msg);
 }
 
+/// \brief button slot function to turn off teleop for defined robot. Sends a teleop 
+/// message over ROS disabling teleop
 void MainWindow::on_pushButton_2_clicked()
 {
     teleop_activated_ = false;
@@ -95,18 +104,24 @@ void MainWindow::on_pushButton_2_clicked()
     if(teleop_pub_) teleop_pub_.publish(msg);
 }
 
+/// \brief horizontal_bar slot function to change maximum linear velocity
+/// \params [in] : value -> new value to be applied to maximum linear velocity
 void MainWindow::on_hs_lin_valueChanged(int value)
 {
     ui->lb_lin->setText(QString::number(value));
     max_lin_ = value;
 }
-
+/// \brief horizontal_bar slot function to change maximum angular velocity
+/// \params [in] : value -> new value to be applied to maximum angular velocity
 void MainWindow::on_hs_ang_valueChanged(int value)
 {
     ui->lb_ang->setText(QString::number(value));
     max_ang_ = value;
 }
 
+/// \brief periodical function called by _update_ QTimer to compute new velocities
+/// to be apllied and send them to the robot (real or sim) over ROS using
+/// controlInfo message
 void MainWindow::onUpdate()
 {
     if(teleop_activated_){
@@ -138,7 +153,9 @@ void MainWindow::onUpdate()
         if(control_pub_) control_pub_.publish(msg);
     }
 }
-
+/// \brief function to sum or subtract value to the directional velocities
+/// to easily compute the resultant velocity and direction (euler) to send to 
+/// the robot. Also computes the resultant angular velocity to be applied
 void MainWindow::updateThrusts()
 {
     if(teleop_activated_){
@@ -157,7 +174,9 @@ void MainWindow::updateThrusts()
         else { thrust_[6] -= 20; if(thrust_[6]<0) thrust_[6]=0; }
     }
 }
-
+/// \brief callback function called when key is pressed. It allows to implement
+/// commands by keys instead of mouse, which is more intuitive
+/// \params [in] : event -> key event detected where info about pressed key is given
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
     if(!event->isAutoRepeat()){
@@ -221,7 +240,9 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         }
     }
 }
-
+/// \brief callback function called when key is released. It allows to implement
+/// commands by keys instead of mouse, which is more intuitive
+/// \params [in] : event -> key event detected where info about released key is given
 void MainWindow::keyReleaseEvent(QKeyEvent *event)
 {
     if(!event->isAutoRepeat()){
@@ -264,6 +285,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event)
     }
 }
 
+/// \brief ROS callback to receive robotInfo message containing primary world 
+/// state of the current robot.
+/// \params [in] : msg -> message contaning robotInfo message data
 void MainWindow::robotInfoCallback(const minho_team_ros::robotInfo::ConstPtr& msg)
 {
     QString info = QString("[")+QString::number(msg->robot_pose.x,'f',2) + 

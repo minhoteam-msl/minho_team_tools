@@ -36,51 +36,82 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(int robot_id,bool real_robot, QWidget *parent = 0);
-    ~MainWindow();
+   /// \brief class constructor that connects signals and slots and creates ROS publishers and
+   /// subscribers. Given robot_id and real_robot defines the names of the topics
+   /// \params [in] : robot_id -> id [0-6] of the robot to be used
+   ///                real_robot -> defines if a real robot is being used or a simulated one
+   explicit MainWindow(int robot_id,bool real_robot, QWidget *parent = 0);
+   /// \brief class destructor, that sends teleop off message on close
+   ~MainWindow();
 
 private slots:
-    void on_pushButton_clicked();
-
-    void on_pushButton_2_clicked();
-
-    void on_hs_lin_valueChanged(int value);
-
-    void on_hs_ang_valueChanged(int value);
-
-    void onUpdate();
-
-    void updateThrusts();
-
-    void keyPressEvent(QKeyEvent *event);
-
-    void keyReleaseEvent(QKeyEvent *event);
-    
-    void robotInfoCallback(const minho_team_ros::robotInfo::ConstPtr& msg);
-    
-    bool event( QEvent * pEvent )
-	{
-		if ( pEvent->type() == QEvent::WindowDeactivate ){
-		    for(int i = 0;i<7;i++) { thrust_activation_[i] = false; thrust_[i] = 0; }
-		}
-		return QMainWindow::event( pEvent );
+   /// \brief button slot function to turn on teleop for defined robot. Sends a teleop 
+   /// message over ROS enabling teleop
+   void on_pushButton_clicked();
+   /// \brief button slot function to turn off teleop for defined robot. Sends a teleop 
+   /// message over ROS disabling teleop
+   void on_pushButton_2_clicked();
+   /// \brief horizontal_bar slot function to change maximum linear velocity
+   /// \params [in] : value -> new value to be applied to maximum linear velocity
+   void on_hs_lin_valueChanged(int value);
+   /// \brief horizontal_bar slot function to change maximum angular velocity
+   /// \params [in] : value -> new value to be applied to maximum angular velocity
+   void on_hs_ang_valueChanged(int value);
+   /// \brief periodical function called by _update_ QTimer to compute new velocities
+   /// to be apllied and send them to the robot (real or sim) over ROS using
+   /// controlInfo message
+   void onUpdate();
+   /// \brief function to sum or subtract value to the directional velocities
+   /// to easily compute the resultant velocity and direction (euler) to send to 
+   /// the robot. Also computes the resultant angular velocity to be applied
+   void updateThrusts();
+   /// \brief callback function called when key is pressed. It allows to implement
+   /// commands by keys instead of mouse, which is more intuitive
+   /// \params [in] : event -> key event detected where info about pressed key is given
+   void keyPressEvent(QKeyEvent *event);
+   /// \brief callback function called when key is released. It allows to implement
+   /// commands by keys instead of mouse, which is more intuitive
+   /// \params [in] : event -> key event detected where info about released key is given
+   void keyReleaseEvent(QKeyEvent *event);
+   /// \brief ROS callback to receive robotInfo message containing primary world 
+   /// state of the current robot.
+   /// \params [in] : msg -> message contaning robotInfo message data
+   void robotInfoCallback(const minho_team_ros::robotInfo::ConstPtr& msg);
+   /// \brief event to drive all controls to zero when GUI is deselected by the user
+   bool event( QEvent * pEvent ){
+      if ( pEvent->type() == QEvent::WindowDeactivate ){
+         for(int i = 0;i<7;i++) { thrust_activation_[i] = false; thrust_[i] = 0; }
+      }
+      return QMainWindow::event( pEvent );
 	}
 private:
-    Ui::MainWindow *ui;
-    bool teleop_activated_;
-    QTimer *_update_;
-    int robot_id_;
-    int max_lin_, max_ang_;
-    bool kick_request_, is_pass_;
-    bool dribblers_state_;
-
-    std::vector<float> thrust_;
-    std::vector<bool> thrust_activation_;
-    
-    ros::Publisher control_pub_, teleop_pub_;
-    ros::Subscriber robot_sub_;
-    ros::NodeHandle *_node_;
-    ros::AsyncSpinner *spinner;
+   /// \brief pointer to GUI
+   Ui::MainWindow *ui;
+   /// \brief defines whether teleop is activated or not
+   bool teleop_activated_;
+   /// \brief update timer to update thrusts and send data
+   QTimer *_update_;
+   /// \brief defined robot id 
+   int robot_id_;
+   /// \brief maximum linear and angular velocites values
+   int max_lin_, max_ang_;
+   /// \brief defines wether there was a kick request. defines 
+   /// wether the request is a kick or a pass
+   bool kick_request_, is_pass_;
+   /// \brief defines the state of the dribblers (running or not)
+   bool dribblers_state_;
+   /// \brief vector to hold current directional thrusts
+   std::vector<float> thrust_;
+   /// \brief vector to enable or disable a certain directional thrust
+   std::vector<bool> thrust_activation_;
+   /// \brief controlInfo and teleop ROS publishers
+   ros::Publisher control_pub_, teleop_pub_;
+   /// \brief robotInfo ROS subscriber
+   ros::Subscriber robot_sub_;
+   /// \brief ROS node handle pointer
+   ros::NodeHandle *_node_;
+   /// \brief ROS AsyncSpinner pointer 
+   ros::AsyncSpinner *spinner;
 };
 
 #endif // MAINWINDOW_H

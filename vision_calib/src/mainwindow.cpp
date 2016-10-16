@@ -1,6 +1,12 @@
 #include "mainwindow.h"
 #include "ui_vision_calib.h"
 
+/// \brief - class constructor. Takes care of initializing GUI,
+/// connect several signals/slots and to create and configure
+/// all ROS publishers and subscribers. Also, requests the current
+/// configuration of the robot.
+/// \params [in] - robot_id -> id [0-6] of the robot to use
+///              - real_robot -> defines wether its a real or sim robot
 MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -69,7 +75,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    
    omniVisionConf = _node_->serviceClient<minho_team_ros::requestOmniVisionConf>("requestOmniVisionConf");
    //Initialize image_transport subscriber
-   image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::display_image,this);
+   image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::imageCallback,this);
    
    
    //Request Current Configuration
@@ -89,12 +95,15 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    interaction_timer->start(100);
 }
 
+/// \brief - class destructor. Shuts down ROS node
 MainWindow::~MainWindow()
 {  
    ros::shutdown();
    delete ui;
 }
 
+/// \brief function to setup the graphicsscene and create the 
+/// image holding matrix
 void MainWindow::setup()
 {
    scene_ = new QGraphicsScene();
@@ -102,7 +111,9 @@ void MainWindow::setup()
    temp = Mat(480,480,CV_8UC3,Scalar(0,0,0));
 }
    
-   
+/// \brief function to detect key press events. This key presses 
+/// detection allow to implement several actions without mouse usage
+/// \params [in] : event -> QKeyEvent holding the data about the key press event   
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
    switch(event->key()){
@@ -162,7 +173,14 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
       }
    }
 }
-void MainWindow::display_image(const sensor_msgs::ImageConstPtr& msg)
+
+/// \brief callback function that receives published images and converts them 
+/// into Opencv(Mat) format using cv_bridge and to Qt's QImage to be displayed.
+/// Since its called by ROS (another thread), emits a signal (addNewImage) so
+/// the GUI's thread can take care of putting the image in GraphicsView.
+/// \params [in] : msg -> sensor_msgs::Image data, holding information about
+/// the image sent.
+void MainWindow::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
    cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"bgr8");
    temp = recv_img->image;
@@ -174,6 +192,8 @@ void MainWindow::display_image(const sensor_msgs::ImageConstPtr& msg)
    emit addNewImage();
 }
 
+/// \brief slot function that consumes addNewImage signal. Only displays the 
+/// image if both calibration modes are disabled (calibration_mode and draw_mode)
 void MainWindow::addImageToScene()
 {
    if(!calibration_mode && !draw_mode){
@@ -182,6 +202,9 @@ void MainWindow::addImageToScene()
    }
 }
 
+/// \brief function to apply binary HSV masking to the selected label, with the
+/// defined parameters for that label, in GUI's trackbars. The conversion is done
+/// based on the image present in temp matrix
 void MainWindow::applyBinary()
 {
    LABEL_t label = static_cast<LABEL_t>(ui->combo_label->currentIndex());
@@ -197,6 +220,9 @@ void MainWindow::applyBinary()
    scene_->addPixmap(QPixmap::fromImage(image_));
 }
 
+/// \brief function to interact with the user and display info/images. If in draw
+/// mode it displays a calibration crosshair and, if in inspection mode, displays
+/// the mapped distance for the selected (mouse hovering) pixel
 void MainWindow::interactWithUser()
 {
    if(draw_mode){
@@ -215,6 +241,8 @@ void MainWindow::interactWithUser()
 }
 
 // BUTTONS
+/// \brief slot function for click action of bt_grab. Function to send a request
+/// for images based on selected options of type and frequency
 void MainWindow::on_bt_grab_clicked()
 {
    bool multiple_send_request = ui->radio_multiple->isChecked();
@@ -224,6 +252,8 @@ void MainWindow::on_bt_grab_clicked()
    imgreq_pub_.publish(msg_);
 }
 
+/// \brief slot function for click action of bt_stop. Function to stop image 
+/// send. It send a single image requst
 void MainWindow::on_bt_stop_clicked()
 {
    msg_.is_multiple = false;
@@ -232,6 +262,8 @@ void MainWindow::on_bt_stop_clicked()
    imgreq_pub_.publish(msg_);
 }
 
+/// \brief slot function for click action of bt_setdist. Checks validaty and
+/// sends new configuration for mirror's pixel-meter mapping
 void MainWindow::on_bt_setdist_clicked()
 {
    QStringList pixValues = ui->line_pixdist->text().split(",");
@@ -273,18 +305,24 @@ void MainWindow::on_bt_setdist_clicked()
    }
 }
 
+/// \brief slot function for click action of bt_setlut. Sends new configuration
+/// for vision's HSV look up table
 void MainWindow::on_bt_setlut_clicked()
 {
    vision_pub_.publish(img_calib_->getLutConfiguration());
    ROS_INFO("Correct vision configuration sent!");
 }
 
+/// \brief slot function for click action of bt_setimg. Sends new configuraiton
+/// for image parameters
 void MainWindow::on_bt_setimg_clicked()
 {
    image_pub_.publish(img_calib_->getImageConfiguration());
    ROS_INFO("Correct image configuration sent!");
 }
 
+/// \brief slot function for click action of bt_screenshot. Takes and saves a
+/// screenshot in {ros_project_folder}/screenshots
 void MainWindow::on_bt_screenshot_clicked()
 {
    QString path = QString(getenv("HOME"))+QString("/catkin_ws/src/minho_team_tools/vision_calib/screenshots/");
@@ -296,12 +334,18 @@ void MainWindow::on_bt_screenshot_clicked()
    imwrite(path.toStdString().c_str(),temp);
 }
 
+/// \brief slot function for click action of check_draw. Enbles or disables 
+/// draw mode
+/// \params [in] : state -> boolean value to define if draw mode is on or off
 void MainWindow::on_check_draw_clicked(bool state)
 {
    draw_mode = state;
 }
 
 //SLIDEBARS
+/// \brief slot function for hue min trackbar. Sets a new value for the selected
+/// label
+/// \params [in] : value -> new value to be applied to label's hue min
 void MainWindow::on_h_min_valueChanged(int value)
 {
    ui->lb_hmin->setText(QString::number(value));
@@ -312,6 +356,9 @@ void MainWindow::on_h_min_valueChanged(int value)
    
 }
 
+/// \brief slot function for hue max trackbar. Sets a new value for the selected
+/// label
+/// \params [in] : value -> new value to be applied to label's hue max
 void MainWindow::on_h_max_valueChanged(int value)
 {
    ui->lb_hmax->setText(QString::number(value));
@@ -321,6 +368,9 @@ void MainWindow::on_h_max_valueChanged(int value)
                                           ,value);
 }
 
+/// \brief slot function for sat min trackbar. Sets a new value for the selected
+/// label
+/// \params [in] : value -> new value to be applied to label's sat min
 void MainWindow::on_s_min_valueChanged(int value)
 {
    ui->lb_smin->setText(QString::number(value));
@@ -331,6 +381,9 @@ void MainWindow::on_s_min_valueChanged(int value)
    
 }
 
+/// \brief slot function for sat max trackbar. Sets a new value for the selected
+/// label
+/// \params [in] : value -> new value to be applied to label's sat max
 void MainWindow::on_s_max_valueChanged(int value)
 {
    ui->lb_smax->setText(QString::number(value));
@@ -340,6 +393,9 @@ void MainWindow::on_s_max_valueChanged(int value)
                                           ,value);
 }
 
+/// \brief slot function for value min trackbar. Sets a new value for the selected
+/// label
+/// \params [in] : value -> new value to be applied to label's value min
 void MainWindow::on_v_min_valueChanged(int value)
 {
    ui->lb_vmin->setText(QString::number(value));
@@ -349,6 +405,9 @@ void MainWindow::on_v_min_valueChanged(int value)
                                           ,value);
 }
 
+/// \brief slot function for value max trackbar. Sets a new value for the selected
+/// label
+/// \params [in] : value -> new value to be applied to label's value max
 void MainWindow::on_v_max_valueChanged(int value)
 {
    ui->lb_vmax->setText(QString::number(value));
@@ -357,7 +416,11 @@ void MainWindow::on_v_max_valueChanged(int value)
                                           ,MAX
                                           ,value);
 }
+
 //SPINBOXES
+/// \brief slot function for tilt spinbox. Sets a new value for the image 
+/// tilt.
+/// \params [in] : value -> new value to be applied image's tilt
 void MainWindow::on_spin_tilt_valueChanged(int value)
 {
    imageConfig msg;
@@ -366,6 +429,10 @@ void MainWindow::on_spin_tilt_valueChanged(int value)
    msg.tilt = value;
    img_calib_->imageConfigFromMsg(msg);
 }
+
+/// \brief slot function for center x spinbox. Sets a new value for the image 
+/// tilt.
+/// \params [in] : value -> new value to be applied image's center x
 void MainWindow::on_spin_cx_valueChanged(int value)
 {
    imageConfig msg;
@@ -374,6 +441,10 @@ void MainWindow::on_spin_cx_valueChanged(int value)
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
 }
+
+/// \brief slot function for center y spinbox. Sets a new value for the image 
+/// tilt.
+/// \params [in] : value -> new value to be applied image's center y
 void MainWindow::on_spin_cy_valueChanged(int value)
 {
    imageConfig msg;
@@ -384,16 +455,28 @@ void MainWindow::on_spin_cy_valueChanged(int value)
 }
    
 //COMBOBOXES
+/// \brief slot function for label's combobox. Sets the current label that
+/// we will be performing the configurations
+/// \params [in] : index -> new label index to be used
 void MainWindow::on_combo_label_currentIndexChanged(int index)
 {
    LABEL_t label = static_cast<LABEL_t>(index);
    loadValuesOnTrackbars(img_calib_->getLabelConfiguration(label));
    
 }
+
+/// \brief slot function for acquisition type's combobox. Sets the current 
+/// acquisition type to be used in image requests
+/// \params [in] : index -> new image acquisition type to be used
 void MainWindow::on_combo_aqtype_currentIndexChanged(int index)
 {
    on_bt_grab_clicked();   
 }
+
+//LOAD FUNCTIONS
+/// \brief function to load values of a label configuration onto GUI's 
+/// trackbars
+/// \params [in] : labelconf -> label message containing label configuration
 void MainWindow::loadValuesOnTrackbars(minho_team_ros::label labelconf)
 {
    ui->h_min->setValue(labelconf.H.min);
@@ -404,6 +487,9 @@ void MainWindow::loadValuesOnTrackbars(minho_team_ros::label labelconf)
    ui->v_max->setValue(labelconf.V.max);
 }
 
+/// \brief function to load values of a mirror configuration onto GUI's 
+/// spinboxes and line edit
+/// \params [in] : mirrorConf -> mirrorConfig message to be used
 void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
 {
    //mirrorConfig
@@ -417,6 +503,9 @@ void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
    ui->line_pixdist->setText(distances);
 }
 
+/// \brief function to load values of a image configuration onto GUI's 
+/// spinboxes
+/// \params [in] : imageConf -> imageConfig message to be used
 void MainWindow::loadImageValues(minho_team_ros::imageConfig imageConf)
 {
    //mirrorConfig

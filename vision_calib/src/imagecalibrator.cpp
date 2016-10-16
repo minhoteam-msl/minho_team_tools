@@ -1,13 +1,12 @@
 #include "imagecalibrator.h"
 
-//Constructor of the class
+/// \brief class constructor. Calls variablesInitializtion function
 ImageCalibrator::ImageCalibrator()
 {
    variablesInitialization();
 }
 
-// Miscellaneous variables Initialization
-// TODO :: Use file for variables initialization
+/// \brief function to initialize data. Creates Mats and morphing elements
 void ImageCalibrator::variablesInitialization()
 {
     processed = Mat(480,480,CV_8UC3,Scalar(0,0,0));
@@ -15,14 +14,12 @@ void ImageCalibrator::variablesInitialization()
     element = getStructuringElement(2, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 }
 
-// Converts rgb struct into hsv values, returns hsv struct
-// TODO :: Rewrite this function
+/// \brief function to convert an rgb pixel into hsv in 0-180/0-255/0-255 range.
+/// \params [in] : in -> rgb struct containing rgb values to be converted
+/// \params [out] : hsv struct containing hsv values resultant from the conversion
 hsv ImageCalibrator::rgbtohsv(rgb in)
 {
     hsv temp;
-    /*pix.data[0] = in.r; pix.data[1] = in.g; pix.data[2] = in.b;
-    cvtColor(pix,pix,CV_BGR2HSV);
-    temp.h = pix.data[0]; temp.s = pix.data[1]; temp.v = pix.data[2];*/
     int min = 0, max = 0, delta = 0;
     if(in.r<in.g)min=in.r; else min=in.g;
     if(in.b<min)min=in.b;
@@ -58,7 +55,11 @@ hsv ImageCalibrator::rgbtohsv(rgb in)
     }
     return temp;
 }
-// Returns binary image of the buffer, given YUV(or HSV) ranges
+
+/// \brief function to return binary representation of an image given a certain
+/// hsv configuration (range).
+/// \params [in] : in -> pointer to target image (in and out image container)
+///                labelconf -> hsv configuration for a certain label
 void ImageCalibrator::getBinary(Mat *in, minho_team_ros::label labelconf)
 {
     //Returns binary representation of a certain range
@@ -87,6 +88,11 @@ void ImageCalibrator::getBinary(Mat *in, minho_team_ros::label labelconf)
     }
 }
 
+/// \brief function to update a certain range value in lutconfig message.
+/// \params [in] : label -> label to be changed
+///                component -> component of label (h,s or v) to be changed
+///                range -> range of component to be changed (min or max)
+///                value -> value to be applied to range
 void ImageCalibrator::updateCurrentConfiguration(LABEL_t label, COMPONENT_t component, RANGE_t range, int value)
 {
    minho_team_ros::label *lb;
@@ -108,6 +114,9 @@ void ImageCalibrator::updateCurrentConfiguration(LABEL_t label, COMPONENT_t comp
    
 }
 
+/// \brief function to get current label configuration
+/// \params [in] : label -> label's id to be get
+/// \params [out] : label -> label's configuration
 minho_team_ros::label ImageCalibrator::getLabelConfiguration(LABEL_t label)
 {
    if(label==FIELD) return lutconfig.field;
@@ -116,31 +125,44 @@ minho_team_ros::label ImageCalibrator::getLabelConfiguration(LABEL_t label)
    else return lutconfig.obstacle;
 }
 
+/// \brief function to get current visionHSVConfig configuration
+/// \params [out] : visionHSVConfig -> current visionHSVConfig configuration
 minho_team_ros::visionHSVConfig ImageCalibrator::getLutConfiguration()
 {
    return lutconfig;
 }
 
+/// \brief function to get current imageConfig configuration
+/// \params [out] : imageConfig -> current imageConfig configuration
 minho_team_ros::imageConfig ImageCalibrator::getImageConfiguration()
 {
    return imageConf;
 }
 
+/// \brief applies a configuration for lutconfig giver a visionHSVConfig message
+/// \params [in] : msg -> visionHSVConfig message to be used 
 void ImageCalibrator::lutConfigFromMsg(visionHSVConfig msg)
 {
    lutconfig = msg;     
 }
 
+/// \brief applies a configuration for mirrorConf giver a mirrorConfig message
+/// \params [in] : msg -> mirrorConfig message to be used 
 void ImageCalibrator::mirrorConfigFromMsg(mirrorConfig msg)
 {
    mirrorConf = msg;
 }
 
+/// \brief applies a configuration for imageConf giver a imageConfig message
+/// \params [in] : msg -> imageConfig message to be used 
 void ImageCalibrator::imageConfigFromMsg(imageConfig msg)
 {
    imageConf = msg;
 }
 
+/// \brief function to draw a center point and a crosshair given the current
+/// imageConf configuration message
+/// \params [in] : image -> target image container where things will be drawn
 void ImageCalibrator::drawCenter(Mat *image)
 {
    circle(*image,Point(imageConf.center_x,imageConf.center_y),3,Scalar(0,0,255),-1);

@@ -70,13 +70,40 @@ public:
    /// imageConf configuration message
    /// \params [in] : image -> target image container where things will be drawn
    void drawCenter(Mat *image);
+   /// \brief function to generate new distLookUpTable based on current mirrorConfig
+   void generateDistanceLookUpTable();
+   /// \brief function to generate new distPix and distReal based on current mirrorConfig
+   void generateDistanceVectors();
+   /// \brief function to convert pixels to meters based on distPix and distReal
+   /// \params [in] : pixels -> distance in pixels to be converted to meters
+   double d2pWorld(int pixels);
+   /// \brief computes euclidean distance between points p1 and p2
+   /// \params [in] : p1 -> first point in distance calculation
+   ///                p2 -> second point in distance calculation
+   ///         [out] : int -> euclidean distance between p1 and p2
+   int d2p(Point p1,Point p2);
+   /// \brief function to map point in image (pixels) to point in world (meters)
+   /// \params [in] : p -> point to be mapped (pixels)
+   ///         [out] : Point2d -> point mapped in meters
+   Point2d worldMapping(Point p);
 private:
-   /* Vision Variables */
+   /// \brief morphing element for binary operations
    Mat element;
+   /// \brief image containers for auxiliary processing
    Mat processed,buffer;
+   /// \brief current defined visionHSVConfig
    visionHSVConfig lutconfig;
+   /// \brief current defined mirrorConfig
    mirrorConfig mirrorConf;
+   /// \brief vector to hold pixel distances mapping vector
+   vector<double> distPix;
+   /// \brief vector to hold meter distances mapping vector
+   vector<double> distReal;
+   /// \brief pixel-meter distances 
+   vector<vector<Point2d> >distLookUpTable;
+   /// \brief current defined imageConfig
    imageConfig imageConf;
+   
 };
 
 #endif // IMAGECALIBRATOR_H

@@ -182,7 +182,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 /// the image sent.
 void MainWindow::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-   cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"bgr8");
+   cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"rgb8");
    temp = recv_img->image;
    image_ =  QImage( temp.data,
                  temp.cols, temp.rows,
@@ -238,6 +238,13 @@ void MainWindow::interactWithUser()
          scene_->addPixmap(QPixmap::fromImage(image_));
       }  
    } 
+   
+   QPointF relativeOrigin = ui->graphicsView->mapToScene(ui->graphicsView->mapFromGlobal(QCursor::pos()));
+   if(relativeOrigin.x()>=0 && relativeOrigin.x()<480 && relativeOrigin.y()>=0 && relativeOrigin.y()<480){
+      ui->lb_pxcoords->setText(QString("(")+QString::number(relativeOrigin.x())+QString(",")+QString::number(relativeOrigin.y())+QString(") pixels"));
+      Point2d real_coords = img_calib_->worldMapping(Point(relativeOrigin.x(),relativeOrigin.y()));
+      ui->lb_realcoords->setText(QString::number(real_coords.x,'f',2)+QString(" m , ")+QString::number(real_coords.y,'f',2)+QString("º"));
+   }
 }
 
 // BUTTONS

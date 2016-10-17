@@ -151,6 +151,7 @@ void ImageCalibrator::lutConfigFromMsg(visionHSVConfig msg)
 void ImageCalibrator::mirrorConfigFromMsg(mirrorConfig msg)
 {
    mirrorConf = msg;
+   generateDistanceVectors();
 }
 
 /// \brief applies a configuration for imageConf giver a imageConfig message
@@ -158,6 +159,7 @@ void ImageCalibrator::mirrorConfigFromMsg(mirrorConfig msg)
 void ImageCalibrator::imageConfigFromMsg(imageConfig msg)
 {
    imageConf = msg;
+   generateDistanceLookUpTable();
 }
 
 /// \brief function to draw a center point and a crosshair given the current
@@ -173,4 +175,62 @@ void ImageCalibrator::drawCenter(Mat *image)
    line(*image,Point(-cos(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_x,-sin(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_y),
    Point(cos(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_x,sin(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_y),
    Scalar(255,0,0),1);
+}
+
+/// \brief function to generate new distLookUpTable based on current mirrorConfig
+void ImageCalibrator::generateDistanceLookUpTable()
+{
+   distLookUpTable.clear();
+   distLookUpTable = vector<vector<Point2d> >(480*480,vector<Point2d>(0));
+
+   for(int i=0; i<=480; i++){ // columns
+     for(int j=0; j<=480; j++){ // rows
+         double dist = d2pWorld(d2p(Point(imageConf.center_x,imageConf.center_y),Point(j,i)));
+         double angulo = (atan2((j-imageConf.center_x),(i-imageConf.center_y))*(180.0/M_PI))-imageConf.tilt;
+         while(angulo<0.0)angulo+=360.0;
+         while(angulo>360.0)angulo-=360.0;
+         distLookUpTable[j].push_back(Point2d(dist,angulo));
+     }
+   }    
+}
+
+/// \brief function to generate new distPix and distReal based on current mirrorConfig
+void ImageCalibrator::generateDistanceVectors()
+{
+   distReal.clear(); distPix.clear();
+   for(float dist=mirrorConf.step;dist<=mirrorConf.max_distance;dist+=mirrorConf.step) 
+      distReal.push_back(dist);
+   for(int i=0;i<mirrorConf.pixel_distances.size();i++) 
+      distPix.push_back((double)mirrorConf.pixel_distances[i]);
+}
+
+/// \brief function to convert pixels to meters based on distPix and distReal
+/// \params [in] : pixels -> distance in pixels to be converted to meters
+double ImageCalibrator::d2pWorld(int pixels)
+{
+   unsigned int index = 0;
+   while(pixels>distPix[index] && index<(distPix.size()-1))index++;
+   if(index<=0)return 0;
+   if(pixels>distPix[distPix.size()-1]){
+      return -1;
+   }
+   else return distReal[index-1]+(((pixels-distPix[index-1])*(distReal[index]-distReal[index-1]))/(distPix[index]-distPix[index-1]));
+}
+
+/// \brief computes euclidean distance between points p1 and p2
+/// \params [in] : p1 -> first point in distance calculation
+///                p2 -> second point in distance calculation
+///         [out] : int -> euclidean distance between p1 and p2
+int ImageCalibrator::d2p(Point p1,Point p2)
+{
+   return sqrt(pow(p2.x-p1.x,2)+pow(p2.y-p1.y,2));
+}
+
+/// \brief function to map point in image (pixels) to point in world (meters)
+/// \params [in] : p -> point to be mapped (pixels)
+///         [out] : Point2d -> point mapped in meters
+Point2d ImageCalibrator::worldMapping(Point p)
+{
+   if(p.x<0 || p.x>=480 || p.y<0 || p.y>=480) return Point2d(0.0,0.0);
+   return Point2d(distLookUpTable[p.x][p.y].x,distLookUpTable[p.x][p.y].y);
 }

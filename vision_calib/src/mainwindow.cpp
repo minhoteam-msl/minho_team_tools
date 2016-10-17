@@ -92,7 +92,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       
    } else ROS_ERROR("Failed to retrieve configuration from target robot.");
    
-   interaction_timer->start(100);
+   interaction_timer->start(50);
 }
 
 /// \brief - class destructor. Shuts down ROS node
@@ -124,14 +124,26 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
       }
       case Qt::Key_W:{ //change mode to world
          ui->combo_aqtype->setCurrentIndex(2);
+         calibration_mode = false;
+         ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+         img_calib_timer->stop();
+         interaction_timer->start(50);
          break;
       }
       case Qt::Key_S:{ //change mode to segmented
          ui->combo_aqtype->setCurrentIndex(1);
+         calibration_mode = false;
+         ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+         img_calib_timer->stop();
+         interaction_timer->start(50);
          break;
       }
       case Qt::Key_M:{ //change mode to map
          ui->combo_aqtype->setCurrentIndex(3);
+         calibration_mode = false;
+         ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+         img_calib_timer->stop();
+         interaction_timer->start(50);
          break;
       }
       case Qt::Key_F:{ //feed - multiple images
@@ -165,7 +177,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
             calibration_mode = false;
             ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
             img_calib_timer->stop();
-            interaction_timer->start(100);
+            interaction_timer->start(50);
          }
          ui->combo_aqtype->setCurrentIndex(0); // Raw mode when
          on_bt_grab_clicked();
@@ -182,13 +194,12 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 /// the image sent.
 void MainWindow::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-   cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"rgb8");
-   temp = recv_img->image;
-   image_ =  QImage( temp.data,
-                 temp.cols, temp.rows,
-                 static_cast<int>(temp.step),
-                 QImage::Format_RGB888 );
-
+   cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"bgr8");
+   temp = recv_img->image.clone();
+   image_ =  QImage( recv_img->image.data,
+                 recv_img->image.cols, recv_img->image.rows,
+                 static_cast<int>(recv_img->image.step),
+                 QImage::Format_RGB888).rgbSwapped();
    emit addNewImage();
 }
 
@@ -215,7 +226,7 @@ void MainWindow::applyBinary()
    image_ =  QImage( binary.data,
                      binary.cols, binary.rows,
                      static_cast<int>(binary.step),
-                     QImage::Format_RGB888 ); 
+                     QImage::Format_RGB888);
    scene_->clear();
    scene_->addPixmap(QPixmap::fromImage(image_));
 }
@@ -230,18 +241,18 @@ void MainWindow::interactWithUser()
       //Draw cross
          Mat draw = temp.clone();
          img_calib_->drawCenter(&draw);
-         image_ =  QImage( draw.data,
+         image_ =  QImage(draw.data,
                  draw.cols, draw.rows,
                  static_cast<int>(draw.step),
-                 QImage::Format_RGB888 );
+                 QImage::Format_RGB888).rgbSwapped();
          scene_->clear();
          scene_->addPixmap(QPixmap::fromImage(image_));
       }  
    } 
-   
+
    QPointF relativeOrigin = ui->graphicsView->mapToScene(ui->graphicsView->mapFromGlobal(QCursor::pos()));
    if(relativeOrigin.x()>=0 && relativeOrigin.x()<480 && relativeOrigin.y()>=0 && relativeOrigin.y()<480){
-      ui->lb_pxcoords->setText(QString("(")+QString::number(relativeOrigin.x())+QString(",")+QString::number(relativeOrigin.y())+QString(") pixels"));
+      ui->lb_pxcoords->setText(QString("(")+QString::number(relativeOrigin.x())+QString(",")+QString::number(relativeOrigin.y())+QString(") px"));
       Point2d real_coords = img_calib_->worldMapping(Point(relativeOrigin.x(),relativeOrigin.y()));
       ui->lb_realcoords->setText(QString::number(real_coords.x,'f',2)+QString(" m , ")+QString::number(real_coords.y,'f',2)+QString("º"));
    }

@@ -6,6 +6,6 @@ The package will in future include:
 
  - [x] Teleoperation of the platform
  - [ ] Configuration of Control parameters
- - [ ] Configuration of Omnivision parameters
+ - [x] Configuration of Omnivision parameters
   
 *Developed by MinhoTeam @2016*

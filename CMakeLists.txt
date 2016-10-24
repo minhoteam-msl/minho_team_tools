@@ -165,4 +165,19 @@ set_target_properties(vision_calib PROPERTIES COMPILE_FLAGS "-fPIC")
 target_compile_features(vision_calib PRIVATE cxx_range_for)
 target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES})
 add_dependencies(vision_calib minho_team_ros_generate_messages_cpp)
+######################################################################
 
+## VISUALIZER ##
+######################################################################
+set(VIS_DIR ${PROJECT_DIRECTORY}/visualizer)
+set(vis_MOC_H ${VIS_DIR}/include/visualizer.h)
+qt5_wrap_cpp(vis_CPP ${vis_MOC_H})
+set(vis_SRC ${VIS_DIR}/src/main.cpp ${VIS_DIR}/src/visualizer.cpp )
+add_executable(visualizer ${vis_SRC} ${vis_CPP}) 
+target_include_directories(visualizer PUBLIC
+$<BUILD_INTERFACE:${VIS_DIR}/include>)
+set_target_properties(visualizer PROPERTIES COMPILE_FLAGS "-fPIC")
+target_compile_features(visualizer PRIVATE cxx_range_for)
+target_link_libraries(visualizer ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES})
+add_dependencies(visualizer minho_team_ros_generate_messages_cpp)
+######################################################################

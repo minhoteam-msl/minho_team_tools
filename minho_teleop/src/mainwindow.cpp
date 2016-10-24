@@ -292,7 +292,7 @@ void MainWindow::robotInfoCallback(const minho_team_ros::robotInfo::ConstPtr& ms
 {
     QString info = QString("[")+QString::number(msg->robot_pose.x,'f',2) + 
                    QString(",")+QString::number(msg->robot_pose.y,'f',2) +
-                   QString(",")+QString::number(msg->imu_value) +
+                   QString(",")+QString::number(msg->robot_pose.z) +
                    QString("] : Has Ball -> ") + QString::number(msg->has_ball);
                    
    ui->lb_pose->setText(info);

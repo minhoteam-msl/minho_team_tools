@@ -19,8 +19,7 @@ using minho_team_ros::robotInfo; //Namespace for robot information msg - SUBSCIB
 Visualizer *exvis;
 void robotInfoCallback(const robotInfo::ConstPtr& msg)
 {
-	exvis->setRobotPosition(msg->robot_pose);
-	if(msg->sees_ball) exvis->setBallPosition2D(msg->ball_position);
+	exvis->setRobotInfo(*msg);
 	exvis->drawWorldModel();
 }
 
@@ -72,8 +71,8 @@ int main(int argc, char **argv)
 	   robot_info_topic << "minho_robot_" << robot_id << "/robotInfo";
 	}
 	ros::Subscriber robot_info_sub = visualizer.subscribe(robot_info_topic.str(), 1000, robotInfoCallback);
-	exvis = new Visualizer();	
-	ROS_WARN("MinhoTeam externalvis_node started running on ROS.");
+	exvis = new Visualizer(robot_id);	
+	ROS_WARN("MinhoTeam visualizer started running on ROS.");
 
 
 	ros::AsyncSpinner spinner(2);

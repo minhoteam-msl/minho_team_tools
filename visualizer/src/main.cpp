@@ -70,7 +70,7 @@ int main(int argc, char **argv)
 	} else {
 	   robot_info_topic << "minho_robot_" << robot_id << "/robotInfo";
 	}
-	ros::Subscriber robot_info_sub = visualizer.subscribe(robot_info_topic.str(), 1000, robotInfoCallback);
+	ros::Subscriber robot_info_sub = visualizer.subscribe(robot_info_topic.str(), 100, robotInfoCallback);
 	exvis = new Visualizer(robot_id);	
 	ROS_WARN("MinhoTeam visualizer started running on ROS.");
 

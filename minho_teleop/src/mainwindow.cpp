@@ -61,10 +61,10 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    int argc = 0;
    ros::init(argc, NULL, asd.toStdString().c_str(),ros::init_options::NoSigintHandler);
    _node_ = new ros::NodeHandle();
-   control_pub_ = _node_->advertise<controlInfo>(control_topic.str().c_str(),100);
+   control_pub_ = _node_->advertise<controlInfo>(control_topic.str().c_str(),1);
    teleop_pub_ = _node_->advertise<teleop>(teleop_topic.str().c_str(),100);
    //Initialize controlInfo subscriber
-   robot_sub_ = _node_->subscribe(robot_topic.str().c_str(), 1000, &MainWindow::robotInfoCallback, this);
+   robot_sub_ = _node_->subscribe(robot_topic.str().c_str(), 100, &MainWindow::robotInfoCallback, this);
    spinner = new ros::AsyncSpinner(2);
    spinner->start();
 

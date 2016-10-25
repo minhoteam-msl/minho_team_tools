@@ -35,11 +35,13 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    std::stringstream control_topic;
    std::stringstream teleop_topic;
    std::stringstream robot_topic;
+   std::stringstream hardware_topic;
    if(real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
       control_topic << "/controlInfo";
       teleop_topic << "/teleop";
       robot_topic << "/robotInfo";
+      hardware_topic << "/hardwareInfo";
       
       if(robot_id>0){
          // Setup custom master
@@ -54,6 +56,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       control_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/controlInfo";
       teleop_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/teleop";
       robot_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/robotInfo";
+      hardware_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/hardwareInfo";
    }
    
 
@@ -65,6 +68,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    teleop_pub_ = _node_->advertise<teleop>(teleop_topic.str().c_str(),100);
    //Initialize controlInfo subscriber
    robot_sub_ = _node_->subscribe(robot_topic.str().c_str(), 100, &MainWindow::robotInfoCallback, this);
+   hardware_sub_ = _node_->subscribe(hardware_topic.str().c_str(), 100, &MainWindow::hardwareInfoCallback, this);
    spinner = new ros::AsyncSpinner(2);
    spinner->start();
 
@@ -292,8 +296,20 @@ void MainWindow::robotInfoCallback(const minho_team_ros::robotInfo::ConstPtr& ms
 {
     QString info = QString("[")+QString::number(msg->robot_pose.x,'f',2) + 
                    QString(",")+QString::number(msg->robot_pose.y,'f',2) +
-                   QString(",")+QString::number(msg->robot_pose.z) +
-                   QString("] : Has Ball -> ") + QString::number(msg->has_ball);
+                   QString(",")+QString::number(msg->robot_pose.z,'f',1) +
+                   QString("º] : HasBall->") + QString::number(msg->has_ball);
                    
    ui->lb_pose->setText(info);
+}
+
+/// \brief ROS callback to receive hardwareInfo message containing primary hardware 
+/// information of the robot. Mainly, it is interesting to display the battery levels.
+/// \params [in] : msg -> message contaning hardwareInfo message data
+void MainWindow::hardwareInfoCallback(const minho_team_ros::hardwareInfo::ConstPtr& msg)
+{
+   QString info = QString("PC:")+QString::number(msg->battery_pc,'f',2) + 
+                   QString(" | CAM: ")+QString::number(msg->battery_camera,'f',2) +
+                   QString(" | MAIN: ")+QString::number(msg->battery_main,'f',2);
+                   
+   ui->lb_bats->setText(info); 
 }

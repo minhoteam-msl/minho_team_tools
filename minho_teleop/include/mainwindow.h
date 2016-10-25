@@ -12,6 +12,7 @@
 #include "ros/ros.h"
 #include "minho_team_ros/robotInfo.h"
 #include "minho_team_ros/controlInfo.h"
+#include "minho_team_ros/hardwareInfo.h"
 #include "minho_team_ros/teleop.h"
 #include <iostream>
 #include <sstream>
@@ -21,8 +22,9 @@
 
 using namespace ros;
 using minho_team_ros::robotInfo; //Namespace for robot information msg - PUBLISHING
-using minho_team_ros::controlInfo; //Namespace for control information msg - SUBSCRIBIN
+using minho_team_ros::controlInfo; //Namespace for control information msg - SUBSCRIBING
 using minho_team_ros::teleop; //Namespace for teleop information msg - SUBSCRIBING
+using minho_team_ros::hardwareInfo; //Namespace for hardware information msg - SUBSCRIBING
 
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
@@ -77,6 +79,10 @@ private slots:
    /// state of the current robot.
    /// \params [in] : msg -> message contaning robotInfo message data
    void robotInfoCallback(const minho_team_ros::robotInfo::ConstPtr& msg);
+   /// \brief ROS callback to receive hardwareInfo message containing primary hardware 
+   /// information of the robot. Mainly, it is interesting to display the battery levels.
+   /// \params [in] : msg -> message contaning hardwareInfo message data
+   void hardwareInfoCallback(const minho_team_ros::hardwareInfo::ConstPtr& msg);
    /// \brief event to drive all controls to zero when GUI is deselected by the user
    bool event( QEvent * pEvent ){
       if ( pEvent->type() == QEvent::WindowDeactivate ){
@@ -108,6 +114,8 @@ private:
    ros::Publisher control_pub_, teleop_pub_;
    /// \brief robotInfo ROS subscriber
    ros::Subscriber robot_sub_;
+   /// \brief hardwareInfo ROS subscriber
+   ros::Subscriber hardware_sub_;
    /// \brief ROS node handle pointer
    ros::NodeHandle *_node_;
    /// \brief ROS AsyncSpinner pointer 

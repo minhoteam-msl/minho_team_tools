@@ -64,11 +64,18 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    int argc = 0;
    ros::init(argc, NULL, asd.toStdString().c_str(),ros::init_options::NoSigintHandler);
    _node_ = new ros::NodeHandle();
+   //Initialize controlInfo publisher
    control_pub_ = _node_->advertise<controlInfo>(control_topic.str().c_str(),1);
+   //Initialize teleop publisher
    teleop_pub_ = _node_->advertise<teleop>(teleop_topic.str().c_str(),100);
-   //Initialize controlInfo subscriber
+   //Initialize robotlInfo subscriber
    robot_sub_ = _node_->subscribe(robot_topic.str().c_str(), 100, &MainWindow::robotInfoCallback, this);
+   //Initialize hardwareInfo subscriber
    hardware_sub_ = _node_->subscribe(hardware_topic.str().c_str(), 100, &MainWindow::hardwareInfoCallback, this);
+   
+   resetIMUService = _node_->serviceClient<minho_team_ros::requestResetIMU>("requestResetIMU");
+   requestRelocService = _node_->serviceClient<minho_team_ros::requestReloc>("requestReloc");
+   //Initialize spinner
    spinner = new ros::AsyncSpinner(2);
    spinner->start();
 
@@ -312,4 +319,18 @@ void MainWindow::hardwareInfoCallback(const minho_team_ros::hardwareInfo::ConstP
                    QString(" | MAIN: ")+QString::number(msg->battery_main,'f',2);
                    
    ui->lb_bats->setText(info); 
+}
+
+/// \brief button slot function to reset the IMU geo-0º-reference
+void MainWindow::on_bt_resetimu_clicked()
+{
+   requestResetIMU srv;
+   resetIMUService.call(srv);
+}
+
+/// \brief button slot function initialize the reloc process in the target robot
+void MainWindow::on_bt_reloc_clicked()
+{
+   requestReloc srv;
+   requestRelocService.call(srv);
 }

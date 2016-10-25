@@ -14,6 +14,8 @@
 #include "minho_team_ros/controlInfo.h"
 #include "minho_team_ros/hardwareInfo.h"
 #include "minho_team_ros/teleop.h"
+#include "minho_team_ros/requestReloc.h"
+#include "minho_team_ros/requestResetIMU.h"
 #include <iostream>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
@@ -25,7 +27,8 @@ using minho_team_ros::robotInfo; //Namespace for robot information msg - PUBLISH
 using minho_team_ros::controlInfo; //Namespace for control information msg - SUBSCRIBING
 using minho_team_ros::teleop; //Namespace for teleop information msg - SUBSCRIBING
 using minho_team_ros::hardwareInfo; //Namespace for hardware information msg - SUBSCRIBING
-
+using minho_team_ros::requestReloc; // Namespace for requestReloc service
+using minho_team_ros::requestResetIMU; // Namespace for requestResetIMU service
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
 
@@ -90,6 +93,10 @@ private slots:
       }
       return QMainWindow::event( pEvent );
 	}
+	/// \brief button slot function to reset the IMU geo-0º-reference
+   void on_bt_resetimu_clicked();
+   /// \brief button slot function initialize the reloc process in the target robot
+   void on_bt_reloc_clicked();
 private:
    /// \brief pointer to GUI
    Ui::MainWindow *ui;
@@ -120,6 +127,10 @@ private:
    ros::NodeHandle *_node_;
    /// \brief ROS AsyncSpinner pointer 
    ros::AsyncSpinner *spinner;
+   /// \brief requestResetIMU ROS Service Client
+   ros::ServiceClient resetIMUService;
+   /// \brief requestReloc ROS Service Client
+   ros::ServiceClient requestRelocService;
 };
 
 #endif // MAINWINDOW_H

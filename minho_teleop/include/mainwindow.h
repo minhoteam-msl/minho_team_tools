@@ -16,6 +16,7 @@
 #include "minho_team_ros/teleop.h"
 #include "minho_team_ros/requestReloc.h"
 #include "minho_team_ros/requestResetIMU.h"
+#include "minho_team_ros/requestKick.h"
 #include <iostream>
 #include <sstream>
 #include <boost/shared_ptr.hpp>
@@ -29,6 +30,7 @@ using minho_team_ros::teleop; //Namespace for teleop information msg - SUBSCRIBI
 using minho_team_ros::hardwareInfo; //Namespace for hardware information msg - SUBSCRIBING
 using minho_team_ros::requestReloc; // Namespace for requestReloc service
 using minho_team_ros::requestResetIMU; // Namespace for requestResetIMU service
+using minho_team_ros::requestKick; // Namespace for requestKick
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
 
@@ -131,6 +133,8 @@ private:
    ros::ServiceClient resetIMUService;
    /// \brief requestReloc ROS Service Client
    ros::ServiceClient requestRelocService;
+   /// \brief requestKick ROS Service Client
+   ros::ServiceClient requestKickService;
 };
 
 #endif // MAINWINDOW_H

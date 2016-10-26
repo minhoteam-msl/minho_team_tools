@@ -36,12 +36,20 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    std::stringstream teleop_topic;
    std::stringstream robot_topic;
    std::stringstream hardware_topic;
+   std::stringstream resetimu_service_topic;
+   std::stringstream reloc_service_topic;
+   std::stringstream kick_service_topic;
+   
+   
    if(real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
       control_topic << "/controlInfo";
       teleop_topic << "/teleop";
       robot_topic << "/robotInfo";
       hardware_topic << "/hardwareInfo";
+      resetimu_service_topic << "/requestResetIMU";
+      reloc_service_topic << "/requestReloc";
+      kick_service_topic << "/requestKick";
       
       if(robot_id>0){
          // Setup custom master
@@ -57,6 +65,9 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       teleop_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/teleop";
       robot_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/robotInfo";
       hardware_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/hardwareInfo";
+      resetimu_service_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/requestResetIMU"; 
+      reloc_service_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/requestReloc"; 
+      kick_service_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/requestKick"; 
    }
    
 
@@ -73,8 +84,10 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    //Initialize hardwareInfo subscriber
    hardware_sub_ = _node_->subscribe(hardware_topic.str().c_str(), 100, &MainWindow::hardwareInfoCallback, this);
    
-   resetIMUService = _node_->serviceClient<minho_team_ros::requestResetIMU>("requestResetIMU");
-   requestRelocService = _node_->serviceClient<minho_team_ros::requestReloc>("requestReloc");
+   resetIMUService = _node_->serviceClient<minho_team_ros::requestResetIMU>(resetimu_service_topic.str().c_str());
+   requestRelocService = _node_->serviceClient<minho_team_ros::requestReloc>(reloc_service_topic.str().c_str());
+   requestKickService = _node_->serviceClient<minho_team_ros::requestKick>(kick_service_topic.str().c_str());
+   
    //Initialize spinner
    spinner = new ros::AsyncSpinner(2);
    spinner->start();
@@ -149,10 +162,12 @@ void MainWindow::onUpdate()
 
         if(kick_request_){
             // send kick
-            msg.kick_strength = thrust_[4];
-            if(is_pass_) msg.kick_is_pass = is_pass_;
+            requestKick srv;
+            srv.request.kick_strength = thrust_[4];
+            if(is_pass_) srv.request.kick_is_pass = is_pass_;
             thrust_[4] = 0;
             kick_request_ = is_pass_ = false;
+            requestKickService.call(srv);
         }
         
         // publish stuff

@@ -1,12 +1,11 @@
 #include "mainwindow.h"
 #include "ui_vision_calib.h"
 
-/// \brief - class constructor. Takes care of initializing GUI,
+/// \brief class constructor. Takes care of initializing GUI,
 /// connect several signals/slots and to create and configure
-/// all ROS publishers and subscribers. Also, requests the current
-/// configuration of the robot.
-/// \params [in] - robot_id -> id [0-6] of the robot to use
-///              - real_robot -> defines wether its a real or sim robot
+/// all ROS publishers and subscribers.
+/// \param robot_id - id [0-6] of the robot to use
+/// \param real_robot - defines wether its a real or sim robot
 MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -113,7 +112,7 @@ void MainWindow::setup()
    
 /// \brief function to detect key press events. This key presses 
 /// detection allow to implement several actions without mouse usage
-/// \params [in] : event -> QKeyEvent holding the data about the key press event   
+/// \param event - QKeyEvent holding the data about the key press event   
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
    switch(event->key()){
@@ -190,7 +189,7 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
 /// into Opencv(Mat) format using cv_bridge and to Qt's QImage to be displayed.
 /// Since its called by ROS (another thread), emits a signal (addNewImage) so
 /// the GUI's thread can take care of putting the image in GraphicsView.
-/// \params [in] : msg -> sensor_msgs::Image data, holding information about
+/// \param msg - sensor_msgs::Image data, holding information about
 /// the image sent.
 void MainWindow::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -354,7 +353,7 @@ void MainWindow::on_bt_screenshot_clicked()
 
 /// \brief slot function for click action of check_draw. Enbles or disables 
 /// draw mode
-/// \params [in] : state -> boolean value to define if draw mode is on or off
+/// \param state - boolean value to define if draw mode is on or off
 void MainWindow::on_check_draw_clicked(bool state)
 {
    draw_mode = state;
@@ -363,7 +362,7 @@ void MainWindow::on_check_draw_clicked(bool state)
 //SLIDEBARS
 /// \brief slot function for hue min trackbar. Sets a new value for the selected
 /// label
-/// \params [in] : value -> new value to be applied to label's hue min
+/// \param value - new value to be applied to label's hue min
 void MainWindow::on_h_min_valueChanged(int value)
 {
    ui->lb_hmin->setText(QString::number(value));
@@ -376,7 +375,7 @@ void MainWindow::on_h_min_valueChanged(int value)
 
 /// \brief slot function for hue max trackbar. Sets a new value for the selected
 /// label
-/// \params [in] : value -> new value to be applied to label's hue max
+/// \param value - new value to be applied to label's hue max
 void MainWindow::on_h_max_valueChanged(int value)
 {
    ui->lb_hmax->setText(QString::number(value));
@@ -388,7 +387,7 @@ void MainWindow::on_h_max_valueChanged(int value)
 
 /// \brief slot function for sat min trackbar. Sets a new value for the selected
 /// label
-/// \params [in] : value -> new value to be applied to label's sat min
+/// \param value - new value to be applied to label's sat min
 void MainWindow::on_s_min_valueChanged(int value)
 {
    ui->lb_smin->setText(QString::number(value));
@@ -401,7 +400,7 @@ void MainWindow::on_s_min_valueChanged(int value)
 
 /// \brief slot function for sat max trackbar. Sets a new value for the selected
 /// label
-/// \params [in] : value -> new value to be applied to label's sat max
+/// \param value - new value to be applied to label's sat max
 void MainWindow::on_s_max_valueChanged(int value)
 {
    ui->lb_smax->setText(QString::number(value));
@@ -413,7 +412,7 @@ void MainWindow::on_s_max_valueChanged(int value)
 
 /// \brief slot function for value min trackbar. Sets a new value for the selected
 /// label
-/// \params [in] : value -> new value to be applied to label's value min
+/// \param value - new value to be applied to label's value min
 void MainWindow::on_v_min_valueChanged(int value)
 {
    ui->lb_vmin->setText(QString::number(value));
@@ -425,7 +424,7 @@ void MainWindow::on_v_min_valueChanged(int value)
 
 /// \brief slot function for value max trackbar. Sets a new value for the selected
 /// label
-/// \params [in] : value -> new value to be applied to label's value max
+/// \param value - new value to be applied to label's value max
 void MainWindow::on_v_max_valueChanged(int value)
 {
    ui->lb_vmax->setText(QString::number(value));
@@ -437,8 +436,8 @@ void MainWindow::on_v_max_valueChanged(int value)
 
 //SPINBOXES
 /// \brief slot function for tilt spinbox. Sets a new value for the image 
-/// tilt.
-/// \params [in] : value -> new value to be applied image's tilt
+/// tilt
+/// \param value - new value to be applied image's tiltilt
 void MainWindow::on_spin_tilt_valueChanged(int value)
 {
    imageConfig msg;
@@ -449,8 +448,8 @@ void MainWindow::on_spin_tilt_valueChanged(int value)
 }
 
 /// \brief slot function for center x spinbox. Sets a new value for the image 
-/// tilt.
-/// \params [in] : value -> new value to be applied image's center x
+/// tilt
+/// \param value - new value to be applied image's center x
 void MainWindow::on_spin_cx_valueChanged(int value)
 {
    imageConfig msg;
@@ -461,8 +460,8 @@ void MainWindow::on_spin_cx_valueChanged(int value)
 }
 
 /// \brief slot function for center y spinbox. Sets a new value for the image 
-/// tilt.
-/// \params [in] : value -> new value to be applied image's center y
+/// tilt
+/// \param value - new value to be applied image's center y
 void MainWindow::on_spin_cy_valueChanged(int value)
 {
    imageConfig msg;
@@ -475,7 +474,7 @@ void MainWindow::on_spin_cy_valueChanged(int value)
 //COMBOBOXES
 /// \brief slot function for label's combobox. Sets the current label that
 /// we will be performing the configurations
-/// \params [in] : index -> new label index to be used
+/// \param index - new label index to be used
 void MainWindow::on_combo_label_currentIndexChanged(int index)
 {
    LABEL_t label = static_cast<LABEL_t>(index);
@@ -485,7 +484,7 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
 
 /// \brief slot function for acquisition type's combobox. Sets the current 
 /// acquisition type to be used in image requests
-/// \params [in] : index -> new image acquisition type to be used
+/// \param index - new image acquisition type to be used
 void MainWindow::on_combo_aqtype_currentIndexChanged(int index)
 {
    on_bt_grab_clicked();   
@@ -494,7 +493,7 @@ void MainWindow::on_combo_aqtype_currentIndexChanged(int index)
 //LOAD FUNCTIONS
 /// \brief function to load values of a label configuration onto GUI's 
 /// trackbars
-/// \params [in] : labelconf -> label message containing label configuration
+/// \param labelconf - label message containing label configuration
 void MainWindow::loadValuesOnTrackbars(minho_team_ros::label labelconf)
 {
    ui->h_min->setValue(labelconf.H.min);
@@ -507,7 +506,7 @@ void MainWindow::loadValuesOnTrackbars(minho_team_ros::label labelconf)
 
 /// \brief function to load values of a mirror configuration onto GUI's 
 /// spinboxes and line edit
-/// \params [in] : mirrorConf -> mirrorConfig message to be used
+/// \param mirrorConf - mirrorConfig message to be used
 void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
 {
    //mirrorConfig
@@ -523,7 +522,7 @@ void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
 
 /// \brief function to load values of a image configuration onto GUI's 
 /// spinboxes
-/// \params [in] : imageConf -> imageConfig message to be used
+/// \param imageConf - imageConfig message to be used
 void MainWindow::loadImageValues(minho_team_ros::imageConfig imageConf)
 {
    //mirrorConfig

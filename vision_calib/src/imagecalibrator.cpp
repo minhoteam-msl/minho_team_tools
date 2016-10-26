@@ -15,8 +15,8 @@ void ImageCalibrator::variablesInitialization()
 }
 
 /// \brief function to convert an rgb pixel into hsv in 0-180/0-255/0-255 range.
-/// \params [in] : in -> rgb struct containing rgb values to be converted
-/// \params [out] : hsv struct containing hsv values resultant from the conversion
+/// \param in - rgb struct containing rgb values to be converted
+/// \return hsv struct containing hsv values resultant from the conversionon
 hsv ImageCalibrator::rgbtohsv(rgb in)
 {
     hsv temp;
@@ -58,8 +58,8 @@ hsv ImageCalibrator::rgbtohsv(rgb in)
 
 /// \brief function to return binary representation of an image given a certain
 /// hsv configuration (range).
-/// \params [in] : in -> pointer to target image (in and out image container)
-///                labelconf -> hsv configuration for a certain label
+/// \param in - pointer to target image (in and out image container)
+/// \param labelconf - hsv configuration for a certain label
 void ImageCalibrator::getBinary(Mat *in, minho_team_ros::label labelconf)
 {
     //Returns binary representation of a certain range
@@ -89,10 +89,10 @@ void ImageCalibrator::getBinary(Mat *in, minho_team_ros::label labelconf)
 }
 
 /// \brief function to update a certain range value in lutconfig message.
-/// \params [in] : label -> label to be changed
-///                component -> component of label (h,s or v) to be changed
-///                range -> range of component to be changed (min or max)
-///                value -> value to be applied to range
+/// \param label - label to be changed
+/// \param component - component of label (h,s or v) to be changed
+/// \param range - range of component to be changed (min or max)
+/// \param value - value to be applied to range
 void ImageCalibrator::updateCurrentConfiguration(LABEL_t label, COMPONENT_t component, RANGE_t range, int value)
 {
    minho_team_ros::label *lb;
@@ -115,8 +115,8 @@ void ImageCalibrator::updateCurrentConfiguration(LABEL_t label, COMPONENT_t comp
 }
 
 /// \brief function to get current label configuration
-/// \params [in] : label -> label's id to be get
-/// \params [out] : label -> label's configuration
+/// \param label - label's id to be get
+/// \return label's configuration
 minho_team_ros::label ImageCalibrator::getLabelConfiguration(LABEL_t label)
 {
    if(label==FIELD) return lutconfig.field;
@@ -126,28 +126,28 @@ minho_team_ros::label ImageCalibrator::getLabelConfiguration(LABEL_t label)
 }
 
 /// \brief function to get current visionHSVConfig configuration
-/// \params [out] : visionHSVConfig -> current visionHSVConfig configuration
+/// \return current visionHSVConfig configuration
 minho_team_ros::visionHSVConfig ImageCalibrator::getLutConfiguration()
 {
    return lutconfig;
 }
 
 /// \brief function to get current imageConfig configuration
-/// \params [out] : imageConfig -> current imageConfig configuration
+/// \return current imageConfig configuration
 minho_team_ros::imageConfig ImageCalibrator::getImageConfiguration()
 {
    return imageConf;
 }
 
 /// \brief applies a configuration for lutconfig giver a visionHSVConfig message
-/// \params [in] : msg -> visionHSVConfig message to be used 
+/// \param msg - visionHSVConfig message to be used  
 void ImageCalibrator::lutConfigFromMsg(visionHSVConfig msg)
 {
    lutconfig = msg;     
 }
 
 /// \brief applies a configuration for mirrorConf giver a mirrorConfig message
-/// \params [in] : msg -> mirrorConfig message to be used 
+/// \param msg - mirrorConfig message to be used  
 void ImageCalibrator::mirrorConfigFromMsg(mirrorConfig msg)
 {
    mirrorConf = msg;
@@ -155,7 +155,7 @@ void ImageCalibrator::mirrorConfigFromMsg(mirrorConfig msg)
 }
 
 /// \brief applies a configuration for imageConf giver a imageConfig message
-/// \params [in] : msg -> imageConfig message to be used 
+/// \param msg - imageConfig message to be used 
 void ImageCalibrator::imageConfigFromMsg(imageConfig msg)
 {
    imageConf = msg;
@@ -164,7 +164,7 @@ void ImageCalibrator::imageConfigFromMsg(imageConfig msg)
 
 /// \brief function to draw a center point and a crosshair given the current
 /// imageConf configuration message
-/// \params [in] : image -> target image container where things will be drawn
+/// \param image - target image container where things will be drawnn
 void ImageCalibrator::drawCenter(Mat *image)
 {
    circle(*image,Point(imageConf.center_x,imageConf.center_y),3,Scalar(0,0,255),-1);
@@ -205,7 +205,7 @@ void ImageCalibrator::generateDistanceVectors()
 }
 
 /// \brief function to convert pixels to meters based on distPix and distReal
-/// \params [in] : pixels -> distance in pixels to be converted to meters
+/// \param pixels - distance in pixels to be converted to meters
 double ImageCalibrator::d2pWorld(int pixels)
 {
    unsigned int index = 0;
@@ -218,17 +218,17 @@ double ImageCalibrator::d2pWorld(int pixels)
 }
 
 /// \brief computes euclidean distance between points p1 and p2
-/// \params [in] : p1 -> first point in distance calculation
-///                p2 -> second point in distance calculation
-///         [out] : int -> euclidean distance between p1 and p2
+/// \param p1 - first point in distance calculation
+/// \param p2 - second point in distance calculation
+/// \return euclidean distance between p1 and p2
 int ImageCalibrator::d2p(Point p1,Point p2)
 {
    return sqrt(pow(p2.x-p1.x,2)+pow(p2.y-p1.y,2));
 }
 
 /// \brief function to map point in image (pixels) to point in world (meters)
-/// \params [in] : p -> point to be mapped (pixels)
-///         [out] : Point2d -> point mapped in meters
+/// \param p - point to be mapped (pixels)
+/// \return point mapped in meters
 Point2d ImageCalibrator::worldMapping(Point p)
 {
    if(p.x<0 || p.x>=480 || p.y<0 || p.y>=480) return Point2d(0.0,0.0);

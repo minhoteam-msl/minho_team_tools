@@ -1,5 +1,9 @@
 #include "visualizer.h"
 
+/// \brief constructor of the class. Calls initialization functions.
+/// Calls file path initialization, calling also the function that
+/// draws the initial field.
+/// \param id - Id of the robot that will be visualized
 Visualizer::Visualizer(int id, QObject *parent) : QObject(parent)
 {
    robot_id = id;
@@ -8,11 +12,17 @@ Visualizer::Visualizer(int id, QObject *parent) : QObject(parent)
    field.copyTo(relayWModel);
 }
 
+/// \brief function that returns a pointer to the current image 
+/// representing the world model described by the robot
+/// \return pointer to the matrix realWModel
 Mat *Visualizer::getWorldModel()
 {
    return &relayWModel;
 }
-    
+  
+/// \brief initializes field image given the field dimensions and
+/// data in a file.
+/// \param file_ - path of the file containing field dimensions
 void Visualizer::initField(QString file_)
 {
     // Create view of current Field
@@ -93,11 +103,8 @@ void Visualizer::initField(QString file_)
 
 }
 
-void Visualizer::setRobotInfo(robotInfo msg)
-{
-   robot_info = msg;
-}
-
+/// \brief draws robot information, ball information and obstacle
+/// information based on info on robot_info, in worldModel matrix
 void Visualizer::drawWorldModel()
 {
    field.copyTo(worldModel);
@@ -156,6 +163,18 @@ void Visualizer::drawWorldModel()
    worldModel.copyTo(relayWModel);
 }
 
+/// \brief sets new information to holding robotInfo structure of
+/// the class, the robot_info object
+/// \param msg - new information to be set
+void Visualizer::setRobotInfo(robotInfo msg)
+{
+   robot_info = msg;
+}
+
+/// \brief converts a point in meters in point in pixels in the
+/// viewport
+/// \param pos - point im meter coordinates to be converted to pixels
+/// \return point in pixels (viewport) converted from point in meters
 Point Visualizer::world2WorldModel(Point2d pos)
 {
    Point converted = Point(0,0);
@@ -169,6 +188,8 @@ Point Visualizer::world2WorldModel(Point2d pos)
    return converted;
 }
 
+/// \brief initializes absolute paths from local paths, to access
+/// configuration files
 void Visualizer::configFilePaths()
 {
    QString home = getenv("HOME");

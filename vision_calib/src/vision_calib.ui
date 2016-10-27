@@ -699,12 +699,12 @@
           </item>
           <item>
            <property name="text">
-            <string>World</string>
+            <string>Interest Points</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Map</string>
+            <string>World</string>
            </property>
           </item>
          </widget>

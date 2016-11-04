@@ -25,6 +25,18 @@
   <property name="windowTitle">
    <string>MinhoTeam Vision Calibration</string>
   </property>
+  <property name="toolTip">
+   <string>* Use Keys:
+T -&gt; Turn Calibration On or OFF
+R -&gt; Request RAW Image
+S -&gt; Request SEGMENTED Image
+W -&gt; Request WORLD Image
+M -&gt; Request MODEL Image
+G -&gt; Grab Single Image
+F -&gt; Feed mode
+I -&gt; Increase FPS
+D -&gt; Decrease FPS</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_7">
     <item row="0" column="0" rowspan="5">
@@ -306,7 +318,7 @@
           </item>
           <item>
            <property name="text">
-            <string>World</string>
+            <string>World Model</string>
            </property>
           </item>
          </widget>

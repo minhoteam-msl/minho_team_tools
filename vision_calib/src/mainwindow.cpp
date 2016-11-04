@@ -25,6 +25,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
 	ui->graphicsView->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
 	connect(img_calib_timer,SIGNAL(timeout()),this,SLOT(applyBinary()));
 	connect(interaction_timer,SIGNAL(timeout()),this,SLOT(interactWithUser()));
+   
    // Setup of ROS
    QString asd = "Vision_calib";
    asd.append(QString::number(robot_id));
@@ -36,14 +37,15 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    std::stringstream vision_topic;
    std::stringstream image_topic;
    
-   if(real_robot){
+   if(!real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
-      imreq_topic << "/imgRequest";
-      imgtrans_topic << "/camera";
-      mirror_topic << "/mirrorConfig";
-      vision_topic << "/visionHSVConfig";
-      image_topic << "/imageConfig";
-      
+      imreq_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      imgtrans_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      mirror_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      vision_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      image_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+  } else {
+      // Setup ROS Node and pusblishers/subscribers in REAL ROBOT
       if(robot_id>0){
          // Setup custom master
          QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
@@ -51,16 +53,14 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
          ROS_WARN("ROS_MASTER_URI: '%s'",robot_ip.toStdString().c_str());
          setenv("ROS_MASTER_URI",robot_ip.toStdString().c_str(),1);
       } else ROS_WARN("ROS_MASTER_URI is localhost");
-      
-   } else {
-      // Setup ROS Node and pusblishers/subscribers in REAL ROBOT
-      imreq_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/imgRequest";
-      imgtrans_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/camera";
-      mirror_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/mirrorConfig";
-      vision_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/visionHSVConfig";
-      image_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/imageConfig";
    }
    
+   imreq_topic << "/imgRequest";
+   imgtrans_topic << "/camera/image";
+   mirror_topic << "/mirrorConfig";
+   vision_topic << "/visionHSVConfig";
+   image_topic << "/imageConfig";
+      
 
    //Initialize ROS
    int argc = 0;
@@ -74,7 +74,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    
    omniVisionConf = _node_->serviceClient<minho_team_ros::requestOmniVisionConf>("requestOmniVisionConf");
    //Initialize image_transport subscriber
-   image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::imageCallback,this);
+   image_transport::TransportHints hints("compressed", ros::TransportHints());
+   image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::imageCallback,this,hints);
    
    
    //Request Current Configuration

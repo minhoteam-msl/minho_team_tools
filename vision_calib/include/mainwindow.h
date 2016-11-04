@@ -103,6 +103,10 @@ private slots:
    /// screenshot in {ros_project_folder}/screenshots
    void on_bt_screenshot_clicked();
    
+   /// \brief slot of function for click action of bt_calib. This enables or disables
+   /// the calibration (LUT) of the received image
+   void on_bt_calib_clicked();
+   
    /// \brief slot function for click action of check_draw. Enbles or disables 
    /// draw mode
    /// \param state - boolean value to define if draw mode is on or off

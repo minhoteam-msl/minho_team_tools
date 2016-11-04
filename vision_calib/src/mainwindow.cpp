@@ -269,6 +269,8 @@ void MainWindow::on_bt_grab_clicked()
    srv.request.frequency = ui->spin_framerate->value();
    srv.request.type = (int)pow(2,ui->combo_aqtype->currentIndex());
    imgRequest.call(srv);
+   
+   this->centralWidget()->setFocus();
 }
 
 /// \brief slot function for click action of bt_stop. Function to stop image 
@@ -280,6 +282,8 @@ void MainWindow::on_bt_stop_clicked()
    srv.request.frequency = ui->spin_framerate->value();
    srv.request.type = (int)pow(2,ui->combo_aqtype->currentIndex());
    imgRequest.call(srv);
+   
+   this->centralWidget()->setFocus();
 }
 
 /// \brief slot function for click action of bt_setdist. Checks validaty and
@@ -323,6 +327,8 @@ void MainWindow::on_bt_setdist_clicked()
       msg.pixel_distances = values;
       mirror_pub_.publish(msg);
    }
+   
+   this->centralWidget()->setFocus();
 }
 
 /// \brief slot function for click action of bt_setlut. Sends new configuration
@@ -331,6 +337,8 @@ void MainWindow::on_bt_setlut_clicked()
 {
    vision_pub_.publish(img_calib_->getLutConfiguration());
    ROS_INFO("Correct vision configuration sent!");
+   
+   this->centralWidget()->setFocus();
 }
 
 /// \brief slot function for click action of bt_setimg. Sends new configuraiton
@@ -339,6 +347,8 @@ void MainWindow::on_bt_setimg_clicked()
 {
    image_pub_.publish(img_calib_->getImageConfiguration());
    ROS_INFO("Correct image configuration sent!");
+   
+   this->centralWidget()->setFocus();
 }
 
 /// \brief slot function for click action of bt_screenshot. Takes and saves a
@@ -352,8 +362,32 @@ void MainWindow::on_bt_screenshot_clicked()
    path+=file;
    ROS_INFO("Saved screenshot to %s",path.toStdString().c_str());
    imwrite(path.toStdString().c_str(),temp);
+   
+   this->centralWidget()->setFocus();
 }
 
+/// \brief slot of function for click action of bt_calib. This enables or disables
+/// the calibration (LUT) of the received image
+void MainWindow::on_bt_calib_clicked()
+{
+   if(!calibration_mode){
+      calibration_mode = true;
+      ui->lb_robot_name->setStyleSheet("QLabel { color : green; }");
+      img_calib_timer->start(30);
+      interaction_timer->stop();
+   } else {
+      calibration_mode = false;
+      ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+      img_calib_timer->stop();
+      interaction_timer->start(50);
+   }
+   ui->combo_aqtype->setCurrentIndex(0); // Raw mode when
+   on_bt_grab_clicked();   
+   
+   this->centralWidget()->setFocus();
+}
+   
+   
 /// \brief slot function for click action of check_draw. Enbles or disables 
 /// draw mode
 /// \param state - boolean value to define if draw mode is on or off
@@ -448,6 +482,8 @@ void MainWindow::on_spin_tilt_valueChanged(int value)
    msg.center_y = ui->spin_cy->value();
    msg.tilt = value;
    img_calib_->imageConfigFromMsg(msg);
+   
+   this->centralWidget()->setFocus();
 }
 
 /// \brief slot function for center x spinbox. Sets a new value for the image 
@@ -460,6 +496,8 @@ void MainWindow::on_spin_cx_valueChanged(int value)
    msg.center_y = ui->spin_cy->value();
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
+   
+   this->centralWidget()->setFocus();
 }
 
 /// \brief slot function for center y spinbox. Sets a new value for the image 
@@ -472,6 +510,8 @@ void MainWindow::on_spin_cy_valueChanged(int value)
    msg.center_y = value;
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
+   
+   this->centralWidget()->setFocus();
 }
    
 //COMBOBOXES
@@ -483,6 +523,8 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
    LABEL_t label = static_cast<LABEL_t>(index);
    loadValuesOnTrackbars(img_calib_->getLabelConfiguration(label));
    
+   this->centralWidget()->setFocus();
+   
 }
 
 /// \brief slot function for acquisition type's combobox. Sets the current 
@@ -490,7 +532,16 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
 /// \param index - new image acquisition type to be used
 void MainWindow::on_combo_aqtype_currentIndexChanged(int index)
 {
-   on_bt_grab_clicked();   
+   on_bt_grab_clicked(); 
+   int id = ui->combo_aqtype->currentIndex();
+   if(id>0){
+      calibration_mode = false;
+      ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+      img_calib_timer->stop();
+      interaction_timer->start(50);
+   }  
+   
+   this->centralWidget()->setFocus();
 }
 
 //LOAD FUNCTIONS

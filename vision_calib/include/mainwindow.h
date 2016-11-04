@@ -15,15 +15,15 @@
 #include <sstream>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/cv_bridge.h>
-#include "minho_team_ros/imgRequest.h"
 #include "minho_team_ros/requestOmniVisionConf.h"
+#include "minho_team_ros/requestImage.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
 #include <QMessageBox>
 
 using namespace ros;
 using namespace cv;
-using minho_team_ros::imgRequest;
+using minho_team_ros::requestImage;
 using minho_team_ros::requestOmniVisionConf;
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
@@ -198,8 +198,6 @@ private:
    /// \brief QTimers to do binary and draw actions
    QTimer *img_calib_timer, *interaction_timer;
    //ROS
-   /// \brief imgRequest ROS Publisher
-   ros::Publisher imgreq_pub_;
    /// \brief mirrorConfig ROS Publisher
    ros::Publisher mirror_pub_;
    /// \brief visionHSVConfig ROS Publisher
@@ -208,14 +206,14 @@ private:
    ros::Publisher image_pub_;
    /// \brief requestOmniVisionConf ROS Service Client
    ros::ServiceClient omniVisionConf;
+   /// \brief requestImage ROS Service Client
+   ros::ServiceClient imgRequest;
    /// \brief image_transport child node
    image_transport::ImageTransport *it_;
    /// \brief sensor_msgs::Image ROS Subscriver
    image_transport::Subscriber image_sub_;
    /// \brief ROS Node
    ros::NodeHandle *_node_;
-   /// \brief imgRequest message
-   imgRequest msg_;
    /// \brief QImage buffer to display in QGraphicsView
    QImage image_;
 

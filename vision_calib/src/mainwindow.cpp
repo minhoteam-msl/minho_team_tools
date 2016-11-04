@@ -67,12 +67,12 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    ros::init(argc, NULL, asd.toStdString().c_str(),ros::init_options::NoSigintHandler);
    _node_ = new ros::NodeHandle();
    it_ = new image_transport::ImageTransport(*_node_);
-   imgreq_pub_ = _node_->advertise<imgRequest>(imreq_topic.str().c_str(),100);
    mirror_pub_ = _node_->advertise<mirrorConfig>(mirror_topic.str().c_str(),100);
    vision_pub_ = _node_->advertise<visionHSVConfig>(vision_topic.str().c_str(),100);
    image_pub_ = _node_->advertise<imageConfig>(image_topic.str().c_str(),100);
    
    omniVisionConf = _node_->serviceClient<minho_team_ros::requestOmniVisionConf>("requestOmniVisionConf");
+   imgRequest = _node_->serviceClient<minho_team_ros::requestImage>("requestImage");
    //Initialize image_transport subscriber
    image_transport::TransportHints hints("compressed", ros::TransportHints());
    image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::imageCallback,this,hints);
@@ -264,20 +264,22 @@ void MainWindow::interactWithUser()
 void MainWindow::on_bt_grab_clicked()
 {
    bool multiple_send_request = ui->radio_multiple->isChecked();
-   msg_.is_multiple = multiple_send_request;
-   msg_.frequency = ui->spin_framerate->value();
-   msg_.type = (int)pow(2,ui->combo_aqtype->currentIndex());
-   imgreq_pub_.publish(msg_);
+   minho_team_ros::requestImage srv;
+   srv.request.is_multiple = multiple_send_request;
+   srv.request.frequency = ui->spin_framerate->value();
+   srv.request.type = (int)pow(2,ui->combo_aqtype->currentIndex());
+   imgRequest.call(srv);
 }
 
 /// \brief slot function for click action of bt_stop. Function to stop image 
 /// send. It send a single image requst
 void MainWindow::on_bt_stop_clicked()
 {
-   msg_.is_multiple = false;
-   msg_.frequency = ui->spin_framerate->value();
-   msg_.type = (int)pow(2,ui->combo_aqtype->currentIndex());
-   imgreq_pub_.publish(msg_);
+   minho_team_ros::requestImage srv;
+   srv.request.is_multiple = false;
+   srv.request.frequency = ui->spin_framerate->value();
+   srv.request.type = (int)pow(2,ui->combo_aqtype->currentIndex());
+   imgRequest.call(srv);
 }
 
 /// \brief slot function for click action of bt_setdist. Checks validaty and

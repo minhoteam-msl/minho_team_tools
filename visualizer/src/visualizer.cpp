@@ -137,7 +137,8 @@ void Visualizer::drawWorldModel()
    
    QString txt = "Visualizer for Robot ";
    txt += QString::number(robot_id);
-   putText(worldModel,txt.toStdString(),Point(50,20),FONT_HERSHEY_SIMPLEX,0.6,Scalar(0,0,0),2);
+   txt += "   [KEYS] ESC - Close | I - Interest Points";
+   putText(worldModel,txt.toStdString(),Point(50,20),FONT_HERSHEY_SIMPLEX,0.45,Scalar(0,0,0),2);
    //##############################
          
    //Draw Ball and Velocity vector

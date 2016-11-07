@@ -178,8 +178,8 @@ void Visualizer::drawWorldModel()
          }
       }
       
-      circle(worldModel, world2WorldModel(Point2d((robot_info.interest_points[i].pos.x,
-      robot_info.interest_points[i].pos.y))),2,color,-1);
+      circle(worldModel, world2WorldModel(Point2d(robot_info.interest_points[i].pos.x,
+      robot_info.interest_points[i].pos.y)),2,color,-1);
    }
    //##############################
    worldModel.copyTo(relayWModel);

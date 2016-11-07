@@ -74,14 +74,21 @@ int main(int argc, char **argv)
 	exvis = new Visualizer(robot_id);	
 	ROS_WARN("MinhoTeam visualizer started running on ROS.");
 
-
+   namedWindow("World Model");
 	ros::AsyncSpinner spinner(2);
 	spinner.start();
-	
+	int ret = 0;
 	while(ros::ok()){
 		Mat *wmodel = exvis->getWorldModel();
 		imshow("World Model",*wmodel);
-		waitKey(5);
+		ret = waitKey(5);
+		if(ret==27){ //ESC
+		   ROS_ERROR("ESC pressed. Closing ...");
+		   ros::shutdown();
+		   destroyWindow("World Model");
+		   a.quit();
+		   return 0;
+		}
 	}
 	return a.exec();
 	return 0;

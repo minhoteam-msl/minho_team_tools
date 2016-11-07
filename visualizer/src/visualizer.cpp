@@ -159,6 +159,28 @@ void Visualizer::drawWorldModel()
 	      line(worldModel,ball,arrow,Scalar(0,255,255),2);
       }
    }
+   
+   //Draw interest Points
+   for(unsigned int i=0;i<robot_info.interest_points.size();i++){
+      Scalar color;
+      switch(robot_info.interest_points[i].type){
+         case 0:{ // LINE POINTS
+            color = Scalar(255,0,0);
+            break;
+         }
+         case 1:{ // BALL POINTS
+            color = Scalar(0,0,255);
+            break;
+         }
+         case 2:{ // OBSTACLE POINTS
+            color = Scalar(0,0,0);
+            break;
+         }
+      }
+      
+      circle(worldModel, world2WorldModel(Point2d((robot_info.interest_points[i].pos.x,
+      robot_info.interest_points[i].pos.y))),2,color,-1);
+   }
    //##############################
    worldModel.copyTo(relayWModel);
 }

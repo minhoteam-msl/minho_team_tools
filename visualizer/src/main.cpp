@@ -86,9 +86,9 @@ int main(int argc, char **argv)
    
    if(!mode_real) {
       ROS_INFO("Running Vision Calib for Robot %d in simulation.",robot_id);
-      robot_info_topic << "minho_robot_" << robot_id;
-      goalkeeper_info_topic << "minho_robot_" << robot_id;
-      request_debug_topic << "minho_robot_" << robot_id;
+      robot_info_topic << "minho_gazebo_robot" << robot_id;
+      goalkeeper_info_topic << "minho_gazebo_robot" << robot_id;
+      request_debug_topic << "minho_gazebo_robot" << robot_id;
    } else {
       ROS_INFO("Running Vision Calib for Robot %d.",robot_id);
       if(robot_id>0){

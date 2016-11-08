@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include <QStyleFactory>
+#include <QDebug>
 #include <QApplication>
 
 int main(int argc, char *argv[])
@@ -28,6 +30,8 @@ int main(int argc, char *argv[])
    else ROS_INFO("Running Teleop for Robot %d in simulation.",robot_id);
 
    QApplication a(argc, argv);
+   QStyle *gui_style = QStyleFactory::create("Fusion");
+   a.setStyle(gui_style);
    MainWindow w(robot_id,mode_real);
    w.show();
 

@@ -43,14 +43,6 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    
    if(real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
-      control_topic << "/controlInfo";
-      teleop_topic << "/teleop";
-      robot_topic << "/robotInfo";
-      hardware_topic << "/hardwareInfo";
-      resetimu_service_topic << "/requestResetIMU";
-      reloc_service_topic << "/requestReloc";
-      kick_service_topic << "/requestKick";
-      
       if(robot_id>0){
          // Setup custom master
          QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
@@ -61,15 +53,23 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       
    } else {
       // Setup ROS Node and pusblishers/subscribers in REAL ROBOT
-      control_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/controlInfo";
-      teleop_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/teleop";
-      robot_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/robotInfo";
-      hardware_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/hardwareInfo";
-      resetimu_service_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/requestResetIMU"; 
-      reloc_service_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/requestReloc"; 
-      kick_service_topic << "minho_gazebo_robot" << std::to_string(robot_id) << "/requestKick"; 
+      control_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      teleop_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      robot_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      hardware_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      resetimu_service_topic << "minho_gazebo_robot" << std::to_string(robot_id); 
+      reloc_service_topic << "minho_gazebo_robot" << std::to_string(robot_id); 
+      kick_service_topic << "minho_gazebo_robot" << std::to_string(robot_id); 
    }
    
+   control_topic << "/controlInfo";
+   teleop_topic << "/teleop";
+   robot_topic << "/robotInfo";
+   hardware_topic << "/hardwareInfo";
+   resetimu_service_topic << "/requestResetIMU";
+   reloc_service_topic << "/requestReloc";
+   kick_service_topic << "/requestKick";
+      
 
    //Initialize ROS
    int argc = 0;
@@ -330,8 +330,8 @@ void MainWindow::robotInfoCallback(const minho_team_ros::robotInfo::ConstPtr& ms
 void MainWindow::hardwareInfoCallback(const minho_team_ros::hardwareInfo::ConstPtr& msg)
 {
    QString info = QString("PC:")+QString::number(msg->battery_pc,'f',2) + 
-                   QString(" | CAM: ")+QString::number(msg->battery_camera,'f',2) +
-                   QString(" | MAIN: ")+QString::number(msg->battery_main,'f',2);
+                   QString(" | Cam: ")+QString::number(msg->battery_camera,'f',2) +
+                   QString(" | Main: ")+QString::number(msg->battery_main,'f',2);
                    
    ui->lb_bats->setText(info); 
 }

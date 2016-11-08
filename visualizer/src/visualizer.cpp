@@ -124,7 +124,7 @@ void Visualizer::drawWorldModel()
    //##############################
    Point robot = world2WorldModel(Point2d(robot_info.robot_pose.x,robot_info.robot_pose.y));
    ellipse(worldModel,robot,Size(fieldAnatomy.fieldDims.ROBOT_DIAMETER/2+1,fieldAnatomy.fieldDims.ROBOT_DIAMETER/2+1),
-         robot_info.robot_pose.z+90.0,45.0,315.0,Scalar(255,0,255),-1);
+         robot_info.robot_pose.z+90.0,45.0,315.0,Scalar(255,255,0),-1);
          
    velModule = sqrt((robot_info.robot_velocity.x)*(robot_info.robot_velocity.x)+(robot_info.robot_velocity.y)*(robot_info.robot_velocity.y));
    sizeLine = velModule*10;
@@ -148,7 +148,7 @@ void Visualizer::drawWorldModel()
       circle(worldModel,ball,11/(fieldAnatomy.fieldDims.FACTOR),Scalar(0,127,255),-1);
      
       if(robot_info.has_ball){
-         circle(worldModel,ball,11/(fieldAnatomy.fieldDims.FACTOR),Scalar(255,0,255),2);   
+         circle(worldModel,ball,11/(fieldAnatomy.fieldDims.FACTOR),Scalar(0,0,255),1);   
       }
       
       velModule = sqrt((robot_info.ball_velocity.x)*(robot_info.ball_velocity.x)+(robot_info.ball_velocity.y)*(robot_info.ball_velocity.y));

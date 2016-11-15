@@ -109,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## DEPENDENCIES ##
 ######################################################################
-set(PROJECT_DIRECTORY ~/catkin_ws/src/minho_team_tools)
+set(PROJECT_DIRECTORY ${minho_team_tools_SOURCE_DIR})
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 set(CURRQTPREFIX /opt/Qt/5.7/gcc_64)
@@ -169,10 +169,12 @@ add_dependencies(vision_calib minho_team_ros_generate_messages_cpp)
 
 ## VISUALIZER ##
 ######################################################################
+set(MTROS_DIR ${PROJECT_DIRECTORY}/../minho_team_ros)
+include_directories(${MTROS_DIR}/coms_node/include)
 set(VIS_DIR ${PROJECT_DIRECTORY}/visualizer)
 set(vis_MOC_H ${VIS_DIR}/include/visualizer.h)
 qt5_wrap_cpp(vis_CPP ${vis_MOC_H})
-set(vis_SRC ${VIS_DIR}/src/main.cpp ${VIS_DIR}/src/visualizer.cpp )
+set(vis_SRC ${VIS_DIR}/src/main.cpp ${VIS_DIR}/src/visualizer.cpp ${MTROS_DIR}/coms_node/src/multicast.cpp)
 add_executable(visualizer ${vis_SRC} ${vis_CPP}) 
 target_include_directories(visualizer PUBLIC
 $<BUILD_INTERFACE:${VIS_DIR}/include>)

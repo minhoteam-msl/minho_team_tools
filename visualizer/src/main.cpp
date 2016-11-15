@@ -197,7 +197,7 @@ int main(int argc, char **argv)
       } else ROS_WARN("ROS_MASTER_URI is localhost");
    } else {  // coms_node to Real robot
       ROS_INFO("Running Vision Calib for Robot %d via Multicast.",robot_id);
-      socket_fd = openSocket("wlan0",&ip_base,&agent_id);
+      socket_fd = openSocket("wlan0",&ip_base,&agent_id,1);
       if(socket_fd<0) exit(0);
       ROS_INFO("UDP Multicast System started.");  
       // start receiving thread

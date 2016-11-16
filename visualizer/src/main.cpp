@@ -180,14 +180,16 @@ int main(int argc, char **argv)
    std::stringstream robot_info_topic;
    std::stringstream goalkeeper_info_topic;
    std::stringstream request_debug_topic;
+   std::stringstream node_name;
+   node_name << "visualizer_" << std::time(0);
    
    if(mode_type==1) { // ROS to Simulated robot
-      ROS_INFO("Running Vision Calib for Robot %d in simulation.",robot_id);
+      ROS_INFO("Running visualizer for Robot %d in simulation.",robot_id);
       robot_info_topic << "minho_gazebo_robot" << robot_id;
       goalkeeper_info_topic << "minho_gazebo_robot" << robot_id;
       request_debug_topic << "minho_gazebo_robot" << robot_id;
    } else if(mode_type==0) {  // ROS to Real robot
-      ROS_INFO("Running Vision Calib for Robot %d.",robot_id);
+      ROS_INFO("Running visualizer for Robot %d.",robot_id);
       if(robot_id>0){
          // Setup custom master
          QString robot_ip = QString(ROS_MASTER_IP)+QString::number(robot_id)
@@ -196,7 +198,7 @@ int main(int argc, char **argv)
          setenv("ROS_MASTER_URI",robot_ip.toStdString().c_str(),1);
       } else ROS_WARN("ROS_MASTER_URI is localhost");
    } else {  // coms_node to Real robot
-      ROS_INFO("Running Vision Calib for Robot %d via Multicast.",robot_id);
+      ROS_INFO("Running visualizer for Robot %d via Multicast.",robot_id);
       socket_fd = openSocket("wlan0",&ip_base,&agent_id,1);
       if(socket_fd<0) exit(0);
       ROS_INFO("UDP Multicast System started.");  
@@ -208,7 +210,7 @@ int main(int argc, char **argv)
    goalkeeper_info_topic << "/goalKeeperInfo";
 	request_debug_topic << "/requestExtendedDebug";
 	//Initialize ROS
-	ros::init(argc, argv, "visualizer",ros::init_options::NoSigintHandler);
+	ros::init(argc, argv, node_name.str().c_str(),ros::init_options::NoSigintHandler);
 	//Request node handler
 	ros::NodeHandle visualizer;
 	

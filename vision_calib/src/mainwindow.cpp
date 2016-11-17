@@ -255,6 +255,10 @@ void MainWindow::interactWithUser()
       ui->lb_pxcoords->setText(QString("(")+QString::number(relativeOrigin.x())+QString(",")+QString::number(relativeOrigin.y())+QString(") px"));
       Point2d real_coords = img_calib_->worldMapping(Point(relativeOrigin.x(),relativeOrigin.y()));
       ui->lb_realcoords->setText(QString::number(real_coords.x,'f',2)+QString(" m , ")+QString::number(real_coords.y,'f',2)+QString("º"));
+      
+      imageConfig imgconf = img_calib_->getImageConfiguration();
+      ui->lb_distpx->setText(QString::number(sqrt((relativeOrigin.x()-imgconf.center_x)*(relativeOrigin.x()-imgconf.center_x)
+      +(relativeOrigin.y()-imgconf.center_y)*(relativeOrigin.y()-imgconf.center_y))));
    }
 }
 

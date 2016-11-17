@@ -112,7 +112,22 @@ find_package(catkin REQUIRED COMPONENTS
 set(PROJECT_DIRECTORY ${minho_team_tools_SOURCE_DIR})
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
 list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
+
+set(username $ENV{USER})
+set(home $ENV{HOME})
+MESSAGE( STATUS "-----> Compiling MinhoTeam Packages for : " ${username})
+
+
+if(EXISTS "/opt/Qt" AND IS_DIRECTORY "/opt/Qt")
+set(CURRQTPREFIX /opt/Qt)
+endif()
+if(EXISTS "/opt/Qt/5.7/gcc_64" AND IS_DIRECTORY "/opt/Qt/5.7/gcc_64")
 set(CURRQTPREFIX /opt/Qt/5.7/gcc_64)
+endif()
+if(EXISTS "${home}/Qt/5.7/gcc_64" AND IS_DIRECTORY "${home}/Qt/5.7/gcc_64")
+set(CURRQTPREFIX ${home}/Qt/5.7/gcc_64)
+endif()
+
 set(CMAKE_PREFIX_PATH ${CURRQTPREFIX})
 find_package(Qt5 COMPONENTS Core SerialPort Network Widgets REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

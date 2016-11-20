@@ -330,6 +330,7 @@ void MainWindow::on_bt_setdist_clicked()
       msg.step = ui->spin_step->value();
       msg.pixel_distances = values;
       mirror_pub_.publish(msg);
+      img_calib_->mirrorConfigFromMsg(msg);
    }
    
    this->centralWidget()->setFocus();

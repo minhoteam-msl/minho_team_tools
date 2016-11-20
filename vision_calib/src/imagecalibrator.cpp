@@ -169,12 +169,14 @@ void ImageCalibrator::drawCenter(Mat *image)
 {
    circle(*image,Point(imageConf.center_x,imageConf.center_y),3,Scalar(0,0,255),-1);
    int hlen = 400;
-   line(*image,Point(-cos(imageConf.tilt*TO_RAD)*hlen+imageConf.center_x,-sin(imageConf.tilt*TO_RAD)*hlen+imageConf.center_y),
-   Point(cos(imageConf.tilt*TO_RAD)*hlen+imageConf.center_x,sin(imageConf.tilt*TO_RAD)*hlen+imageConf.center_y),
-   Scalar(255,0,0),1);
-   line(*image,Point(-cos(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_x,-sin(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_y),
+   
+   line(*image,Point(imageConf.center_x,imageConf.center_y),
    Point(cos(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_x,sin(imageConf.tilt*TO_RAD+M_PI_2)*hlen+imageConf.center_y),
    Scalar(255,0,0),1);
+   
+   line(*image,Point(-cos(imageConf.tilt*TO_RAD)*hlen+imageConf.center_x,-sin(imageConf.tilt*TO_RAD)*hlen+imageConf.center_y),
+   Point(cos(imageConf.tilt*TO_RAD)*hlen+imageConf.center_x,sin(imageConf.tilt*TO_RAD)*hlen+imageConf.center_y),
+   Scalar(255,0,255),1);
 }
 
 /// \brief function to generate new distLookUpTable based on current mirrorConfig

@@ -230,3 +230,11 @@ void Visualizer::configFilePaths()
    fieldPath = configFolderPath+fieldID+".view";
    file.close();
 }
+
+/// \brief returns absolute file path for field file in config folder
+/// \param field_name - name of the field file
+/// \return - absolute file path of field file
+QString Visualizer::getFieldFileName(std::string field_name)
+{
+   return configFolderPath+QString(field_name.c_str())+".view";
+}

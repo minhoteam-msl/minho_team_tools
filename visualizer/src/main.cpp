@@ -243,6 +243,12 @@ int main(int argc, char **argv)
 		   req_debug = !req_debug;
 		   if(req_debug) ROS_INFO("Extended debug set to ON");
 		   else ROS_INFO("Extended debug set to OFF");
+		} else if(ret=='o' || ret=='O'){
+		   ROS_INFO("Changing to Official Field.");
+		   exvis->initField(exvis->getFieldFileName("Official"));
+		} else if(ret=='l' || ret=='L'){
+		   ROS_INFO("Changing to Lar Field.");
+		   exvis->initField(exvis->getFieldFileName("Lar"));
 		}
 	}
 	

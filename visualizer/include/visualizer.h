@@ -34,6 +34,12 @@ public slots:
    /// the class, the robot_info object
    /// \param msg - new information to be set
    void setRobotInfo(robotInfo msg);
+   
+      
+   /// \brief returns absolute file path for field file in config folder
+   /// \param field_name - name of the field file
+   /// \return - absolute file path of field file
+   QString getFieldFileName(std::string field_name);
 private slots:
    /// \brief converts a point in meters in point in pixels in the
    /// viewport

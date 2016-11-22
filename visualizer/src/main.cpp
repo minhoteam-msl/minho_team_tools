@@ -232,7 +232,7 @@ int main(int argc, char **argv)
 	while(ros::ok()){
 		Mat *wmodel = exvis->getWorldModel();
 		imshow("World Model",*wmodel);
-		ret = waitKey(5);
+		ret = waitKey(20);
 		if(ret==27){ //ESC
 		   ROS_ERROR("ESC pressed. Closing ...");
 		   ros::shutdown();

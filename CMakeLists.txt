@@ -111,7 +111,6 @@ find_package(catkin REQUIRED COMPONENTS
 ######################################################################
 set(PROJECT_DIRECTORY ${minho_team_tools_SOURCE_DIR})
 include_directories(${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIR})
-list(APPEND CMAKE_CXX_FLAGS "${GAZEBO_CXX_FLAGS}")
 
 set(username $ENV{USER})
 set(home $ENV{HOME})
@@ -129,18 +128,15 @@ set(CURRQTPREFIX ${home}/Qt/5.7/gcc_64)
 endif()
 
 set(CMAKE_PREFIX_PATH ${CURRQTPREFIX})
-find_package(Qt5 COMPONENTS Core SerialPort Network Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 set(QT_DIR ${CURRQTPREFIX}/include)
-include_directories(${QT_DIR} ${QT_DIR}/QtCore ${QT_DIR}/QtConcurrent ${QT_DIR}/QtDesigner ${QT_DIR}/QtDesignerComponents
-${QT_DIR}/QtGui ${QT_DIR}/QtNetwork ${QT_DIR}/QtSerialPort ${QT_DIR}/QtWebSockets ${QT_DIR}/QtWidgets ${QT_DIR}/QtXml)
-set(qt_LIBRARIES libQt5SerialPort.so libQt5Core.so libQt5Widgets.so libQt5Network.so libQt5Gui.so libQt5Qml.so libQt5Quick.so)
+include_directories(${QT_DIR} ${QT_DIR}/QtCore ${QT_DIR}/QtGui ${QT_DIR}/QtWidgets)
+set(qt_LIBRARIES libQt5Core.so libQt5Widgets.so libQt5Gui.so)
 link_directories(${CURRQTPREFIX}/lib)
-add_definitions(-DQT_THREAD_SUPPORT)
-set(CMAKE_BUILD_TYPE Debug)
 ######################################################################
 
 #Linking steps for OpenCV Libraries
@@ -197,4 +193,22 @@ set_target_properties(visualizer PROPERTIES COMPILE_FLAGS "-fPIC")
 target_compile_features(visualizer PRIVATE cxx_range_for)
 target_link_libraries(visualizer ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES})
 add_dependencies(visualizer minho_team_ros_generate_messages_cpp)
+######################################################################
+
+## MINI_BASESTATION CALIB ##
+######################################################################
+set(MINIBS_DIR ${PROJECT_DIRECTORY}/mini_basestation)
+set(minibs_MOC_H ${MINIBS_DIR}/include/mainwindow.h)
+qt5_wrap_cpp(minibs_CPP ${minibs_MOC_H})
+set(minibs_SRC ${MINIBS_DIR}/src/main.cpp ${MINIBS_DIR}/src/mainwindow.cpp 
+${MINIBS_DIR}/src/ball.cpp ${MINIBS_DIR}/src/customscene.cpp ${MINIBS_DIR}/src/desenharcampo.cpp 
+${MINIBS_DIR}/src/multicastpp.cpp ${MINIBS_DIR}/src/robo.cpp ${MINIBS_DIR}/src/thpool.c 
+${MINIBS_DIR}/src/velocityvector.cpp ${MINIBS_DIR}/config/rs.qrc) 
+add_executable(mini_basestation ${minibs_SRC} ${minibs_CPP}) 
+target_include_directories(mini_basestation PUBLIC
+$<BUILD_INTERFACE:${MINIBS_DIR}/include>)
+set_target_properties(mini_basestation PROPERTIES COMPILE_FLAGS "-fPIC")
+target_compile_features(mini_basestation PRIVATE cxx_range_for)
+target_link_libraries(mini_basestation ${catkin_LIBRARIES} ${qt_LIBRARIES})
+add_dependencies(mini_basestation minho_team_ros_generate_messages_cpp)
 ######################################################################

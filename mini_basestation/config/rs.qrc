@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>resources/away.png</file>
+        <file>resources/display.ttf</file>
+        <file>resources/left.png</file>
+        <file>resources/minho.png</file>
+        <file>resources/off_1.gif</file>
+        <file>resources/off_2.gif</file>
+        <file>resources/off_3.gif</file>
+        <file>resources/off_4.gif</file>
+        <file>resources/off_5.gif</file>
+        <file>resources/right.png</file>
+        <file>data/campo-lar.txt</file>
+        <file>data/campo-oficial.txt</file>
+    </qresource>
+</RCC>

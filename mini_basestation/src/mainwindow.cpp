@@ -370,23 +370,28 @@ void MainWindow::setRobotLable(QLabel *lable, bool state, QString number)
 void MainWindow::change_robot_info(minho_team_ros::interAgentInfo incoming_data)
 {
     robo[incoming_data.agent_id-1]->setPosition(getx(incoming_data.agent_info.robot_info.robot_pose.x),getx(incoming_data.agent_info.robot_info.robot_pose.y));
-
+    robo[incoming_data.agent_id-1]->setAngle(incoming_data.agent_info.robot_info.robot_pose.z);
     setRobotLablePosition(incoming_data.agent_info.robot_info.robot_pose.x,
     incoming_data.agent_info.robot_info.robot_pose.y,
     incoming_data.agent_info.robot_info.robot_pose.z
     ,incoming_data.agent_id,true);
-    
-    robo[incoming_data.agent_id-1]->setAngle(incoming_data.agent_info.robot_info.robot_pose.z);
+  
+    // Draw robot velocity vector
 
     //velrb[incoming_data.agent_id-1]->setPosition(getx(incoming_data.agent_info.robot_info.robot_pose.x),getx(incoming_data.agent_info.robot_info.robot_pose.y),getx(incoming_data.agent_info.robot_info.robot_velocity.x),gety(incoming_data.agent_info.robot_info.robot_velocity.y));
 
 
     if(incoming_data.agent_info.robot_info.sees_ball)
     {
+        robo[incoming_data.agent_id-1]->setBallCatch(incoming_data.agent_info.robot_info.has_ball);
         ball[incoming_data.agent_id-1]->setPosition(getx(incoming_data.agent_info.robot_info.ball_position.x),gety(incoming_data.agent_info.robot_info.ball_position.y));
+        
+        // Draw ball velocity vector
         //velball[incoming_data.agent_id-1]->setPosition(getx(incoming_data.agent_info.robot_info.ball_position.x),getx(incoming_data.agent_info.robot_info.ball_position.y),getx(incoming_data.agent_info.robot_info.ball_velocity.x),gety(incoming_data.agent_info.robot_info.ball_velocity.y));
+        
     } else {
         ball[incoming_data.agent_id-1]->setPosition(-1000,-1000);  
+        robo[incoming_data.agent_id-1]->setBallCatch(false);
     }
 }
 

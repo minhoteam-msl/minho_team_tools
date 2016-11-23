@@ -16,8 +16,9 @@ Robo::Robo(MainWindow *mainw, int number)
     height=width;
     myMain = mainw;
     Pen.setColor(QColor(Qt::black));
+    Pen.setWidth(3);
     font.setFamily("Arial");
-    font.setPointSize( 6 );
+    font.setPointSize(6);
     pixmap3.load(":/robot.png");
     alfa = 90;
     r = 0;
@@ -58,18 +59,25 @@ void Robo::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     if(has_ball){
         QPainterPath ballCircle;
         ballCircle.moveTo(width/2,height/2);
-        ballCircle.arcTo(boundingRect(), 0,360);
-        painter->setBrush(Qt::transparent);
-        Pen.setColor(QColor(0,255,255));
+        ballCircle.arcTo(boundingRect(), AngleDirection1+30, 300);
+        Pen.setColor(QColor(255,0,255));
         painter->setPen(Pen);
         painter->drawPath(ballCircle);
+        Pen.setColor(QColor(0,0,0));
     }
 
     if(numberSet!=""){
         Pen.setColor(QColor(255,255,255));
         painter->setPen(Pen);
         painter->setFont(font);
-        painter->drawText(width/5,height/1.5,numberSet);
+        int px = width/2;
+        int py = height/2;
+        float dx = width/8;
+        float dy = height/8;
+        float dangle = (float)getAngle()*(M_PI/180.0);
+        px -= cos(dangle)*dx-sin(dangle)*dy;
+        py -= sin(dangle)*dx+cos(dangle)*dy;
+        painter->drawText(px,py,numberSet);
     }
 
 }

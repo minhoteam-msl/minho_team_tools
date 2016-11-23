@@ -39,7 +39,6 @@ void* udpReceivingThread(void *mcast);
 /// \param packet 
 void processInfo(void *packet);
 
-
 /// \brief mainwindow GUI pointer
 MainWindow *window;
 
@@ -64,23 +63,11 @@ int main(int argc, char *argv[])
     window = &w;
     Multicastpp rtdb;
 
-    //Setup Updated timer thread
-    // #########################
-    /*signal(SIGALRM,sendInformationUpdate);
-    timer.it_interval.tv_sec = 0;
-    timer.it_interval.tv_usec = DATA_UPDATE_USEC;
-    timer.it_value.tv_sec = 0;
-    timer.it_value.tv_usec = DATA_UPDATE_USEC;*/
-    // #########################
-
     //Setup Thread pool and receving thread
     // #########################
     thpool_t = thpool_init(6); //5 threads per agent ?
     pthread_create(&recv_monitor_thread, NULL, udpReceivingThread, &rtdb);
 
-    // Run functions and join threads
-    // #########################
-    //setitimer (ITIMER_REAL, &timer, NULL);
     a.exec();
     pthread_join(recv_monitor_thread, NULL);
     ROS_ERROR("Cleaning resources on close ...");

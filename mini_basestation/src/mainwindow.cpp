@@ -374,7 +374,7 @@ void MainWindow::change_robot_info(minho_team_ros::interAgentInfo incoming_data)
     setRobotLablePosition(incoming_data.agent_info.robot_info.robot_pose.x,
     incoming_data.agent_info.robot_info.robot_pose.y,
     incoming_data.agent_info.robot_info.robot_pose.z
-    ,incoming_data.agent_id);
+    ,incoming_data.agent_id,true);
     
     robo[incoming_data.agent_id-1]->setAngle(incoming_data.agent_info.robot_info.robot_pose.z);
 
@@ -386,7 +386,7 @@ void MainWindow::change_robot_info(minho_team_ros::interAgentInfo incoming_data)
         ball[incoming_data.agent_id-1]->setPosition(getx(incoming_data.agent_info.robot_info.ball_position.x),gety(incoming_data.agent_info.robot_info.ball_position.y));
         //velball[incoming_data.agent_id-1]->setPosition(getx(incoming_data.agent_info.robot_info.ball_position.x),getx(incoming_data.agent_info.robot_info.ball_position.y),getx(incoming_data.agent_info.robot_info.ball_velocity.x),gety(incoming_data.agent_info.robot_info.ball_velocity.y));
     } else {
-      ball[incoming_data.agent_id-1]->setPosition(-10,-10);  
+        ball[incoming_data.agent_id-1]->setPosition(-1000,-1000);  
     }
 }
 
@@ -407,26 +407,48 @@ void MainWindow::onUpdateFromRobot(void *data)
    return;
 }
 
-void MainWindow::setRobotLablePosition(float x, float y, int angle, int robot)
+void MainWindow::setRobotLablePosition(float x, float y, int angle, int robot, bool in_meter)
 {
-    switch (robot) {
-    case 1:
-    ui->lb_pos_r1->setText("Pose["+QString::number(getMeterx(x))+","+QString::number(getMetery(y))+","+QString::number(angle)+"º"+"]");
-        break;
-    case 2:
-    ui->lb_pos_r2->setText("Pose["+QString::number(getMeterx(x))+","+QString::number(getMetery(y))+","+QString::number(angle)+"º"+"]");
-        break;
-    case 3:
-    ui->lb_pos_r3->setText("Pose["+QString::number(getMeterx(x))+","+QString::number(getMetery(y))+","+QString::number(angle)+"º"+"]");
-        break;
-    case 4:
-    ui->lb_pos_r4->setText("Pose["+QString::number(getMeterx(x))+","+QString::number(getMetery(y))+","+QString::number(angle)+"º"+"]");
-        break;
-    case 5:
-    ui->lb_pos_r5->setText("Pose["+QString::number(getMeterx(x))+","+QString::number(getMetery(y))+","+QString::number(angle)+"º"+"]");
-        break;
-    default:
-        break;
+    if(in_meter){
+       switch (robot) {
+          case 1:
+          ui->lb_pos_r1->setText("Pose["+QString::number(x,'f',2)+" , "+QString::number(y,'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 2:
+          ui->lb_pos_r2->setText("Pose["+QString::number(x,'f',2)+" , "+QString::number(y,'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 3:
+          ui->lb_pos_r3->setText("Pose["+QString::number(x,'f',2)+" , "+QString::number(y,'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 4:
+          ui->lb_pos_r4->setText("Pose["+QString::number(x,'f',2)+" , "+QString::number(y,'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 5:
+          ui->lb_pos_r5->setText("Pose["+QString::number(x,'f',2)+" , "+QString::number(y,'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          default:
+              break;
+       }
+    } else {
+       switch (robot) {
+          case 1:
+          ui->lb_pos_r1->setText("Pose["+QString::number(getMeterx(x),'f',2)+" , "+QString::number(getMetery(y),'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 2:
+          ui->lb_pos_r2->setText("Pose["+QString::number(getMeterx(x),'f',2)+" , "+QString::number(getMetery(y),'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 3:
+          ui->lb_pos_r3->setText("Pose["+QString::number(getMeterx(x),'f',2)+" , "+QString::number(getMetery(y),'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 4:
+          ui->lb_pos_r4->setText("Pose["+QString::number(getMeterx(x),'f',2)+" , "+QString::number(getMetery(y),'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          case 5:
+          ui->lb_pos_r5->setText("Pose["+QString::number(getMeterx(x),'f',2)+" , "+QString::number(getMetery(y),'f',2)+" , "+QString::number(angle)+"º"+"]");
+              break;
+          default:
+              break;
+       }
     }
 }
 

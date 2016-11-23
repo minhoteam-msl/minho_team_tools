@@ -131,7 +131,7 @@ void Robo::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void Robo::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    myMain->setRobotLablePosition(this->pos().x()+width/2,this->pos().y()+height/2,this->getAngle(),this->myNumber);
+    myMain->setRobotLablePosition(this->pos().x()+width/2,this->pos().y()+height/2,this->getAngle(),this->myNumber,false);
     pressed = false;
     update();
     QGraphicsItem::mouseReleaseEvent(event);
@@ -176,6 +176,6 @@ void Robo::wheelEvent(QGraphicsSceneWheelEvent *event)
     else if(this->getAngle() > 360)
     setAngle(this->getAngle()-360);
 
-    myMain->setRobotLablePosition(this->pos().x()+width/2,this->pos().y()+height/2,this->getAngle(),this->myNumber);
+    myMain->setRobotLablePosition(this->pos().x()+width/2,this->pos().y()+height/2,this->getAngle(),this->myNumber,false);
     update();
 }

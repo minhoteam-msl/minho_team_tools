@@ -53,7 +53,7 @@ public slots:
 
     int getRoboTSize();
 
-    void setRobotLablePosition(float x,float y,int angle, int robot);
+    void setRobotLablePosition(float x,float y,int angle, int robot, bool in_meter);
 
     void onUpdateFromRobot(void *data);
     

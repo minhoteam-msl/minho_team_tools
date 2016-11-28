@@ -116,38 +116,25 @@ set(username $ENV{USER})
 set(home $ENV{HOME})
 MESSAGE( STATUS "-----> Compiling MinhoTeam Packages for : " ${username})
 
-
-if(EXISTS "/opt/Qt" AND IS_DIRECTORY "/opt/Qt")
-set(CURRQTPREFIX /opt/Qt)
-endif()
-if(EXISTS "/opt/Qt/5.7/gcc_64" AND IS_DIRECTORY "/opt/Qt/5.7/gcc_64")
-set(CURRQTPREFIX /opt/Qt/5.7/gcc_64)
-endif()
-if(EXISTS "/opt/Qt/5.5/gcc_64" AND IS_DIRECTORY "/opt/Qt/5.5/gcc_64")
-set(CURRQTPREFIX /opt/Qt/5.5/gcc_64)
-endif()
-if(EXISTS "${home}/Qt/5.7/gcc_64" AND IS_DIRECTORY "${home}/Qt/5.7/gcc_64")
-set(CURRQTPREFIX ${home}/Qt/5.7/gcc_64)
-endif()
-
-set(CMAKE_PREFIX_PATH ${CURRQTPREFIX})
+#Linking steps for Qt Libraries
+########################################
 find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
+add_definitions (${QT_DEFINITIONS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-set(QT_DIR ${CURRQTPREFIX}/include)
-include_directories(${QT_DIR} ${QT_DIR}/QtCore ${QT_DIR}/QtGui ${QT_DIR}/QtWidgets)
-set(qt_LIBRARIES libQt5Core.so libQt5Widgets.so libQt5Gui.so)
-link_directories(${CURRQTPREFIX}/lib)
-######################################################################
+set(qt_LIBRARIES Qt5::Widgets Qt5::Core Qt5::Gui)
+include_directories(${Qt5Widgets_INCLUDE_DIRS})
+include_directories(${Qt5Core_INCLUDE_DIRS})
+include_directories(${Qt5Gui_INCLUDE_DIRS})
+########################################
 
 #Linking steps for OpenCV Libraries
 ########################################
-include_directories(/usr/local/include/opencv /usr/local/include/opencv2)
-set (opencv_LIBRARIES libopencv_core.so libopencv_highgui.so libopencv_imgproc.so)
-link_directories(/usr/local/lib)
-link_directories(/usr/lib/x86_64-linux-gnu)
+find_package(OpenCV REQUIRED)
+include_directories(${OpenCV_INCLUDE_DIRS})
+set (opencv_LIBRARIES ${OpenCV_LIBS})
 ########################################
 ######################################################################
 

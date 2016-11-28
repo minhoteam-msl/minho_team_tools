@@ -116,7 +116,7 @@ void Visualizer::drawWorldModel()
    //Draw Obstacles
    //##############################
    for(unsigned int i= 0;i < robot_info.obstacles.size(); i++){
-      circle(worldModel,world2WorldModel(Point2d(robot_info.obstacles[i].x,robot_info.obstacles[i].y)),fieldAnatomy.fieldDims.ROBOT_DIAMETER/3,Scalar(0,0,0),-1);
+      circle(worldModel,world2WorldModel(Point2d(robot_info.obstacles[i].x,robot_info.obstacles[i].y)),11/(fieldAnatomy.fieldDims.FACTOR),Scalar(0,0,0),-1);
    }
    //##############################
    

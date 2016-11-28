@@ -16,7 +16,7 @@
 #include <pthread.h>
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 5120
 
 /// \brief struct to represet a udp packet, containing
 /// a serialized ROS message

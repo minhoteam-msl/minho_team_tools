@@ -18,9 +18,9 @@ Hotkeys:
 
 Program Usage:   
 * Real Robot:
-   * rosrun minho\_team\_tools visualizer -r \<TARGET_ROBOT\> - Runs with ROS
+   * rosrun minho\_team\_tools minho_teleop -r \<TARGET_ROBOT\> - Runs with ROS
 * Simulated Robot:
-   * rosrun minho\_team\_tools visualizer -s \<TARGET_ROBOT\> - Runs with ROS
+   * rosrun minho\_team\_tools minho_teleop -s \<TARGET_ROBOT\> - Runs with ROS
    
 \<TARGET_ROBOT\> ranges from 1 to 5.
 

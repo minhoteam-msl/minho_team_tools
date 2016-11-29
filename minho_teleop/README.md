@@ -22,6 +22,6 @@ Program Usage:
 * Simulated Robot:
    * rosrun minho\_team\_tools minho_teleop -s \<TARGET_ROBOT\> - Runs with ROS
    
-\<TARGET_ROBOT\> ranges from 1 to 5.
+\<TARGET_ROBOT\> ranges from 1 to 5 for other robots. When target is 0, it runs on local machine.
 
 *Developed by MinhoTeam @2016*

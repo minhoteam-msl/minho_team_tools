@@ -8,7 +8,7 @@ The package will in future include:
  - [ ] Configuration of Control parameters (control_calib)
  - [x] Configuration of Omnivision parameters (vision_calib)
  - [x] Single-robot visualization debug tool (visualizer)
- - [x] Multi-robot visualization tool (mini-basestation)
+ - [x] Simplified Multi-robot visualization tool (mini-basestation)
  
  To see program usage please refer to individual README.md of each program.
 *Developed by MinhoTeam @2016*

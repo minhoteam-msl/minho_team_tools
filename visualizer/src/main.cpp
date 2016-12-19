@@ -32,6 +32,7 @@ using minho_team_ros::robotInfo; //Namespace for robot information msg - SUBSCIB
 using minho_team_ros::goalKeeperInfo;
 using minho_team_ros::interAgentInfo;
 using minho_team_ros::requestExtendedDebug;
+using minho_team_ros::pathData;
 
 //Node specific objects
 /// \brief external visualizer class to draw robot's world model
@@ -43,7 +44,7 @@ ros::ServiceClient requestExtDebug;
 /// \brief id variable of target robot
 int robot_id;
 /// \brief ROS subscribers for robotInfo and goalKeeperInfo
-ros::Subscriber robot_info_sub,gk_info_sub;
+ros::Subscriber robot_info_sub,gk_info_sub, path_sub;
 
 
 // ###### THREAD DATA ######
@@ -87,6 +88,17 @@ void robotInfoCallback(const robotInfo::ConstPtr& msg)
       srv.request.requested = req_debug;
       requestExtDebug.call(srv); 
    } 
+}
+
+/// \brief pathData callback function to receive and process
+/// pathData messages over ROS.
+/// \param msg - pointer to message containing pathData 
+void pathInfoCallback(const pathData::ConstPtr& msg)
+{
+   pthread_mutex_lock (&exvis_mutex); //Lock mutex
+	exvis->setPathPoints(*msg);
+	exvis->drawWorldModel();
+	pthread_mutex_unlock (&exvis_mutex); //Unlock mutex
 }
 
 /// \brief goalKeeperInfo callback function to receive and process
@@ -178,6 +190,7 @@ int main(int argc, char **argv)
    exvis = new Visualizer(robot_id);
    req_debug = false;
    std::stringstream robot_info_topic;
+   std::stringstream path_data_topic;
    std::stringstream goalkeeper_info_topic;
    std::stringstream request_debug_topic;
    std::stringstream node_name;
@@ -188,6 +201,7 @@ int main(int argc, char **argv)
       robot_info_topic << "minho_gazebo_robot" << robot_id;
       goalkeeper_info_topic << "minho_gazebo_robot" << robot_id;
       request_debug_topic << "minho_gazebo_robot" << robot_id;
+      path_data_topic << "minho_gazebo_robot" << robot_id;
    } else if(mode_type==0) {  // ROS to Real robot
       ROS_INFO("Running visualizer for Robot %d.",robot_id);
       if(robot_id>0){
@@ -209,6 +223,8 @@ int main(int argc, char **argv)
    robot_info_topic << "/robotInfo";
    goalkeeper_info_topic << "/goalKeeperInfo";
 	request_debug_topic << "/requestExtendedDebug";
+   path_data_topic << "/pathData";
+
 	//Initialize ROS
 	ros::init(argc, argv, node_name.str().c_str(),ros::init_options::NoSigintHandler);
 	//Request node handler
@@ -218,8 +234,9 @@ int main(int argc, char **argv)
 	   ROS_WARN("Subscribing to robotInfo & goalkeeperInfo.");
 	   //Initialize hardwareInfo subscriber
 	   robot_info_sub = visualizer.subscribe(robot_info_topic.str(), 100, robotInfoCallback);
-	   gk_info_sub = visualizer.subscribe(goalkeeper_info_topic.str(), 100, robotInfoCallback);
+	   gk_info_sub = visualizer.subscribe(goalkeeper_info_topic.str(), 100, goalKeeperInfoCallback);
 	   requestExtDebug = visualizer.serviceClient<minho_team_ros::requestExtendedDebug>(request_debug_topic.str().c_str());
+      path_sub = visualizer.subscribe(path_data_topic.str(), 100, pathInfoCallback);
 	}
 		
 	if(mode_type<=1)ROS_WARN("MinhoTeam visualizer started running on ROS.");

@@ -202,3 +202,18 @@ target_compile_features(mini_basestation PRIVATE cxx_range_for)
 target_link_libraries(mini_basestation ${catkin_LIBRARIES} ${qt_LIBRARIES})
 add_dependencies(mini_basestation minho_team_ros_generate_messages_cpp)
 ######################################################################
+
+## CONTROL ##
+######################################################################
+set(CCALIB_DIR ${PROJECT_DIRECTORY}/control_calib)
+set(ccalib_MOC_H ${CCALIB_DIR}/include/mainwindow.h)
+qt5_wrap_cpp(ccalib_CPP ${ccalib_MOC_H})
+set(ccalib_SRC ${CCALIB_DIR}/src/main.cpp ${CCALIB_DIR}/src/mainwindow.cpp)
+add_executable(control_calib ${ccalib_SRC} ${ccalib_CPP}) 
+target_include_directories(control_calib PUBLIC
+$<BUILD_INTERFACE:${CCALIB_DIR}/include>)
+set_target_properties(control_calib PROPERTIES COMPILE_FLAGS "-fPIC")
+target_compile_features(control_calib PRIVATE cxx_range_for)
+target_link_libraries(control_calib ${catkin_LIBRARIES} ${qt_LIBRARIES})
+add_dependencies(control_calib minho_team_ros_generate_messages_cpp)
+######################################################################

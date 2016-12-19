@@ -112,11 +112,26 @@ void Visualizer::drawWorldModel()
    int sizeLine = 0;
    float direction = 0.0;
    Point arrow;
+
+   for(unsigned int i=0;i<path_points.voronoi.size();i++){
+      line(worldModel,world2WorldModel(Point2d(path_points.voronoi[i].ini.x,path_points.voronoi[i].ini.y)),
+                        world2WorldModel(Point2d(path_points.voronoi[i].fini.x,path_points.voronoi[i].fini.y)),
+                        Scalar(0,255,255),1);   
+   }
+
+   if(path_points.path.size()>1){
+      for(unsigned int i=0;i<path_points.path.size()-1;i++){
+      line(worldModel,world2WorldModel(Point2d(path_points.path[i].x,path_points.path[i].y)),
+                      world2WorldModel(Point2d(path_points.path[i+1].x,path_points.path[i+1].y)),
+                      Scalar(0,0,255),2);   
+      }
+   }
    
+
    //Draw Obstacles
    //##############################
    for(unsigned int i= 0;i < robot_info.obstacles.size(); i++){
-      circle(worldModel,world2WorldModel(Point2d(robot_info.obstacles[i].x,robot_info.obstacles[i].y)),11/(fieldAnatomy.fieldDims.FACTOR),Scalar(0,0,0),-1);
+      circle(worldModel,world2WorldModel(Point2d(robot_info.obstacles[i].x,robot_info.obstacles[i].y)),fieldAnatomy.fieldDims.ROBOT_DIAMETER/2+1,Scalar(0,0,0),-1);
    }
    //##############################
    
@@ -183,6 +198,7 @@ void Visualizer::drawWorldModel()
       robot_info.interest_points[i].pos.y)),2,color,-1);
    }
    //##############################
+   
    worldModel.copyTo(relayWModel);
 }
 

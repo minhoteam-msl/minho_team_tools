@@ -4,7 +4,10 @@
 #include <QObject>
 #include "types.h"
 #include "minho_team_ros/robotInfo.h"
+#include "minho_team_ros/pathData.h" // CALLING SERVICE
+
 using minho_team_ros::robotInfo;
+using minho_team_ros::pathData;
 
 class Visualizer : public QObject
 {
@@ -34,12 +37,14 @@ public slots:
    /// the class, the robot_info object
    /// \param msg - new information to be set
    void setRobotInfo(robotInfo msg);
-   
-      
+         
    /// \brief returns absolute file path for field file in config folder
    /// \param field_name - name of the field file
    /// \return - absolute file path of field file
    QString getFieldFileName(std::string field_name);
+
+   /// \brief sets a new value for pathData 
+   inline void setPathPoints(pathData points) { path_points = points; }
 private slots:
    /// \brief converts a point in meters in point in pixels in the
    /// viewport
@@ -64,6 +69,8 @@ private:
    robotInfo robot_info;
    /// \brief id of the robot to be visualized
    int robot_id;
+   /// \brief pathData object to hold most recent path and voronoi data
+   pathData path_points;
 };
 
 #endif // VISUALIZER_H

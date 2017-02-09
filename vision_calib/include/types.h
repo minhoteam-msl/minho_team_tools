@@ -43,7 +43,6 @@ enum UAV_COLORS_BIT {UAV_ORANGE_BIT = 32, UAV_BLACK_BIT = 4, UAV_GREEN_BIT = 16,
 typedef enum LABEL_t {FIELD = 0, LINE, BALL, OBSTACLE} LABEL_t;
 typedef enum COMPONENT_t { H = 0, S, V} COMPONENT_t;
 typedef enum RANGE_t {MIN = 0, MAX} RANGE_t;
-
 /*
 ############################################################################
 ############################################################################   

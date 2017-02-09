@@ -116,7 +116,7 @@ private:
    /// \brief defines whether teleop is activated or not
    bool teleop_activated_;
    /// \brief update timer to update thrusts and send data
-   QTimer *_update_;
+   QTimer *_update_, *send_;
    /// \brief defined robot id 
    int robot_id_;
    /// \brief maximum linear and angular velocites values

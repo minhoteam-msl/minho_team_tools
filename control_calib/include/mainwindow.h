@@ -31,6 +31,7 @@ private slots:
     void on_max_lin_valueChanged(int value);
     void on_max_rot_valueChanged(int value);
     void on_bt_path_clicked();
+    void on_bt_smooth_path_clicked();
     void on_bt_voronoi_clicked();
     void on_spin_p_valueChanged(double value);
     void on_spin_i_valueChanged(double value);
@@ -47,6 +48,8 @@ private slots:
     void on_targ_kstr_valueChanged(int value);
     void on_kick_type_chuto_clicked(bool state);
     void on_kick_type_passe_clicked(bool state);
+    void on_spin_accel_valueChanged(double value);
+    void on_spin_decel_valueChanged(double value);
     void sendInfo();
 private:
     Ui::MainWindow *ui;

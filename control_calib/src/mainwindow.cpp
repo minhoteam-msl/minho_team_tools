@@ -55,6 +55,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       ui->spin_d->setValue(srv.response.config.D);
       ui->max_lin->setValue(srv.response.config.max_linear_velocity);
       ui->max_rot->setValue(srv.response.config.max_angular_velocity);
+      ui->spin_accel->setValue(srv.response.config.acceleration);
+      ui->spin_decel->setValue(srv.response.config.deceleration);
     } else ROS_ERROR("Failed to retrieve configuration from target robot.");
 
     send_timer = new QTimer();
@@ -82,6 +84,11 @@ void MainWindow::on_max_rot_valueChanged(int value)
 void MainWindow::on_bt_path_clicked()
 {
     ctrl_config.send_path = !ctrl_config.send_path;
+}
+
+void MainWindow::on_bt_smooth_path_clicked()
+{
+    ctrl_config.send_smooth_path = !ctrl_config.send_smooth_path;
 }
 
 void MainWindow::on_bt_voronoi_clicked()
@@ -161,6 +168,14 @@ void MainWindow::on_kick_type_chuto_clicked(bool state)
 void MainWindow::on_kick_type_passe_clicked(bool state)
 {
     if(state) ai.target_kick_is_pass = true;
+}
+void MainWindow::on_spin_accel_valueChanged(double value)
+{
+    ctrl_config.acceleration = value;
+}
+void MainWindow::on_spin_decel_valueChanged(double value)
+{
+    ctrl_config.deceleration = value;
 }
 
 void MainWindow::sendInfo()

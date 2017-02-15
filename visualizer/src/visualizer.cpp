@@ -42,64 +42,89 @@ void Visualizer::initField(QString file_)
 
     //using 1px -> FACTORcm relation
     int relation = fieldAnatomy.fieldDims.FACTOR*10;
-    int anchorPoint1 = 0,anchorPoint2 = 0;
-    for(int i=0;i<counter;i++) if(i!=18) fieldAnatomy.dimensions[i] /= relation;
-    field = Mat(fieldAnatomy.fieldDims.TOTAL_WIDTH,fieldAnatomy.fieldDims.TOTAL_LENGTH,CV_8UC3,Scalar(0,120,0));
-    //draw outter line
-    anchorPoint1 = (fieldAnatomy.fieldDims.TOTAL_LENGTH-fieldAnatomy.fieldDims.LENGTH)/2+fieldAnatomy.fieldDims.LINE_WIDTH/2;
-    anchorPoint2 = (fieldAnatomy.fieldDims.TOTAL_WIDTH-fieldAnatomy.fieldDims.WIDTH)/2+fieldAnatomy.fieldDims.LINE_WIDTH/2;
-    rectangle(field,Point(anchorPoint1,anchorPoint2),Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH
-            ,anchorPoint2+fieldAnatomy.fieldDims.WIDTH),Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    //draw center line and circles
-    line(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2,anchorPoint2)
-        ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2,anchorPoint2+fieldAnatomy.fieldDims.WIDTH),
-        Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2),
-           fieldAnatomy.fieldDims.SPOT_CENTER+2,Scalar(255,255,255),-1);
-    circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2),
-           fieldAnatomy.fieldDims.CENTER_RADIUS,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    //draw left area
-    rectangle(field,Point(anchorPoint1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH1/2)
-            ,Point(anchorPoint1+fieldAnatomy.fieldDims.AREA_LENGTH1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH1/2)
-            ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    rectangle(field,Point(anchorPoint1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH2/2)
-            ,Point(anchorPoint1+fieldAnatomy.fieldDims.AREA_LENGTH2,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH2/2)
-            ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.DISTANCE_PENALTY,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2),
-           fieldAnatomy.fieldDims.SPOT_CENTER,Scalar(255,255,255),-1);
-    //draw right area
-    rectangle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH1/2)
-            ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.AREA_LENGTH1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH1/2)
-            ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    rectangle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH2/2)
-            ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.AREA_LENGTH2,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH2/2)
-            ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.DISTANCE_PENALTY,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2),
-           fieldAnatomy.fieldDims.SPOT_CENTER,Scalar(255,255,255),-1);
-    //draw left corners
-    ellipse(field,Point(anchorPoint1,anchorPoint2),Size(fieldAnatomy.fieldDims.RADIUS_CORNER,fieldAnatomy.fieldDims.RADIUS_CORNER),
-            0.0,0.0,90.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    ellipse(field,Point(anchorPoint1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH),Size(fieldAnatomy.fieldDims.RADIUS_CORNER,fieldAnatomy.fieldDims.RADIUS_CORNER),
-            0.0,270.0,360.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    //draw right corners
-    ellipse(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH,anchorPoint2),Size(fieldAnatomy.fieldDims.RADIUS_CORNER,fieldAnatomy.fieldDims.RADIUS_CORNER),
-            0.0,90.0,180.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    ellipse(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH,anchorPoint2+fieldAnatomy.fieldDims.WIDTH),Size(fieldAnatomy.fieldDims.RADIUS_CORNER,fieldAnatomy.fieldDims.RADIUS_CORNER),
-            0.0,180.0,270.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    //draw ref box
-    rectangle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2-50,anchorPoint2+fieldAnatomy.fieldDims.WIDTH+5),
-             Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2+50,anchorPoint2+fieldAnatomy.fieldDims.WIDTH+25),
-              Scalar(255,0,255),-1);
-    putText(field,"REFBOX",Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2-30,anchorPoint2+fieldAnatomy.fieldDims.WIDTH+20),
-            CV_FONT_HERSHEY_COMPLEX,0.5,Scalar(0,0,0),2);
-    //draw right goalie
-    rectangle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.GOALIE_LENGTH/2-fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
-            ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH+fieldAnatomy.fieldDims.GOALIE_WIDTH,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.GOALIE_LENGTH/2+fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
-            ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
-    //draw left goalie
-    rectangle(field,Point(anchorPoint1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.GOALIE_LENGTH/2-fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
-            ,Point(anchorPoint1-fieldAnatomy.fieldDims.GOALIE_WIDTH,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.GOALIE_LENGTH/2+fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
-            ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+//using 1px -> FACTORcm relation
+      int anchorPoint1 = 0,anchorPoint2 = 0;
+      for(int i=0;i<23;i++) if(i!=18) fieldAnatomy.dimensions[i] /= relation;
+      field = Mat(fieldAnatomy.fieldDims.TOTAL_WIDTH,fieldAnatomy.fieldDims.TOTAL_LENGTH,CV_8UC3,Scalar(0,120,0));
+      //draw outter line
+      anchorPoint1 = (fieldAnatomy.fieldDims.TOTAL_LENGTH-fieldAnatomy.fieldDims.LENGTH)/2+fieldAnatomy.fieldDims.LINE_WIDTH/2;
+      anchorPoint2 = (fieldAnatomy.fieldDims.TOTAL_WIDTH-fieldAnatomy.fieldDims.WIDTH)/2+fieldAnatomy.fieldDims.LINE_WIDTH/2;
+      rectangle(field,Rect(Point(anchorPoint1,anchorPoint2),
+             Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.LINE_WIDTH,
+                   anchorPoint2+fieldAnatomy.fieldDims.WIDTH-fieldAnatomy.fieldDims.LINE_WIDTH))
+             ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      //draw center line and circles
+      line(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2,anchorPoint2)
+         ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2,
+         anchorPoint2+fieldAnatomy.fieldDims.WIDTH-fieldAnatomy.fieldDims.LINE_WIDTH),
+         Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2,
+                        anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2),
+            fieldAnatomy.fieldDims.SPOT_CENTER,Scalar(255,255,255),-1);
+
+      circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2,
+                        anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2),
+            fieldAnatomy.fieldDims.CENTER_RADIUS-fieldAnatomy.fieldDims.LINE_WIDTH/2,Scalar(255,255,255),
+            fieldAnatomy.fieldDims.LINE_WIDTH);
+      //draw ref box
+      rectangle(field,Point(fieldAnatomy.fieldDims.TOTAL_LENGTH/2-500/relation,anchorPoint2+fieldAnatomy.fieldDims.WIDTH+50/relation),
+              Point(fieldAnatomy.fieldDims.TOTAL_LENGTH/2+500/relation,anchorPoint2+fieldAnatomy.fieldDims.WIDTH+250/relation),
+               Scalar(255,0,255),-1);
+      putText(field,"REFBOX",Point(fieldAnatomy.fieldDims.TOTAL_LENGTH/2-30,anchorPoint2+fieldAnatomy.fieldDims.WIDTH+20),
+             CV_FONT_HERSHEY_COMPLEX,0.5,Scalar(0,0,0),2);
+      //draw left corners
+      ellipse(field,Point(anchorPoint1,anchorPoint2),Size(fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH
+             ,fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH),
+             0.0,0.0,90.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      ellipse(field,Point(anchorPoint1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH-fieldAnatomy.fieldDims.LINE_WIDTH),
+             Size(fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH
+             ,fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH),
+             0.0,270.0,360.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      //draw right corners
+      ellipse(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.LINE_WIDTH,anchorPoint2),
+             Size(fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH
+             ,fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH),
+             0.0,90.0,180.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      ellipse(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.LINE_WIDTH,anchorPoint2+fieldAnatomy.fieldDims.WIDTH-fieldAnatomy.fieldDims.LINE_WIDTH),
+             Size(fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH
+             ,fieldAnatomy.fieldDims.RADIUS_CORNER-fieldAnatomy.fieldDims.LINE_WIDTH),
+             0.0,180.0,270.0,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      //draw left goalie
+      rectangle(field,Point(anchorPoint1,fieldAnatomy.fieldDims.TOTAL_WIDTH/2-fieldAnatomy.fieldDims.GOALIE_LENGTH/2+fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
+             ,Point(anchorPoint1-fieldAnatomy.fieldDims.GOALIE_WIDTH,fieldAnatomy.fieldDims.TOTAL_WIDTH/2+fieldAnatomy.fieldDims.GOALIE_LENGTH/2-fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
+             ,Scalar(255,0,0),fieldAnatomy.fieldDims.LINE_WIDTH);
+      //draw right goalie
+      rectangle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.LINE_WIDTH-1,
+              fieldAnatomy.fieldDims.TOTAL_WIDTH/2-fieldAnatomy.fieldDims.GOALIE_LENGTH/2+fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
+             ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.LINE_WIDTH+fieldAnatomy.fieldDims.GOALIE_WIDTH,
+             fieldAnatomy.fieldDims.TOTAL_WIDTH/2+fieldAnatomy.fieldDims.GOALIE_LENGTH/2-fieldAnatomy.fieldDims.GOALIE_POST_WIDTH/2)
+             ,Scalar(255,0,0),fieldAnatomy.fieldDims.LINE_WIDTH);
+      /*line(field,Point(0,fieldAnatomy.fieldDims.TOTAL_WIDTH/2),
+          Point(fieldAnatomy.fieldDims.TOTAL_LENGTH,fieldAnatomy.fieldDims.TOTAL_WIDTH/2),Scalar(255,255,255));*/
+      //draw left area
+      rectangle(field,Point(anchorPoint1,fieldAnatomy.fieldDims.TOTAL_WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH1/2+fieldAnatomy.fieldDims.LINE_WIDTH/2)
+             ,Point(anchorPoint1+fieldAnatomy.fieldDims.AREA_LENGTH1-fieldAnatomy.fieldDims.LINE_WIDTH,
+                    fieldAnatomy.fieldDims.TOTAL_WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH1/2-fieldAnatomy.fieldDims.LINE_WIDTH/2)
+             ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      rectangle(field,Point(anchorPoint1,fieldAnatomy.fieldDims.TOTAL_WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH2/2+fieldAnatomy.fieldDims.LINE_WIDTH/2)
+             ,Point(anchorPoint1+fieldAnatomy.fieldDims.AREA_LENGTH2-fieldAnatomy.fieldDims.LINE_WIDTH,
+                    fieldAnatomy.fieldDims.TOTAL_WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH2/2-fieldAnatomy.fieldDims.LINE_WIDTH/2)
+             ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.DISTANCE_PENALTY-fieldAnatomy.fieldDims.SPOTS/2-fieldAnatomy.fieldDims.LINE_WIDTH,
+            anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2),
+            fieldAnatomy.fieldDims.SPOTS,Scalar(255,255,255),-1);
+      //draw right area
+      rectangle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.LINE_WIDTH-1
+                     ,fieldAnatomy.fieldDims.TOTAL_WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH1/2+fieldAnatomy.fieldDims.LINE_WIDTH/2)
+             ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.AREA_LENGTH1,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH1/2)
+             ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      rectangle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.LINE_WIDTH-1
+                     ,fieldAnatomy.fieldDims.TOTAL_WIDTH/2-fieldAnatomy.fieldDims.AREA_WIDTH2/2+fieldAnatomy.fieldDims.LINE_WIDTH/2)
+             ,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH-fieldAnatomy.fieldDims.AREA_LENGTH2,anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2+fieldAnatomy.fieldDims.AREA_WIDTH2/2)
+             ,Scalar(255,255,255),fieldAnatomy.fieldDims.LINE_WIDTH);
+      circle(field,Point(anchorPoint1+fieldAnatomy.fieldDims.LENGTH+fieldAnatomy.fieldDims.LINE_WIDTH/2-fieldAnatomy.fieldDims.DISTANCE_PENALTY,
+            anchorPoint2+fieldAnatomy.fieldDims.WIDTH/2-fieldAnatomy.fieldDims.LINE_WIDTH/2),
+            fieldAnatomy.fieldDims.SPOTS,Scalar(255,255,255),-1);
 
 }
 

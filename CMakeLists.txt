@@ -233,3 +233,18 @@ target_compile_features(control_calib PRIVATE cxx_range_for)
 target_link_libraries(control_calib ${catkin_LIBRARIES} ${qt_LIBRARIES})
 add_dependencies(control_calib minho_team_ros_generate_messages_cpp)
 ######################################################################
+
+## MAPGEN ##
+######################################################################
+set(MPGEN_SRCDIR ${PROJECT_DIRECTORY}/minhomapgen/src)
+set(mpgen_MOC_H ${PROJECT_DIRECTORY}/minhomapgen/include/mainwindow.h)
+qt5_wrap_cpp(mpgen_CPP ${mpgen_MOC_H})
+set(mpgen_SRC ${MPGEN_SRCDIR}/main.cpp ${MPGEN_SRCDIR}/mainwindow.cpp)
+add_executable(minhomapgen ${mpgen_SRC} ${mpgen_CPP}) 
+target_include_directories(minhomapgen PUBLIC
+$<BUILD_INTERFACE:${PROJECT_DIRECTORY}/minhomapgen/include>)
+
+set_target_properties(minhomapgen PROPERTIES COMPILE_FLAGS "-fPIC")
+target_compile_features(minhomapgen PRIVATE cxx_range_for)
+target_link_libraries(minhomapgen ${qt_LIBRARIES} ${opencv_LIBRARIES})
+######################################################################

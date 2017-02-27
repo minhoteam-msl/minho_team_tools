@@ -110,6 +110,10 @@ private slots:
    
    /// \brief button slot function initialize the reloc process in the target robot
    void on_bt_reloc_clicked();
+
+   void on_bt_kick_clicked();
+
+   void on_hs_kick_valueChanged(int value);
 private:
    /// \brief pointer to GUI
    Ui::MainWindow *ui;

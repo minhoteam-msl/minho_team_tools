@@ -18,9 +18,17 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    calibration_mode = draw_mode = false;
    ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
    ui->lb_robot_name->setText(QString("Calibration Mode for Robot ")+QString::number(robot_id_));
-   ui->lb_robot_name_2=ui->lb_robot_name;
+   ui->lb_robot_name_2->setStyleSheet("QLabel { color : red; }");
+   ui->lb_robot_name_2->setText(QString("Calibration Mode for Robot ")+QString::number(robot_id_));
+   ui->lb_robot_name_3->setStyleSheet("QLabel { color : red; }");
+   ui->lb_robot_name_3->setText(QString("Calibration Mode for Robot ")+QString::number(robot_id_));
+   
    ui->graphicsView->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
    ui->graphicsView->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+   ui->graphicsView_2->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+   ui->graphicsView_2->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+   ui->graphicsView_3->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+   ui->graphicsView_3->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
    ui->tabWidget->setCurrentIndex(0);
    on_radio_property_clicked();
    
@@ -33,7 +41,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    
    //SIGNAL
    connect(this,SIGNAL(addNewImage()),this,SLOT(addImageToScene()));
-   connect(this,SIGNAL(addError(int)),this,SLOT(drawrealError(int)));
+   //connect(this,SIGNAL(addError(int)),this,SLOT(drawrealError(int)));
    connect(img_calib_timer,SIGNAL(timeout()),this,SLOT(applyBinary()));
    connect(interaction_timer,SIGNAL(timeout()),this,SLOT(interactWithUser()));
    connect(ui->tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabSelected()));
@@ -52,6 +60,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    std::stringstream pid_topic;
    std::stringstream error_topic;
    std::stringstream roi_topic;
+   std::stringstream world_topic;
 
    if(!real_robot){
       // Setup ROS Node and pusblishers/subscribers in SIMULATOR
@@ -64,6 +73,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       pid_topic << "minho_gazebo_robot" << std::to_string(robot_id);
       error_topic << "minho_gazebo_robot" << std::to_string(robot_id);
       roi_topic << "minho_gazebo_robot" << std::to_string(robot_id);
+      world_topic << "minho_gazebo_robot" << std::to_string(robot_id);
   } else {
       // Setup ROS Node and pusblishers/subscribers in REAL ROBOT
       if(robot_id>0){
@@ -84,6 +94,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    pid_topic << "/PID";
    error_topic << "/ControlerError";
    roi_topic << "/ROI";
+   world_topic << "/worldConfig";
       
 
    //Initialize ROS
@@ -99,6 +110,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    property_pub_ = _node_->advertise<cameraProperty>(property_topic.str().c_str(),100);
    pid_pub_ = _node_->advertise<PID>(pid_topic.str().c_str(),100);
    roi_pub_ = _node_->advertise<ROI>(roi_topic.str().c_str(),10);
+   world_pub_ = _node_->advertise<worldConfig>(world_topic.str().c_str(),2);
    
    // Initializing service Clients
    pidConf = _node_->serviceClient<minho_team_ros::requestCamPID>("requestCamPID");
@@ -110,11 +122,12 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    //Initialize image_transport and error subscriber
    image_transport::TransportHints hints("compressed", ros::TransportHints());
    image_sub_ = it_->subscribe(imgtrans_topic.str().c_str(),1,&MainWindow::imageCallback,this,hints);
-   error_sub_ = _node_->subscribe(error_topic.str().c_str(),1,&MainWindow::drawCallback,this);   
+   error_sub_ = _node_->subscribe(error_topic.str().c_str(),1,&MainWindow::addValCallback,this);   
    
    //Request Current Property Configuration
    loadPropertiesValues(0);
    set_ROIs();
+   LoadTargetsCal();
 
    //Request Current Mirror, LUT, IMAGE Configurations
    requestOmniVisionConf srv; 
@@ -124,11 +137,22 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       img_calib_->mirrorConfigFromMsg(srv.response.mirrorConf);
       img_calib_->lutConfigFromMsg(srv.response.visionConf);
       img_calib_->imageConfigFromMsg(srv.response.imageConf);
+      worldConfBall = srv.response.worldConfBall;
+      worldConfObs = srv.response.worldConfObs;
+      worldConfRLE = srv.response.worldConfRLE;
       loadValuesOnTrackbars(img_calib_->getLabelConfiguration(static_cast<LABEL_t>(ui->combo_label->currentIndex())));
       loadMirrorValues(srv.response.mirrorConf);
       loadImageValues(srv.response.imageConf);
 
    } else ROS_ERROR("Failed to retrieve configuration from target robot.");
+
+   requestCamPID srv_pid;
+   srv_pid.request.kalman=true;
+   if(pidConf.call(srv_pid)){
+	kalmanConf = srv_pid.response.Kalman;
+        kalmanConf.kalman = true;
+   	loadKalmanValues();
+   }else ROS_ERROR("Failed to retrieve configuration from target robot.");
    
    interaction_timer->start(50);
 }
@@ -146,10 +170,11 @@ void MainWindow::setup()
 {
    scene_ = new QGraphicsScene();
    scene_2= new QGraphicsScene();
+   scene_3= new QGraphicsScene();
    ui->graphicsView->setScene(scene_);
    ui->graphicsView_2->setScene(scene_2);
+   ui->graphicsView_3->setScene(scene_3);
    calib=false;
-   configura_plot();
    temp = Mat(480,480,CV_8UC3,Scalar(0,0,0));
 }
    
@@ -255,15 +280,19 @@ void MainWindow::addImageToScene()
 		  scene_->addPixmap(QPixmap::fromImage(image_));
 	   }
    }
-   else {
-	    scene_2->clear();
-	    QPainter p(&image_);
-	    p.setPen(Qt::red);
-	    p.drawRect(ui->spinBox_x_w->value(),ui->spinBox_y_w->value(),ui->spinBox_d_w->value(),ui->spinBox_d_w->value());
-	    p.setPen(Qt::blue);
-	    p.drawRect(ui->spinBox_x_b->value(),ui->spinBox_y_b->value(),ui->spinBox_d_b->value(),ui->spinBox_d_b->value());
-	    scene_2->addPixmap(QPixmap::fromImage(image_));
+   else if(ui->tabWidget->currentIndex()==2){
+		  scene_3->clear();
+		  scene_3->addPixmap(QPixmap::fromImage(image_));
 	   }
+   	   else {
+	    	scene_2->clear();
+	    	QPainter p(&image_);
+	    	p.setPen(Qt::red);
+	    	p.drawRect(ui->spinBox_x_w->value(),ui->spinBox_y_w->value(),ui->spinBox_d_w->value(),ui->spinBox_d_w->value());
+	    	p.setPen(Qt::blue);
+	    	p.drawRect(ui->spinBox_x_b->value(),ui->spinBox_y_b->value(),ui->spinBox_d_b->value(),ui->spinBox_d_b->value());
+	    	scene_2->addPixmap(QPixmap::fromImage(image_));
+	   	}
 }
 
 /// \brief function to apply binary HSV masking to the selected label, with the
@@ -322,7 +351,6 @@ void MainWindow::interactWithUser()
       imageConfig imgconf = img_calib_->getImageConfiguration();
       ui->lb_distpx->setText(QString::number(sqrt((relativeOrigin.x()-imgconf.center_x)*(relativeOrigin.x()-imgconf.center_x)
       +(relativeOrigin.y()-imgconf.center_y)*(relativeOrigin.y()-imgconf.center_y))));
-      ui->lb_distpx_2->setText(ui->lb_distpx->text());
 }
 // BUTTONS
 /// \brief slot function for click action of bt_grab. Function to send a request
@@ -338,6 +366,7 @@ void MainWindow::on_bt_grab_clicked()
    
    this->centralWidget()->setFocus();
 }
+
 
 /// \brief slot function for click action of bt_stop. Function to stop image 
 /// send. It send a single image requst
@@ -435,6 +464,19 @@ void MainWindow::on_bt_screenshot_clicked()
 /// \brief slot function for click action of bt_screenshot. Takes and saves a
 /// screenshot in {ros_project_folder}/screenshots
 void MainWindow::on_bt_screenshot_2_clicked()
+{
+   QString path = QString(getenv("HOME"))+QString("/catkin_ws/src/minho_team_tools/vision_calib/screenshots/");
+   QString file = "Screenshot_CamP_";
+   file.append(QString::number(std::time(0))); 
+   file.append(".png");
+   path+=file;
+   ROS_INFO("Saved screenshot to %s",path.toStdString().c_str());
+   imwrite(path.toStdString().c_str(),temp);
+   
+   this->centralWidget()->setFocus();
+}
+
+void MainWindow::on_bt_screenshot_3_clicked()
 {
    QString path = QString(getenv("HOME"))+QString("/catkin_ws/src/minho_team_tools/vision_calib/screenshots/");
    QString file = "Screenshot_CamP_";
@@ -608,6 +650,19 @@ void MainWindow::on_combo_label_currentIndexChanged(int index)
    
 }
 
+void MainWindow::on_combo_label_2_currentIndexChanged(int index)
+{
+   if(index==0){
+   	ui->spin_framerate_3->setValue(worldConfBall.value_a);
+   	ui->spinBox->setValue(worldConfBall.value_b);
+   }
+   else {
+   	ui->spin_framerate_3->setValue(worldConfObs.value_a);
+   	ui->spinBox->setValue(worldConfObs.value_b);
+   }
+   this->centralWidget()->setFocus();
+}
+
 /// \brief slot function for acquisition type's combobox. Sets the current 
 /// acquisition type to be used in image requests
 /// \param index - new image acquisition type to be used
@@ -615,6 +670,20 @@ void MainWindow::on_combo_aqtype_currentIndexChanged(int index)
 {
    on_bt_grab_clicked(); 
    int id = ui->combo_aqtype->currentIndex();
+   if(id>0){
+      calibration_mode = false;
+      ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
+      img_calib_timer->stop();
+      interaction_timer->start(50);
+   }  
+   
+   this->centralWidget()->setFocus();
+}
+
+void MainWindow::on_combo_aqtype_2_currentIndexChanged(int index)
+{
+   on_bt_grab_2_clicked(); 
+   int id = ui->combo_aqtype_2->currentIndex();
    if(id>0){
       calibration_mode = false;
       ui->lb_robot_name->setStyleSheet("QLabel { color : red; }");
@@ -653,6 +722,15 @@ void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
                + QString(",");
    distances.remove(distances.size()-1,1);
    ui->line_pixdist->setText(distances);
+
+   ui->spin_framerate_3->setValue(worldConfBall.value_a);
+   ui->spinBox->setValue(worldConfBall.value_b);
+
+   ui->spin_framerate_5->setValue(worldConfRLE.value_a);
+   ui->spin_framerate_6->setValue(worldConfRLE.value_b);
+   ui->spin_framerate_7->setValue(worldConfRLE.value_c);
+   ui->spin_framerate_8->setValue(worldConfRLE.window);
+   
 }
 
 /// \brief function to load values of a image configuration onto GUI's 
@@ -667,54 +745,12 @@ void MainWindow::loadImageValues(minho_team_ros::imageConfig imageConf)
 }
 
 
-/*---------------------------------FUNÇOES DO PLOT REAL TIME-------------------------------------*/
-/*----------------------------------------------------------------------------------------------*/
-//FUNCTION THAT CONFIGURES PLOT
-void MainWindow::configura_plot()
-{
-
-    ui->error_plot->addGraph();
-    ui->error_plot->graph(0)->setPen(QPen(Qt::red));
-    ui->error_plot->graph(0)->setAntialiasedFill(false);
-    ui->error_plot->yAxis->setLabel("Error");
-    ui->error_plot->xAxis->setLabel("Tempo (s)");
-
-     ui->error_plot->xAxis->setTickLabelType(QCPAxis::ltDateTime);
-     ui->error_plot->xAxis->setDateTimeFormat("mm:ss");
-     ui->error_plot->xAxis->setAutoTickStep(true);
-     ui->error_plot->xAxis->setTickStep(1);
-     ui->error_plot->axisRect()->setupFullAxesBox();
-
-     // make left and bottom axes transfer their ranges to right and top axes:
-     connect(ui->error_plot->xAxis, SIGNAL(rangeChanged(QCPRange)), ui->error_plot->xAxis2, SLOT(setRange(QCPRange)));
-     connect(ui->error_plot->yAxis, SIGNAL(rangeChanged(QCPRange)), ui->error_plot->yAxis2, SLOT(setRange(QCPRange)));
-}
-
-
-void MainWindow::drawrealError(int num)
-{
-	
-    static int key_x=0;
-	
-    ui->error_plot->graph(0)->addData(key_x, num);
-    // remove data of lines that's outside visible range:
-    ui->error_plot->graph(0)->removeDataBefore(key_x-1000);
-    // rescale value (vertical) axis to fit the current data:
-    ui->error_plot->graph(0)->rescaleValueAxis();
-    ui->error_plot->xAxis->setRange(key_x+1, 1000, Qt::AlignRight);
-    ui->error_plot->replot();
-    key_x+=2;
-}
-/*----------------------------------------------------------------------------------------------*/
-/*----------------------------------------------------------------------------------------------*/
-
 /// \brief slot function for properties type's combobox. Sets the current 
 /// property to be calibrated
 /// \param index - new property type to be used
 void MainWindow::on_combo_properties_currentIndexChanged(int index)
 {
 	loadPropertiesValues(index);
-	configura_plot();
    	this->centralWidget()->setFocus();
 }
 
@@ -811,12 +847,17 @@ void MainWindow::tabSelected()
 		   interaction_timer->start(50);
 		   on_bt_grab_clicked();
 		}
+        if(ui->tabWidget->currentIndex()==2){
+		   interaction_timer->stop();
+		   interaction_timer->start(50);
+		   img_calib_timer->stop();
+		   on_bt_grab_2_clicked();
+	}
 	if(ui->tabWidget->currentIndex()==1){
-		interaction_timer->stop();
-		interaction_timer->start(50);
-		img_calib_timer->stop();
-		configura_plot();
-		calibrate_activ();
+		   interaction_timer->stop();
+		   interaction_timer->start(50);
+		   img_calib_timer->stop();
+		   calibrate_activ();
 		}
 }
 
@@ -856,6 +897,22 @@ void MainWindow::loadPropertiesValues(int num)
    if(!propertyConf.call(srv_prop))ROS_ERROR("Failed to retrieve property values from target robot."); 
    else if(!pidConf.call(srv_pid))ROS_ERROR("Failed to retrieve PID values from target Property.");
 		else set_track_ranges(srv_prop.response.property,srv_pid.response.parameterS);
+}
+
+void MainWindow::LoadTargetsCal()
+{
+   cameraProperty msg;
+   msg.targets = true;
+   requestCamProperty srv_prop;
+   srv_prop.request.property=msg;
+   srv_prop.request.is_set=false;
+   if(!propertyConf.call(srv_prop))ROS_ERROR("Failed to retrieve property values from target robot.");
+   else ui->sat_trackbar->setValue(srv_prop.response.property.val_a);
+   msg.targets = true;
+   msg.blue = true;
+   srv_prop.request.property=msg;
+   if(!propertyConf.call(srv_prop))ROS_ERROR("Failed to retrieve property values from target robot.");
+   else ui->lumi_trackbar->setValue(srv_prop.response.property.val_a);
 }
 
 /// \brief function to set trackbar ranges of Kp,Ki,Kd,Prop
@@ -978,11 +1035,10 @@ void MainWindow::on_prop_trackbar_valueChanged(int value)
 /// the GUI's thread can take care of other messages.
 /// \param msg - error_msg::error data, holds information about the error
 /// of the selected property.
-void MainWindow::drawCallback(minho_team_ros::ControlerError msg)
+void MainWindow::addValCallback(minho_team_ros::ControlerError msg)
 {
 	if(msg.property_id>=0 && msg.property_id<=6){
 		if(calib){
-			emit addError(msg.erro);
 			ui->prop_trackbar->setValue((msg.value*temp_prop_div));
     			ui->Prop_value->setText(QString::number(msg.value,'f',3));
 		}
@@ -1033,3 +1089,147 @@ void MainWindow::on_bt_ROIS_b_clicked()
 	roi_pub_.publish(msg);
 
 }
+
+void MainWindow::on_bt_grab_2_clicked()
+{
+   bool multiple_send_request = ui->radio_multiple_2->isChecked();
+   minho_team_ros::requestImage srv;
+   srv.request.is_multiple = multiple_send_request;
+   srv.request.frequency = 20;
+   srv.request.type = ui->combo_aqtype_2->currentIndex();
+   imgRequest.call(srv);
+   
+   this->centralWidget()->setFocus();
+}
+
+/// \brief slot function for click action of bt_stop. Function to stop image 
+/// send. It send a single image requst
+void MainWindow::on_bt_stop_2_clicked()
+{
+   minho_team_ros::requestImage srv;
+   srv.request.is_multiple = false;
+   srv.request.frequency = ui->spin_framerate_2->value();
+   srv.request.type = ui->combo_aqtype_2->currentIndex();
+   imgRequest.call(srv);
+   
+   this->centralWidget()->setFocus();
+}
+
+
+void MainWindow::on_spin_framerate_3_valueChanged(double value)
+{
+   if(ui->combo_label_2->currentIndex()==0) worldConfBall.value_a = value;
+   else worldConfObs.value_a = value;
+
+   //this->centralWidget()->setFocus();
+}
+
+
+void MainWindow::on_spinBox_valueChanged(int value)
+{
+   if(ui->combo_label_2->currentIndex()==0) worldConfBall.value_b = value;
+   else worldConfObs.value_b = value;
+
+   //this->centralWidget()->setFocus();
+}
+
+void MainWindow::on_bt_worldpar_clicked()
+{
+   if(ui->combo_label_2->currentIndex()==0)world_pub_.publish(worldConfBall);
+   else world_pub_.publish(worldConfObs);
+
+}
+
+void MainWindow::on_spin_framerate_5_valueChanged(int value)
+{
+   worldConfRLE.value_a = value;
+}
+
+void MainWindow::on_spin_framerate_6_valueChanged(int value)
+{
+   worldConfRLE.value_b = value;
+}
+
+void MainWindow::on_spin_framerate_7_valueChanged(int value)
+{
+   worldConfRLE.value_c = value;
+}
+
+void MainWindow::on_spin_framerate_8_valueChanged(int value)
+{
+   worldConfRLE.window = value;
+}
+
+void MainWindow::on_bt_RLE_clicked()
+{
+   world_pub_.publish(worldConfRLE);
+}
+
+void MainWindow::on_bt_lumi_clicked()
+{
+   cameraProperty msg;
+   msg.val_a = ui->lumi_trackbar->value();
+   msg.targets = true;
+   msg.blue = false;
+   property_pub_.publish(msg);
+}
+
+void MainWindow::on_bt_sat_clicked()
+{
+   cameraProperty msg;
+   msg.value_a = ui->sat_trackbar->value();
+   msg.targets = true;
+   msg.blue = true;
+   property_pub_.publish(msg);
+}
+
+void MainWindow::on_sat_trackbar_valueChanged(int value)
+{
+   ui->sat_value->setText(QString::number(value));
+}
+
+void MainWindow::on_lumi_trackbar_valueChanged(int value)
+{
+   ui->lumi_value->setText(QString::number(value));
+}
+
+void MainWindow::loadKalmanValues()
+{
+   kalmanConf.kalman = true;
+   ui->Qxy->setValue((int)kalmanConf.value_a);
+   ui->Qz->setValue(kalmanConf.value_b);
+   ui->Rxy->setValue(kalmanConf.value_c);
+   ui->Rz->setValue(kalmanConf.window);
+}
+
+void MainWindow::on_bt_kalman_clicked()
+{
+   kalmanConf.value_a = ui->Qxy->value();
+   kalmanConf.value_b = ui->Qz->value();
+   kalmanConf.value_c = ui->Rxy->value();
+   kalmanConf.window = ui->Rz->value();
+   kalmanConf.kalman = true;
+   world_pub_.publish(kalmanConf);
+}
+
+void MainWindow::on_Qxy_valueChanged(int value)
+{
+   ui->lb_Qxy->setText(QString::number(value));
+}
+
+void MainWindow::on_Qz_valueChanged(int value)
+{
+   ui->lb_Qz->setText(QString::number(value));
+}
+
+void MainWindow::on_Rxy_valueChanged(int value)
+{
+   ui->lb_Rxy->setText(QString::number(value));
+}
+
+void MainWindow::on_Rz_valueChanged(int value)
+{
+   ui->lb_Rz->setText(QString::number(value));
+}
+
+

@@ -22,6 +22,7 @@
 #include "minho_team_ros/requestROI.h"
 #include "minho_team_ros/ControlerError.h"
 #include "minho_team_ros/ROI.h"
+#include "minho_team_ros/worldConfig.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
 #include <QMessageBox>
@@ -38,6 +39,7 @@ using minho_team_ros::cameraProperty;
 using minho_team_ros::PID;
 using minho_team_ros::ControlerError;
 using minho_team_ros::ROI;
+using minho_team_ros::worldConfig;
 
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
@@ -204,11 +206,7 @@ private slots:
    /// screenshot in {ros_project_folder}/screenshots
    void on_bt_screenshot_2_clicked();
 
-   /* Functions responsible for drawing error plot */
-   /// \para num - error value to draw
-   void configura_plot();
-   void drawrealError(int num);
-   /*----------------------------------------------------*/
+   /*----------------------------------------------------------------------------------------------*/
 
    /// \brief slot function for tab change. Enables or disables 
    /// components necessary for each tab.
@@ -264,7 +262,7 @@ private slots:
    /// the GUI's thread can take care of other messages.
    /// \param msg - error_msg::error data, holds information about the error
    /// of the selected property.
-   void drawCallback(minho_team_ros::ControlerError msg);
+   void addValCallback(minho_team_ros::ControlerError msg);
 
    /// \brief function to set trackbar ranges of Kp,Ki,Kd,Prop
    /// \param prop - new cameraProperty that contains values to be loaded to trackbar of property
@@ -285,8 +283,32 @@ private slots:
 
    void on_bt_ROIS_w_clicked();
    void on_bt_ROIS_b_clicked();
-
    void set_ROIs();
+   void on_bt_grab_2_clicked();
+   void on_bt_stop_2_clicked();
+   void on_bt_screenshot_3_clicked();
+   void on_combo_label_2_currentIndexChanged(int index);
+   void on_combo_aqtype_2_currentIndexChanged(int index);
+   void on_bt_worldpar_clicked();
+   void on_spin_framerate_3_valueChanged(double value);
+   void on_spinBox_valueChanged(int value);
+   void on_spin_framerate_5_valueChanged(int value);
+   void on_spin_framerate_6_valueChanged(int value);
+   void on_spin_framerate_7_valueChanged(int value);
+   void on_spin_framerate_8_valueChanged(int value);
+   void on_bt_RLE_clicked();
+   void on_bt_lumi_clicked();
+   void on_bt_sat_clicked();
+   void on_sat_trackbar_valueChanged(int value);
+   void on_lumi_trackbar_valueChanged(int value);
+   void LoadTargetsCal();
+   void loadKalmanValues();
+   void on_bt_kalman_clicked();
+   void on_Qxy_valueChanged(int value);
+   void on_Qz_valueChanged(int value);
+   void on_Rxy_valueChanged(int value);
+   void on_Rz_valueChanged(int value);
+
 
 private:
    /// \brief pointer to MainWindow's GUI 
@@ -298,7 +320,7 @@ private:
    /// \brief boolean variables to define current working mode
    bool calibration_mode,draw_mode;
    /// \brief parent scene in QGraphicsView to draw on
-   QGraphicsScene *scene_,*scene_2;
+   QGraphicsScene *scene_,*scene_2, *scene_3;
    /// \brief ImageCalibrator object, to do image operations and data
    /// (calibrations) storage
    ImageCalibrator *img_calib_;
@@ -335,16 +357,19 @@ private:
    ros::NodeHandle *_node_;
    
    ros::Publisher roi_pub_;
+   ros::Publisher world_pub_;
    ros::ServiceClient roiConf;
    /// \brief QImage buffer to display in QGraphicsView
    QImage image_;
 
    bool calib;
 
+   worldConfig worldConfBall, worldConfObs, worldConfRLE, kalmanConf;
+
+
 signals:
    /// \brief signal to make the new image be drawn in GUI
    void addNewImage();
-   void addError(int erro); 
     
 };
 

@@ -351,3 +351,17 @@ void MainWindow::on_bt_reloc_clicked()
    requestReloc srv;
    requestRelocService.call(srv);
 }
+
+void MainWindow::on_bt_kick_clicked()
+{
+   // send kick
+   requestKick srv;
+   srv.request.kick_strength = ui->hs_kick->value();
+   requestKickService.call(srv);   
+}
+
+void MainWindow::on_hs_kick_valueChanged(int value)
+{
+   ui->lb_kick->setText(QString::number(ui->hs_kick->value()));
+}
+

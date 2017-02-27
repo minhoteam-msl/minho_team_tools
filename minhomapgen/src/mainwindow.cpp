@@ -31,8 +31,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_bt_gen_clicked() //Generate and Save Map File
 {
+    QString path = QString(getenv("HOME"))+"/Common/Fields";
     QString filename = QFileDialog::getSaveFileName(this,
-    tr("Save map File"), getenv("HOME"), tr("Map Files (*.map)"));
+    tr("Save map File"), path, tr("Map Files (*.map)"));
 
     if(filename!=""){
         if(!filename.contains(".map")){
@@ -86,14 +87,20 @@ void MainWindow::saveMapConfiguration(QString file_)
     int step = outputResolution/scale; //step in pixels
     ui->pb_write->setValue(counter);
     ui->pb_write->setMaximum((((field.rows)/step)+1)*(((field.cols+1)/step)+1));
-    QString str = QString::number(outputResolution);
+    QString uns;
+    QString str = "";
     if(ui->cb_units->currentIndex()==1){
         divider = 1000.0; // if set to m output
-        str+=",m,";
+        uns="m";
     } else { // mm
-        str+=",mm,";
+        uns="mm";
     }
-    str+=QString::number((((field.rows)/step)+1)*(((field.cols+1)/step)+1))+"\n";
+
+    str += QString::number((float)(fieldAnatomy.fieldDims.TOTAL_LENGTH*scale)/1000.0);
+    str+=",";
+    str += QString::number((float)(fieldAnatomy.fieldDims.TOTAL_WIDTH*scale)/1000.0);
+    str+=",";
+    str+=QString::number((((field.rows)/step)+1)*(((field.cols+1)/step)+1))+",Field,"+uns+"\n";
     out << str;
     QString output = "";
     double xReal = 0.0, yReal = 0.0;
@@ -288,8 +295,9 @@ void MainWindow::display()
 
 void MainWindow::on_bt_load_clicked() //Load field
 {
+    QString path = QString(getenv("HOME"))+"/Common/Fields";
     QString filename = QFileDialog::getOpenFileName(this,
-    tr("Load field File"), QString::fromLocal8Bit(getenv("HOME"))+QString("/Desktop/minhomapgen/config"), tr("Field Files (*.view)"));
+    tr("Load field File"), path, tr("Field Files (*.view)"));
 
     if(filename!=""){
         loadFieldConfiguration(filename);

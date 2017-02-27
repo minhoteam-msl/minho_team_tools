@@ -120,6 +120,7 @@ private:
    vector<vector<Point2d> >distLookUpTable;
    /// \brief current defined imageConfig
    imageConfig imageConf;
+
    
 };
 

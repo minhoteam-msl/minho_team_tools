@@ -2,12 +2,24 @@
 #define VISUALIZER_H
 
 #include <QObject>
-#include "types.h"
+#include "Utils/types.h"
+#include <opencv2/opencv.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <QTimer>
+#include <QDebug>
+#include <QTime>
+#include <QFile>
+#include <stdlib.h>
+#include "ros/ros.h"
 #include "minho_team_ros/robotInfo.h"
+#include "minho_team_ros/goalKeeperInfo.h"
 #include "minho_team_ros/pathData.h" // CALLING SERVICE
 
 using minho_team_ros::robotInfo;
 using minho_team_ros::pathData;
+using minho_team_ros::goalKeeperInfo;
+using namespace cv;
 
 class Visualizer : public QObject
 {
@@ -31,12 +43,17 @@ public slots:
    
    /// \brief draws robot information, ball information and obstacle
    /// information based on info on robot_info, in worldModel matrix
-   void drawWorldModel();
+   void drawWorldModel(bool drawKeeperInfo);
    
    /// \brief sets new information to holding robotInfo structure of
    /// the class, the robot_info object
    /// \param msg - new information to be set
    void setRobotInfo(robotInfo msg);
+
+   /// \brief sets new information to holding robotInfo structure of
+   /// the class, the robot_info object
+   /// \param msg - new information to be set
+   void setGoalKeeperInfo(goalKeeperInfo msg);
          
    /// \brief returns absolute file path for field file in config folder
    /// \param field_name - name of the field file
@@ -67,6 +84,7 @@ private:
    QString fieldPath;
    /// \brief robotInfo message object, that holds world model information
    robotInfo robot_info;
+   goalKeeperInfo keeper_info;
    /// \brief id of the robot to be visualized
    int robot_id;
    /// \brief pathData object to hold most recent path and voronoi data

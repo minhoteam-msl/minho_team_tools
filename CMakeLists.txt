@@ -138,6 +138,8 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 set (opencv_LIBRARIES ${OpenCV_LIBS})
 ########################################
 
+include_directories($ENV{HOME}/Common)
+
 #Linking steps for QCUSTOMPLOT Libraries
 ########################################
 include_directories(${minho_team_tools_SOURCE_DIR}/libs)

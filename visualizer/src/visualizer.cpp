@@ -130,7 +130,7 @@ void Visualizer::initField(QString file_)
 
 /// \brief draws robot information, ball information and obstacle
 /// information based on info on robot_info, in worldModel matrix
-void Visualizer::drawWorldModel()
+void Visualizer::drawWorldModel(bool drawKeeperInfo)
 {
    field.copyTo(worldModel);
    float velModule = 0.0;
@@ -180,7 +180,11 @@ void Visualizer::drawWorldModel()
    txt += "   [KEYS] ESC - Close | I - Interest Points";
    putText(worldModel,txt.toStdString(),Point(50,20),FONT_HERSHEY_SIMPLEX,0.45,Scalar(0,0,0),2);
    //##############################
-         
+     
+   if(drawKeeperInfo){    
+      Point ball = world2WorldModel(Point2d(keeper_info.impact_zone.x,keeper_info.impact_zone.y));
+         circle(worldModel,ball,20/(fieldAnatomy.fieldDims.FACTOR),Scalar(255,0,255),-1);
+   }
    //Draw Ball and Velocity vector
    //##############################
    if(robot_info.sees_ball){
@@ -235,6 +239,11 @@ void Visualizer::setRobotInfo(robotInfo msg)
    robot_info = msg;
 }
 
+void Visualizer::setGoalKeeperInfo(goalKeeperInfo msg)
+{
+   keeper_info = msg;
+}
+
 /// \brief converts a point in meters in point in pixels in the
 /// viewport
 /// \param pos - point im meter coordinates to be converted to pixels
@@ -256,9 +265,10 @@ Point Visualizer::world2WorldModel(Point2d pos)
 /// configuration files
 void Visualizer::configFilePaths()
 {
-   QString home = getenv("HOME");
-   mainFilePath = home+"/"+QString(mainPath);
-   configFolderPath = home+"/"+QString(cfgFolderPath);
+   QString home = QString::fromStdString(getenv("HOME"));
+   QString commonDir = home+QString(COMMON_PATH);
+   mainFilePath = commonDir+QString(MAINFILENAME);
+   configFolderPath = commonDir+QString(FIELDS_PATH);
 
    QFile file(mainFilePath);
    if(!file.open(QIODevice::ReadOnly)) {

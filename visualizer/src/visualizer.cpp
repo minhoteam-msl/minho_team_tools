@@ -113,25 +113,70 @@ void Visualizer::drawWorldModel()
    float direction = 0.0;
    Point arrow;
 
-   for(unsigned int i=0;i<path_points.voronoi.size();i++){
-      line(worldModel,world2WorldModel(Point2d(path_points.voronoi[i].ini.x,path_points.voronoi[i].ini.y)),
-                        world2WorldModel(Point2d(path_points.voronoi[i].fini.x,path_points.voronoi[i].fini.y)),
-                        Scalar(0,255,255),1);   
+   for(unsigned int i=0; i<path_points.voronoi_seg.size(); i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.voronoi_seg[i].ini.x,path_points.voronoi_seg[i].ini.y)),
+                        world2WorldModel(Point2d(path_points.voronoi_seg[i].fini.x,path_points.voronoi_seg[i].fini.y)),
+                        Scalar(0,255,255), 1);
    }
 
-   if(path_points.path.size()>1){
-      for(unsigned int i=0;i<path_points.path.size()-1;i++){
-      line(worldModel,world2WorldModel(Point2d(path_points.path[i].x,path_points.path[i].y)),
-                      world2WorldModel(Point2d(path_points.path[i+1].x,path_points.path[i+1].y)),
-                      Scalar(0,0,255),2);   
+   for(unsigned int i=0; i<path_points.intersect_seg.size(); i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.intersect_seg[i].ini.x,path_points.intersect_seg[i].ini.y)),
+                        world2WorldModel(Point2d(path_points.intersect_seg[i].fini.x,path_points.intersect_seg[i].fini.y)),
+                        Scalar(160,160,160), 1);
+   }
+
+   if(path_points.dijk_path.size() > 1) {
+      for(unsigned int i=0; i<path_points.dijk_path.size()-1; i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.dijk_path[i].x,path_points.dijk_path[i].y)),
+                      world2WorldModel(Point2d(path_points.dijk_path[i+1].x,path_points.dijk_path[i+1].y)),
+                      Scalar(255,0,0), 3);
       }
    }
-   
+
+   if(path_points.dijk_path_obst_circle.size() > 1) {
+      for(unsigned int i=0; i<path_points.dijk_path_obst_circle.size()-1; i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.dijk_path_obst_circle[i].x,path_points.dijk_path_obst_circle[i].y)),
+                      world2WorldModel(Point2d(path_points.dijk_path_obst_circle[i+1].x,path_points.dijk_path_obst_circle[i+1].y)),
+                      Scalar(255,153,51), 2);
+      }
+   }
+
+   if(path_points.smooth_path.size() > 1) {
+      for(unsigned int i=0; i<path_points.smooth_path.size()-1; i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.smooth_path[i].x,path_points.smooth_path[i].y)),
+                      world2WorldModel(Point2d(path_points.smooth_path[i+1].x,path_points.smooth_path[i+1].y)),
+                      Scalar(0,76,153), 3);
+      }
+   }
+
+   if(path_points.smooth_path_obst_circle.size() > 1) {
+      for(unsigned int i=0; i<path_points.smooth_path_obst_circle.size()-1; i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.smooth_path_obst_circle[i].x,path_points.smooth_path_obst_circle[i].y)),
+                      world2WorldModel(Point2d(path_points.smooth_path_obst_circle[i+1].x,path_points.smooth_path_obst_circle[i+1].y)),
+                      Scalar(51,153,255), 2);
+      }
+   }
+
+   if(path_points.path.size() > 1) {
+      for(unsigned int i=0; i<path_points.path.size()-1; i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.path[i].x,path_points.path[i].y)),
+                      world2WorldModel(Point2d(path_points.path[i+1].x,path_points.path[i+1].y)),
+                      Scalar(0,0,255), 3);
+      }
+   }
+
 
    //Draw Obstacles
    //##############################
    for(unsigned int i= 0;i < robot_info.obstacles.size(); i++){
       circle(worldModel,world2WorldModel(Point2d(robot_info.obstacles[i].x,robot_info.obstacles[i].y)),fieldAnatomy.fieldDims.ROBOT_DIAMETER/2+1,Scalar(0,0,0),-1);
+   }
+
+   //Draw Obstacles Circle
+   //##############################
+   for(unsigned int i= 0; i<path_points.obstacles_circle.size(); i=i+3) {
+      circle(worldModel,world2WorldModel(Point2d(path_points.obstacles_circle[i], path_points.obstacles_circle[i+1])),
+              (int)((path_points.obstacles_circle[i+2]*100.0)/2.0), Scalar(0,0,0), 1);
    }
    //##############################
    

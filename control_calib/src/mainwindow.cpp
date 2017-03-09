@@ -55,6 +55,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       ui->spin_d->setValue(srv.response.config.D);
       ui->max_lin->setValue(srv.response.config.max_linear_velocity);
       ui->max_rot->setValue(srv.response.config.max_angular_velocity);
+      ui->spin_accel->setValue(srv.response.config.acceleration);
+      ui->spin_decel->setValue(srv.response.config.deceleration);
     } else ROS_ERROR("Failed to retrieve configuration from target robot.");
 
     send_timer = new QTimer();
@@ -79,14 +81,52 @@ void MainWindow::on_max_rot_valueChanged(int value)
     ctrl_config.max_angular_velocity = value;
 }
 
+void MainWindow::on_bt_voronoi_seg_clicked()
+{
+    ctrl_config.send_voronoi_seg = !ctrl_config.send_voronoi_seg;
+    cconfig_pub.publish(ctrl_config);
+}
+
+void MainWindow::on_bt_intersect_seg_clicked()
+{
+    ctrl_config.send_intersect_seg = !ctrl_config.send_intersect_seg;
+    cconfig_pub.publish(ctrl_config);
+}
+
+void MainWindow::on_bt_dijk_path_clicked()
+{
+    ctrl_config.send_dijk_path = !ctrl_config.send_dijk_path;
+    cconfig_pub.publish(ctrl_config);
+}
+
+void MainWindow::on_bt_dijk_path_obst_circle_clicked()
+{
+    ctrl_config.send_dijk_path_obst_circle = !ctrl_config.send_dijk_path_obst_circle;
+    cconfig_pub.publish(ctrl_config);
+}
+
+void MainWindow::on_bt_smooth_path_clicked()
+{
+    ctrl_config.send_smooth_path = !ctrl_config.send_smooth_path;
+    cconfig_pub.publish(ctrl_config);
+}
+
+void MainWindow::on_bt_smooth_path_obst_circle_clicked()
+{
+    ctrl_config.send_smooth_path_obst_circle = !ctrl_config.send_smooth_path_obst_circle;
+    cconfig_pub.publish(ctrl_config);
+}
+
 void MainWindow::on_bt_path_clicked()
 {
     ctrl_config.send_path = !ctrl_config.send_path;
+    cconfig_pub.publish(ctrl_config);
 }
 
-void MainWindow::on_bt_voronoi_clicked()
+void MainWindow::on_bt_obstacles_circle_clicked()
 {
-    ctrl_config.send_voronoi = !ctrl_config.send_voronoi;
+    ctrl_config.send_obstacles_circle = !ctrl_config.send_obstacles_circle;
+    cconfig_pub.publish(ctrl_config);
 }
 
 void MainWindow::on_spin_p_valueChanged(double value)
@@ -149,6 +189,11 @@ void MainWindow::on_action_3_clicked(bool state)
     if(state) ai.action = 3;
 }
 
+void MainWindow::on_action_4_clicked(bool state)
+{
+    if(state) ai.action = 4;
+}
+
 void MainWindow::on_targ_kstr_valueChanged(int value)
 {
     ai.target_kick_strength = value;
@@ -162,10 +207,22 @@ void MainWindow::on_kick_type_passe_clicked(bool state)
 {
     if(state) ai.target_kick_is_pass = true;
 }
+void MainWindow::on_spin_accel_valueChanged(double value)
+{
+    ctrl_config.acceleration = value;
+}
+void MainWindow::on_spin_decel_valueChanged(double value)
+{
+    ctrl_config.deceleration = value;
+}
+
+void MainWindow::on_bt_send_parameters_clicked()
+{
+    cconfig_pub.publish(ctrl_config);
+}
 
 void MainWindow::sendInfo()
 {
-    ai_pub.publish(ai);
-    cconfig_pub.publish(ctrl_config);
+    ai_pub.publish(ai); 
 }
 

@@ -77,7 +77,7 @@ void robotInfoCallback(const robotInfo::ConstPtr& msg)
    static int count = 0;
    pthread_mutex_lock (&exvis_mutex); //Lock mutex
 	exvis->setRobotInfo(*msg);
-	exvis->drawWorldModel();
+	exvis->drawWorldModel(false);
 	pthread_mutex_unlock (&exvis_mutex); //Unlock mutex
 	
 	if(count<10){
@@ -97,7 +97,7 @@ void pathInfoCallback(const pathData::ConstPtr& msg)
 {
    pthread_mutex_lock (&exvis_mutex); //Lock mutex
 	exvis->setPathPoints(*msg);
-	exvis->drawWorldModel();
+	exvis->drawWorldModel(false);
 	pthread_mutex_unlock (&exvis_mutex); //Unlock mutex
 }
 
@@ -110,7 +110,8 @@ void goalKeeperInfoCallback(const goalKeeperInfo::ConstPtr& msg)
    robotInfo robot_info_msg = msg->robot_info;
    pthread_mutex_lock (&exvis_mutex); //Lock mutex
 	exvis->setRobotInfo(robot_info_msg);
-	exvis->drawWorldModel();
+   exvis->setGoalKeeperInfo(*msg);
+	exvis->drawWorldModel(true);
 	pthread_mutex_unlock (&exvis_mutex); //Unlock mutex
 	   
    if(count<10){
@@ -153,7 +154,7 @@ void* udpReceivingThread(void *socket)
          if(msg.agent_id==robot_id){
             pthread_mutex_lock (&exvis_mutex); //Lock mutex
 	         exvis->setRobotInfo(msg.agent_info.robot_info);
-	         exvis->drawWorldModel();
+	         exvis->drawWorldModel(false);
             pthread_mutex_unlock (&exvis_mutex); //Unlock mutex 
          }
       }

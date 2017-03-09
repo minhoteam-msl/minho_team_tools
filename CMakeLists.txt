@@ -118,16 +118,17 @@ MESSAGE( STATUS "-----> Compiling MinhoTeam Packages for : " ${username})
 
 #Linking steps for Qt Libraries
 ########################################
-find_package(Qt5 COMPONENTS Core Widgets Gui REQUIRED)
+find_package(Qt5 COMPONENTS Core Widgets Gui PrintSupport REQUIRED)
 add_definitions (${QT_DEFINITIONS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
-set(qt_LIBRARIES Qt5::Widgets Qt5::Core Qt5::Gui)
+set(qt_LIBRARIES Qt5::Widgets Qt5::Core Qt5::Gui Qt5::PrintSupport)
 include_directories(${Qt5Widgets_INCLUDE_DIRS})
 include_directories(${Qt5Core_INCLUDE_DIRS})
 include_directories(${Qt5Gui_INCLUDE_DIRS})
+include_directories(${Qt5PrintSupport_INCLUDE_DIRS})
 ########################################
 
 #Linking steps for OpenCV Libraries
@@ -135,6 +136,23 @@ include_directories(${Qt5Gui_INCLUDE_DIRS})
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 set (opencv_LIBRARIES ${OpenCV_LIBS})
+########################################
+
+include_directories($ENV{HOME}/Common)
+
+#Linking steps for QCUSTOMPLOT Libraries
+########################################
+include_directories(${minho_team_tools_SOURCE_DIR}/libs)
+##### libqcustomplot #####
+##################
+add_library(qcustomplot SHARED ${minho_team_tools_SOURCE_DIR}/libs/qcustomplot.cpp)
+set_target_properties( qcustomplot
+    PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${minho_team_tools_SOURCE_DIR}/libs
+)
+target_compile_features(qcustomplot PRIVATE cxx_range_for)
+target_link_libraries(qcustomplot ${qt_LIBRARIES})
+set (qcustomplot_LIBRARIES ${minho_team_tools_SOURCE_DIR}/libs/libqcustomplot.so)
 ########################################
 ######################################################################
 
@@ -144,13 +162,13 @@ set(TELEOP_DIR ${PROJECT_DIRECTORY}/minho_teleop)
 set(teleop_MOC_H ${TELEOP_DIR}/include/mainwindow.h)
 qt5_wrap_cpp(teleop_CPP ${teleop_MOC_H})
 set(teleop_SRC ${TELEOP_DIR}/src/main.cpp ${TELEOP_DIR}/src/mainwindow.cpp )
-add_executable(minho_teleop ${teleop_SRC} ${teleop_CPP}) 
-target_include_directories(minho_teleop PUBLIC
+add_executable(teleop ${teleop_SRC} ${teleop_CPP}) 
+target_include_directories(teleop PUBLIC
 $<BUILD_INTERFACE:${TELEOP_DIR}/include>)
-set_target_properties(minho_teleop PROPERTIES COMPILE_FLAGS "-fPIC")
-target_compile_features(minho_teleop PRIVATE cxx_range_for)
-target_link_libraries(minho_teleop ${catkin_LIBRARIES} ${qt_LIBRARIES})
-add_dependencies(minho_teleop minho_team_ros_generate_messages_cpp)
+set_target_properties(teleop PROPERTIES COMPILE_FLAGS "-fPIC")
+target_compile_features(teleop PRIVATE cxx_range_for)
+target_link_libraries(teleop ${catkin_LIBRARIES} ${qt_LIBRARIES})
+add_dependencies(teleop minho_team_ros_generate_messages_cpp)
 ######################################################################
 
 ## VISION CALIB ##
@@ -164,8 +182,8 @@ target_include_directories(vision_calib PUBLIC
 $<BUILD_INTERFACE:${VISIONCALIB_DIR}/include>)
 set_target_properties(vision_calib PROPERTIES COMPILE_FLAGS "-fPIC")
 target_compile_features(vision_calib PRIVATE cxx_range_for)
-target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES})
-add_dependencies(vision_calib minho_team_ros_generate_messages_cpp)
+target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES} ${qcustomplot_LIBRARIES})
+add_dependencies(vision_calib minho_team_ros_generate_messages_cpp qcustomplot)
 ######################################################################
 
 ## VISUALIZER ##
@@ -216,4 +234,19 @@ set_target_properties(control_calib PROPERTIES COMPILE_FLAGS "-fPIC")
 target_compile_features(control_calib PRIVATE cxx_range_for)
 target_link_libraries(control_calib ${catkin_LIBRARIES} ${qt_LIBRARIES})
 add_dependencies(control_calib minho_team_ros_generate_messages_cpp)
+######################################################################
+
+## MAPGEN ##
+######################################################################
+set(MPGEN_SRCDIR ${PROJECT_DIRECTORY}/minhomapgen/src)
+set(mpgen_MOC_H ${PROJECT_DIRECTORY}/minhomapgen/include/mainwindow.h)
+qt5_wrap_cpp(mpgen_CPP ${mpgen_MOC_H})
+set(mpgen_SRC ${MPGEN_SRCDIR}/main.cpp ${MPGEN_SRCDIR}/mainwindow.cpp)
+add_executable(minhomapgen ${mpgen_SRC} ${mpgen_CPP}) 
+target_include_directories(minhomapgen PUBLIC
+$<BUILD_INTERFACE:${PROJECT_DIRECTORY}/minhomapgen/include>)
+
+set_target_properties(minhomapgen PROPERTIES COMPILE_FLAGS "-fPIC")
+target_compile_features(minhomapgen PRIVATE cxx_range_for)
+target_link_libraries(minhomapgen ${qt_LIBRARIES} ${opencv_LIBRARIES})
 ######################################################################

@@ -17,14 +17,30 @@
 #include <cv_bridge/cv_bridge.h>
 #include "minho_team_ros/requestOmniVisionConf.h"
 #include "minho_team_ros/requestImage.h"
+#include "minho_team_ros/requestCamProperty.h"
+#include "minho_team_ros/requestCamPID.h"
+#include "minho_team_ros/requestROI.h"
+#include "minho_team_ros/ControlerError.h"
+#include "minho_team_ros/ROI.h"
+#include "minho_team_ros/worldConfig.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
 #include <QMessageBox>
+
 
 using namespace ros;
 using namespace cv;
 using minho_team_ros::requestImage;
 using minho_team_ros::requestOmniVisionConf;
+using minho_team_ros::requestCamProperty;
+using minho_team_ros::requestCamPID;
+using minho_team_ros::requestROI;
+using minho_team_ros::cameraProperty;
+using minho_team_ros::PID;
+using minho_team_ros::ControlerError;
+using minho_team_ros::ROI;
+using minho_team_ros::worldConfig;
+
 #define ROS_MASTER_IP "http://172.16.49."
 #define ROS_MASTER_PORT ":11311"
 
@@ -185,21 +201,132 @@ private slots:
    /// spinboxes
    /// \param imageConf - imageConfig message to be used
    void loadImageValues(minho_team_ros::imageConfig imageConf);
+   
+   /// \brief slot function for click action of bt_screenshot. Takes and saves a
+   /// screenshot in {ros_project_folder}/screenshots
+   void on_bt_screenshot_2_clicked();
+
+   /*----------------------------------------------------------------------------------------------*/
+
+   /// \brief slot function for tab change. Enables or disables 
+   /// components necessary for each tab.
+   void tabSelected();
+
+   /// \brief slot function for click action of bt_campid. Sends
+   /// the property PID Controler values
+   void on_bt_campid_clicked();
+
+   /// \brief slot function for click action of bt_camprop. Sends
+   /// the property value
+   void on_bt_camprop_clicked();
+
+   /// \brief function for video activate when tabs change
+   /// from 0 to 1
+   void calibrate_activ();
+
+   /// \brief slot function for properties type's combobox. Sets the current 
+   /// property to be calibrated
+   /// \param index - new property type to be used
+   void on_combo_properties_currentIndexChanged(int index);
+
+   /// \brief slot function for check action of radio_PID. Enables and disable
+   /// some trackbars
+   void on_radio_PID_clicked();
+
+   /// \brief slot function for check action of radio_property. Enables and disable
+   /// some trackbars
+   void on_radio_property_clicked();
+
+   /// \brief slot function for Kp trackbar. Sets a new value for the selected
+   /// label
+   /// \param value - new value to be applied to label's value
+   void on_Kp_trackbar_valueChanged(int value);
+
+   /// \brief slot function for Kd trackbar. Sets a new value for the selected
+   /// label
+   /// \param value - new value to be applied to label's value
+   void on_Kd_trackbar_valueChanged(int value);
+
+   /// \brief slot function for Ki trackbar. Sets a new value for the selected
+   /// label
+   /// \param value - new value to be applied to label's value
+   void on_Ki_trackbar_valueChanged(int value);
+
+   /// \brief slot function for property value trackbar. Sets a new value for the selected
+   /// label
+   /// \param value - new value to be applied to label's value
+   void on_prop_trackbar_valueChanged(int value);
+
+   /// \brief callback function that receives published error messages
+   /// Since its called by ROS (another thread), emits a signal (addError) so
+   /// the GUI's thread can take care of other messages.
+   /// \param msg - error_msg::error data, holds information about the error
+   /// of the selected property.
+   void addValCallback(minho_team_ros::ControlerError msg);
+
+   /// \brief function to set trackbar ranges of Kp,Ki,Kd,Prop
+   /// \param prop - new cameraProperty that contains values to be loaded to trackbar of property
+   /// \param pid - new PID that contains values to be loaded to trackbars of PID
+   void set_track_ranges(cameraProperty prop,PID pid);
+
+   /// \brief function to read properties values from pusblishers
+   /// \param num - represents index of property
+   void loadPropertiesValues(int num);
+
+   /// \brief slot function for click action of bt_auto_cal. Sends
+   /// signal to omniCamera to start the auto-calibration process
+   void on_bt_auto_cal_clicked();
+
+   /// \brief slot function for click action of bt_campid. Sends
+   /// signal to reset PID controler of Properties of omniCamera
+   void on_bt_reset_clicked();
+
+   void on_bt_ROIS_w_clicked();
+   void on_bt_ROIS_b_clicked();
+   void set_ROIs();
+   void on_bt_grab_2_clicked();
+   void on_bt_stop_2_clicked();
+   void on_bt_screenshot_3_clicked();
+   void on_combo_label_2_currentIndexChanged(int index);
+   void on_combo_aqtype_2_currentIndexChanged(int index);
+   void on_bt_worldpar_clicked();
+   void on_spin_framerate_3_valueChanged(double value);
+   void on_spinBox_valueChanged(int value);
+   void on_spin_framerate_5_valueChanged(int value);
+   void on_spin_framerate_6_valueChanged(int value);
+   void on_spin_framerate_7_valueChanged(int value);
+   void on_spin_framerate_8_valueChanged(int value);
+   void on_bt_RLE_clicked();
+   void on_bt_lumi_clicked();
+   void on_bt_sat_clicked();
+   void on_sat_trackbar_valueChanged(int value);
+   void on_lumi_trackbar_valueChanged(int value);
+   void LoadTargetsCal();
+   void loadKalmanValues();
+   void on_bt_kalman_clicked();
+   void on_Qxy_valueChanged(int value);
+   void on_Qz_valueChanged(int value);
+   void on_Rxy_valueChanged(int value);
+   void on_Rz_valueChanged(int value);
+
+
 private:
    /// \brief pointer to MainWindow's GUI 
    Ui::MainWindow *ui;
    /// \brief robot's id that we are configuring
    int robot_id_;
+   /// \brief dividers to establish values correspondency
+   float temp_prop_div,temp_k_div;
    /// \brief boolean variables to define current working mode
    bool calibration_mode,draw_mode;
    /// \brief parent scene in QGraphicsView to draw on
-   QGraphicsScene *scene_;
+   QGraphicsScene *scene_,*scene_2, *scene_3;
    /// \brief ImageCalibrator object, to do image operations and data
    /// (calibrations) storage
    ImageCalibrator *img_calib_;
    /// \brief Opencv image container to work binary conversions
    Mat temp;
-   /// \brief QTimers to do binary and draw actions
+   /// \brief QTimers to do binary and draw actions and error plot
    QTimer *img_calib_timer, *interaction_timer;
    //ROS
    /// \brief mirrorConfig ROS Publisher
@@ -208,22 +335,41 @@ private:
    ros::Publisher vision_pub_;
    /// \brief imageConfig ROS Publisher
    ros::Publisher image_pub_;
+   /// \brief cameraProperty ROS publisher
+   ros::Publisher property_pub_;
+   /// \brief PID ROS publisher
+   ros::Publisher pid_pub_;
    /// \brief requestOmniVisionConf ROS Service Client
    ros::ServiceClient omniVisionConf;
    /// \brief requestImage ROS Service Client
    ros::ServiceClient imgRequest;
+   /// \brief requestCamProperty ROS Service Client
+   ros::ServiceClient propertyConf;
+   /// \brief requestCamPID ROS Service Client
+   ros::ServiceClient pidConf;
    /// \brief image_transport child node
    image_transport::ImageTransport *it_;
    /// \brief sensor_msgs::Image ROS Subscriver
    image_transport::Subscriber image_sub_;
+   /// \brief error_msgs::Error ROS Subscriver
+   ros::Subscriber error_sub_;
    /// \brief ROS Node
    ros::NodeHandle *_node_;
+   
+   ros::Publisher roi_pub_;
+   ros::Publisher world_pub_;
+   ros::ServiceClient roiConf;
    /// \brief QImage buffer to display in QGraphicsView
    QImage image_;
 
+   bool calib;
+
+   worldConfig worldConfBall, worldConfObs, worldConfRLE, kalmanConf;
+
+
 signals:
    /// \brief signal to make the new image be drawn in GUI
-   void addNewImage();   
+   void addNewImage();
     
 };
 

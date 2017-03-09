@@ -110,13 +110,17 @@ private slots:
    
    /// \brief button slot function initialize the reloc process in the target robot
    void on_bt_reloc_clicked();
+
+   void on_bt_kick_clicked();
+
+   void on_hs_kick_valueChanged(int value);
 private:
    /// \brief pointer to GUI
    Ui::MainWindow *ui;
    /// \brief defines whether teleop is activated or not
    bool teleop_activated_;
    /// \brief update timer to update thrusts and send data
-   QTimer *_update_;
+   QTimer *_update_, *send_;
    /// \brief defined robot id 
    int robot_id_;
    /// \brief maximum linear and angular velocites values

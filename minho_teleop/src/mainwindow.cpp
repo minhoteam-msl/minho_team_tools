@@ -13,11 +13,12 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    teleop_activated_ = false;
    robot_id_ = robot_id;
    _update_ = new QTimer();
+   send_ = new QTimer();
    dribblers_state_ = false;
    kick_request_ = is_pass_ = false;
    thrust_.resize(7);
    thrust_activation_.resize(7);
-   connect(_update_,SIGNAL(timeout()),this,SLOT(onUpdate()));
+   connect(send_,SIGNAL(timeout()),this,SLOT(onUpdate()));
    connect(_update_,SIGNAL(timeout()),this,SLOT(updateThrusts()));
    ui->hs_lin->setValue(30);
    ui->hs_ang->setValue(30);
@@ -92,7 +93,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    spinner = new ros::AsyncSpinner(2);
    spinner->start();
 
-   _update_->start(50); // update teleop data to robot
+   _update_->start(30); // update thrusts
+   send_->start(30); // send data
 }
 
 /// \brief class destructor, that sends teleop off message on close
@@ -349,3 +351,17 @@ void MainWindow::on_bt_reloc_clicked()
    requestReloc srv;
    requestRelocService.call(srv);
 }
+
+void MainWindow::on_bt_kick_clicked()
+{
+   // send kick
+   requestKick srv;
+   srv.request.kick_strength = ui->hs_kick->value();
+   requestKickService.call(srv);   
+}
+
+void MainWindow::on_hs_kick_valueChanged(int value)
+{
+   ui->lb_kick->setText(QString::number(ui->hs_kick->value()));
+}
+

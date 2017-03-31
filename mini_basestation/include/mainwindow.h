@@ -22,9 +22,13 @@
 #include "ros/ros.h"
 #include <pthread.h>
 #include <signal.h>
+#include "std_msgs/UInt8.h"
+
+
+
 
 using namespace std;
-
+using std_msgs::UInt8;
 using minho_team_ros::interAgentInfo;
 /// \brief struct to represet a udp packet, containing
 /// a serialized ROS message
@@ -126,6 +130,7 @@ private:
 
     int robotWithBall;
     
+    unsigned long int packets[5];
     pthread_t *recv_thread_ptr;
 signals:
     void new_robot_info(minho_team_ros::interAgentInfo incoming_data);

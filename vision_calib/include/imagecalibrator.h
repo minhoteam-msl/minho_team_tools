@@ -102,6 +102,9 @@ public:
    /// \param p - point to be mapped (pixels)
    /// \return point mapped in meters
    Point2d worldMapping(Point p);
+
+   void generateLookUpTable();
+   int getClassifier(int x, int y, Mat *image);
    
 private:
    /// \brief morphing element for binary operations
@@ -120,6 +123,8 @@ private:
    vector<vector<Point2d> >distLookUpTable;
    /// \brief current defined imageConfig
    imageConfig imageConf;
+
+   int YUVLookUpTable[256*256*256];
 
    
 };

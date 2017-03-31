@@ -173,6 +173,10 @@ add_dependencies(teleop minho_team_ros_generate_messages_cpp)
 
 ## VISION CALIB ##
 ######################################################################
+set(LOC_DIR ${PROJECT_DIRECTORY}/../minho_team_ros/localization_node)
+link_directories(${PROJECT_DIRECTORY}/../minho_team_ros/lib)
+include_directories(${LOC_DIR}/include)
+
 set(VISIONCALIB_DIR ${PROJECT_DIRECTORY}/vision_calib)
 set(visioncalib_MOC_H ${VISIONCALIB_DIR}/include/mainwindow.h ${VISIONCALIB_DIR}/include/imagecalibrator.h)
 qt5_wrap_cpp(visioncalib_CPP ${visioncalib_MOC_H})
@@ -182,7 +186,7 @@ target_include_directories(vision_calib PUBLIC
 $<BUILD_INTERFACE:${VISIONCALIB_DIR}/include>)
 set_target_properties(vision_calib PROPERTIES COMPILE_FLAGS "-fPIC")
 target_compile_features(vision_calib PRIVATE cxx_range_for)
-target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES} ${qcustomplot_LIBRARIES})
+target_link_libraries(vision_calib ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LIBRARIES} ${qcustomplot_LIBRARIES} libRLE.so)
 add_dependencies(vision_calib minho_team_ros_generate_messages_cpp qcustomplot)
 ######################################################################
 

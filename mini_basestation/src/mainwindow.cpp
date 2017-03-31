@@ -59,6 +59,7 @@ MainWindow::MainWindow(bool is_official_field, pthread_t *recv_thread, QWidget *
     for(int i=0;i<5;i++){
         robo_state[i] = false;
         robo_state_old[i] = false;
+        packets[i] = 0;
     }
 
     int id = QFontDatabase::addApplicationFont(":/resources/display.ttf");
@@ -397,18 +398,25 @@ void MainWindow::change_robot_info(minho_team_ros::interAgentInfo incoming_data)
 
 void MainWindow::onUpdateFromRobot(void *data)
 {
-    // deserialize message
-   interAgentInfo incoming_data;
-   deserializeROSMessage<interAgentInfo>((udp_packet *)data,&incoming_data);
-   delete((udp_packet *)data);
+   // deserialize message
+   udp_packet *temp = (udp_packet *)data;
+   UInt8 msg;
+   ros::serialization::IStream istream(temp->packet, sizeof(msg.data));
+   ros::serialization::deserialize(istream, msg);
+   if(msg.data==1){
+       interAgentInfo incoming_data;
+       deserializeROSMessage<interAgentInfo>((udp_packet *)data,&incoming_data);
+       delete((udp_packet *)data);
 
-   int agent_id = incoming_data.agent_id;
+       int agent_id = incoming_data.agent_id;
 
-   if(agent_id<1 || agent_id>=6);
-   else {
-       emit new_robot_info(incoming_data);
+       if(agent_id<1 || agent_id>=6);
+       else {
+           packets[agent_id-1]++;
+           std::cout << "Recv " << agent_id << packets[agent_id-1]<< std::endl;
+           emit new_robot_info(incoming_data);
+       }
    }
-
    return;
 }
 

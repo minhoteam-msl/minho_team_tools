@@ -111,7 +111,51 @@ void ImageCalibrator::updateCurrentConfiguration(LABEL_t label, COMPONENT_t comp
    if(range==MIN) comp->min = value;
    else if(range==MAX) comp->max = value;
    else return;
-   
+}
+
+
+void ImageCalibrator::generateLookUpTable()
+{
+    rgb pix; hsv pix2;
+    unsigned int index;
+    for (int r=0; r<256; r++) // classify every RGB color into our LUT
+        for (int g=0; g<256; g++)
+            for (int b=0; b<256; b++)
+            {
+                 pix.r = r; pix.g = g; pix.b =b;
+                 pix2 = rgbtohsv(pix);
+                 index = (r<<16)+(g<<8)+b;
+
+                //-- initialize on update --
+                YUVLookUpTable[index] = UAV_NOCOLORS_BIT;
+                //-- Reference Colour range --
+                if (((pix2.h>=lutconfig.line.H.min) && (pix2.h<=lutconfig.line.H.max))
+                   && ((pix2.s>=lutconfig.line.S.min) && (pix2.s<=lutconfig.line.S.max))
+                   && ((pix2.v>=lutconfig.line.V.min) && (pix2.v<=lutconfig.line.V.max))){
+                    YUVLookUpTable[index] = UAV_WHITE_BIT;
+                }else if (((pix2.h>=lutconfig.field.H.min) && (pix2.h<=lutconfig.field.H.max))
+                   && ((pix2.s>=lutconfig.field.S.min) && (pix2.s<=lutconfig.field.S.max))
+                   && ((pix2.v>=lutconfig.field.V.min) && (pix2.v<=lutconfig.field.V.max))){
+                    YUVLookUpTable[index] = UAV_GREEN_BIT;
+                } else if (((pix2.h>=lutconfig.obstacle.H.min) && (pix2.h<=lutconfig.obstacle.H.max))
+                   && ((pix2.s>=lutconfig.obstacle.S.min) && (pix2.s<=lutconfig.obstacle.S.max))
+                   && ((pix2.v>=lutconfig.obstacle.V.min) && (pix2.v<=lutconfig.obstacle.V.max))){
+                    YUVLookUpTable[index] = UAV_BLACK_BIT;
+                }else if (((pix2.h>=lutconfig.ball.H.min) && (pix2.h<=lutconfig.ball.H.max))
+                   && ((pix2.s>=lutconfig.ball.S.min) && (pix2.s<=lutconfig.ball.S.max))
+                   && ((pix2.v>=lutconfig.ball.V.min) && (pix2.v<=lutconfig.ball.V.max))){
+                    YUVLookUpTable[index] = UAV_ORANGE_BIT;
+                }
+            }
+}
+
+// Returns the classifier of a pixel based on the Look Up Table
+int ImageCalibrator::getClassifier(int x, int y, Mat *image)
+{
+    if(x<0 || x>=480 || y<0 || y>=480) return UAV_NOCOLORS_BIT;
+    Vec3b *color = image->ptr<Vec3b>(y);
+    long int index = (color[x][2]<<16) + (color[x][1]<<8) + (color[x][0]);
+    return YUVLookUpTable[index];
 }
 
 /// \brief function to get current label configuration
@@ -143,7 +187,8 @@ minho_team_ros::imageConfig ImageCalibrator::getImageConfiguration()
 /// \param msg - visionHSVConfig message to be used  
 void ImageCalibrator::lutConfigFromMsg(visionHSVConfig msg)
 {
-   lutconfig = msg;     
+   lutconfig = msg;
+   generateLookUpTable();
 }
 
 /// \brief applies a configuration for mirrorConf giver a mirrorConfig message

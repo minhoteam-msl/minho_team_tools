@@ -22,6 +22,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    ui->lb_robot_name_2->setText(QString("Calibration Mode for Robot ")+QString::number(robot_id_));
    ui->lb_robot_name_3->setStyleSheet("QLabel { color : red; }");
    ui->lb_robot_name_3->setText(QString("Calibration Mode for Robot ")+QString::number(robot_id_));
+
    
    ui->graphicsView->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
    ui->graphicsView->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
@@ -29,6 +30,7 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
    ui->graphicsView_2->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
    ui->graphicsView_3->setHorizontalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
    ui->graphicsView_3->setVerticalScrollBarPolicy ( Qt::ScrollBarAlwaysOff );
+
    ui->tabWidget->setCurrentIndex(0);
    on_radio_property_clicked();
    
@@ -153,7 +155,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
         kalmanConf.kalman = true;
    	loadKalmanValues();
    }else ROS_ERROR("Failed to retrieve configuration from target robot.");
-   
+
+   InitializeLinesDetector();
    interaction_timer->start(50);
 }
 
@@ -164,6 +167,13 @@ MainWindow::~MainWindow()
    delete ui;
 }
 
+void MainWindow::InitializeLinesDetector()
+{
+   idxImage = Mat(480,480,CV_8UC3,Scalar(0,0,0));
+   imageConfig imgconf = img_calib_->getImageConfiguration();
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(imgconf.center_x,imgconf.center_y), 2, 70, 235,1,1);
+}
+
 /// \brief function to setup the graphicsscene and create the 
 /// image holding matrix
 void MainWindow::setup()
@@ -171,9 +181,11 @@ void MainWindow::setup()
    scene_ = new QGraphicsScene();
    scene_2= new QGraphicsScene();
    scene_3= new QGraphicsScene();
+
    ui->graphicsView->setScene(scene_);
    ui->graphicsView_2->setScene(scene_2);
    ui->graphicsView_3->setScene(scene_3);
+
    calib=false;
    temp = Mat(480,480,CV_8UC3,Scalar(0,0,0));
 }
@@ -253,6 +265,22 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
    }
 }
 
+/// \brief function that allows to add a point to the mask contour with
+/// mouse lbutton and remove the last one with mouse rbutton
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::LeftButton) {
+       QPointF relativeOrigin = ui->graphicsView->mapToScene(ui->graphicsView->mapFromGlobal(QCursor::pos()));
+       if(relativeOrigin.x()>=0 && relativeOrigin.x()<480 && relativeOrigin.y()>=0 && relativeOrigin.y()<480){
+            maskContourPoints.push_back(Point(relativeOrigin.x(),relativeOrigin.y()));
+        }
+    } else if(event->button() == Qt::RightButton){
+        maskContourPoints.pop_back();
+    } else if(event->button() == Qt::MiddleButton){
+        maskContourPoints.clear();
+    }
+}
+   
 /// \brief callback function that receives published images and converts them 
 /// into Opencv(Mat) format using cv_bridge and to Qt's QImage to be displayed.
 /// Since its called by ROS (another thread), emits a signal (addNewImage) so
@@ -263,10 +291,41 @@ void MainWindow::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
    cv_bridge::CvImagePtr recv_img = cv_bridge::toCvCopy(msg,"bgr8");
    temp = recv_img->image.clone();
+   if(ui->tabWidget->currentIndex()==2){
+
+     vector<int> s;
+     Point temp_2;
+     imageConfig imgconf = img_calib_->getImageConfiguration();
+
+     idxImage.setTo(0);
+   
+     s = linesRad.getLine(1);
+     for(unsigned i = 0; i < s.size(); i++)
+     {
+         temp_2 = linesRad.getPointXYFromInteger(s[i]);
+         idxImage.ptr()[s[i]] = img_calib_->getClassifier(temp_2.x,temp_2.y, &temp);
+     }
+
+     rleLinesRad = RLE(linesRad, UAV_GREEN_BIT, UAV_WHITE_BIT, UAV_GREEN_BIT, 1, 1, 1, 5);
+     if(!rleLinesRad.rlData.empty()){
+        ui->pixel_num_lb->setText(QString::number(rleLinesRad.rlData[0].lengthColor));
+        ui->pixel_num_lb_2->setText(QString::number((int)sqrt((rleLinesRad.rlData[0].start%480-imgconf.center_x)*(rleLinesRad.rlData[0].start%480-imgconf.center_x)
+      +(rleLinesRad.rlData[0].start/480-imgconf.center_y)*(rleLinesRad.rlData[0].start/480-imgconf.center_y))));
+        ui->bt_setlength->setEnabled(true);
+     }
+     else {
+	ui->pixel_num_lb->setText(QString::number(0));
+	ui->pixel_num_lb_2->setText(QString::number(0));
+	ui->bt_setlength->setEnabled(false);
+     }
+     
+   }
+			    
    image_ =  QImage( recv_img->image.data,
                  recv_img->image.cols, recv_img->image.rows,
                  static_cast<int>(recv_img->image.step),
                  QImage::Format_RGB888).rgbSwapped();
+                 
    emit addNewImage();
 }
 
@@ -281,18 +340,20 @@ void MainWindow::addImageToScene()
 	   }
    }
    else if(ui->tabWidget->currentIndex()==2){
+            if(!draw_mode){
 		  scene_3->clear();
 		  scene_3->addPixmap(QPixmap::fromImage(image_));
 	   }
-   	   else {
-	    	scene_2->clear();
-	    	QPainter p(&image_);
-	    	p.setPen(Qt::red);
-	    	p.drawRect(ui->spinBox_x_w->value(),ui->spinBox_y_w->value(),ui->spinBox_d_w->value(),ui->spinBox_d_w->value());
-	    	p.setPen(Qt::blue);
-	    	p.drawRect(ui->spinBox_x_b->value(),ui->spinBox_y_b->value(),ui->spinBox_d_b->value(),ui->spinBox_d_b->value());
-	    	scene_2->addPixmap(QPixmap::fromImage(image_));
-	   	}
+	}  
+        else {
+	       scene_2->clear();
+	       QPainter p(&image_);
+	       p.setPen(Qt::red);
+	       p.drawRect(ui->spinBox_x_w->value(),ui->spinBox_y_w->value(),ui->spinBox_d_w->value(),ui->spinBox_d_w->value());
+	       p.setPen(Qt::blue);
+	       p.drawRect(ui->spinBox_x_b->value(),ui->spinBox_y_b->value(),ui->spinBox_d_b->value(),ui->spinBox_d_b->value());
+	       scene_2->addPixmap(QPixmap::fromImage(image_));
+	   }
 }
 
 /// \brief function to apply binary HSV masking to the selected label, with the
@@ -318,10 +379,16 @@ void MainWindow::applyBinary()
 /// the mapped distance for the selected (mouse hovering) pixel
 void MainWindow::interactWithUser()
 {
-   if(draw_mode){
-      if(ui->check_draw->isChecked()){
+    Mat draw = temp.clone();
+    const cv::Point *pts = (const cv::Point*) Mat(maskContourPoints).data;
+	int npts = Mat(maskContourPoints).rows;
+
+	polylines(draw, &pts,&npts, 1,
+    true, Scalar(255,0,255),1, CV_AA, 0);
+
+   if((draw_mode || draw_scan || draw_rle)){
+      if(ui->check_draw->isChecked() && ui->tabWidget->currentIndex()==0){
       //Draw cross
-         Mat draw = temp.clone();
          img_calib_->drawCenter(&draw);
          image_ =  QImage(draw.data,
                  draw.cols, draw.rows,
@@ -329,8 +396,20 @@ void MainWindow::interactWithUser()
                  QImage::Format_RGB888).rgbSwapped();
          scene_->clear();
          scene_->addPixmap(QPixmap::fromImage(image_));
-      }  
-   } 
+      }
+     if(ui->tabWidget->currentIndex()==2){
+     // Draw RLE && Scanlines
+	Mat draw = temp.clone();
+	if(ui->check_draw_2->isChecked())linesRad.draw(draw,Scalar(0,0,255));
+	if(ui->check_draw_3->isChecked())rleLinesRad.draw(Scalar(255,255,255), Scalar(255,0,0), Scalar(255,255,255), &draw);
+        image_ =  QImage(draw.data,
+                 draw.cols, draw.rows,
+                 static_cast<int>(draw.step),
+                 QImage::Format_RGB888).rgbSwapped();
+        scene_3->clear();
+        scene_3->addPixmap(QPixmap::fromImage(image_));
+     }
+   }
 
    QPointF relativeOrigin = ui->graphicsView->mapToScene(ui->graphicsView->mapFromGlobal(QCursor::pos()));
    if(relativeOrigin.x()>=0 && relativeOrigin.x()<480 && relativeOrigin.y()>=0 && relativeOrigin.y()<480){
@@ -386,15 +465,20 @@ void MainWindow::on_bt_stop_clicked()
 void MainWindow::on_bt_setdist_clicked()
 {
    QStringList pixValues = ui->line_pixdist->text().split(",");
-   vector<short unsigned int> values; values.clear();
+   QStringList lineLeng = ui->line_pixleng->text().split(",");
+   vector<short unsigned int> values, values_2; values.clear(); values_2.clear();
    int targetValues = ui->spin_maxdist->value()/ui->spin_step->value();
    bool bad_configuration = false;
    int bad_conf_type = 0;
-   if(targetValues!=pixValues.size()) { 
+   if(targetValues!=pixValues.size() || targetValues!=lineLeng.size()) { 
       bad_configuration = true; bad_conf_type = 1; 
-   } else {
-      for(unsigned int val=0;val<pixValues.size();val++)
+   } else if(maskContourPoints.size()<10){
+      bad_configuration = true; bad_conf_type = 3; 
+   }else {
+      for(unsigned int val=0;val<pixValues.size();val++){
          values.push_back(pixValues[val].toInt());
+	 values_2.push_back(lineLeng[val].toInt());
+      }
          
       unsigned int i = 0;
       while( ((i+1)<values.size()) && !bad_configuration){
@@ -411,6 +495,7 @@ void MainWindow::on_bt_setdist_clicked()
       if(bad_conf_type==1) err = "Wrong number of distance values.\n"
       +QString::number(targetValues)+" arguments needed but "
       +QString::number(pixValues.size())+" were provided";
+      else if(bad_conf_type==3) err = "Unsufficient number of mask points.";
       else err = "Wrong sequence of distance values.";
       QMessageBox::critical(NULL, QObject::tr("Bad Distances Configuration"),
          QObject::tr(err.toStdString().c_str()));
@@ -420,9 +505,17 @@ void MainWindow::on_bt_setdist_clicked()
       msg.max_distance = ui->spin_maxdist->value();
       msg.step = ui->spin_step->value();
       msg.pixel_distances = values;
+      msg.lines_length = values_2;
+      msg.mask_contour.clear();
+      position pt ;
+      for(int i=0;i<maskContourPoints.size();i++){
+         pt.x = maskContourPoints[i].x;
+         pt.y = maskContourPoints[i].y;
+         msg.mask_contour.push_back(pt);
+      }
+      
       mirror_pub_.publish(msg);
    }
-   
    this->centralWidget()->setFocus();
 }
 
@@ -432,6 +525,7 @@ void MainWindow::on_bt_setlut_clicked()
 {
    vision_pub_.publish(img_calib_->getLutConfiguration());
    ROS_INFO("Correct vision configuration sent!");
+   img_calib_->generateLookUpTable();
    
    this->centralWidget()->setFocus();
 }
@@ -517,6 +611,14 @@ void MainWindow::on_bt_calib_clicked()
 void MainWindow::on_check_draw_clicked(bool state)
 {
    draw_mode = state;
+}
+void MainWindow::on_check_draw_2_clicked(bool state)
+{
+   draw_scan = state;
+}
+void MainWindow::on_check_draw_3_clicked(bool state)
+{
+   draw_rle = state;
 }
 
 //SLIDEBARS
@@ -619,6 +721,7 @@ void MainWindow::on_spin_cx_valueChanged(int value)
    msg.center_y = ui->spin_cy->value();
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 235,1,1);
    
    this->centralWidget()->setFocus();
 }
@@ -633,6 +736,7 @@ void MainWindow::on_spin_cy_valueChanged(int value)
    msg.center_y = value;
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 235,1,1);
    
    this->centralWidget()->setFocus();
 }
@@ -715,13 +819,23 @@ void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
 {
    //mirrorConfig
    ui->spin_step->setValue(mirrorConf.step);
+   ui->spin_step_2->setValue(mirrorConf.step);
    ui->spin_maxdist->setValue(mirrorConf.max_distance);
+   ui->spin_maxdist_2->setValue(mirrorConf.max_distance);
    QString distances = "";
    for(unsigned int i=0;i<mirrorConf.pixel_distances.size();i++)
       distances+=QString::number(mirrorConf.pixel_distances[i])
                + QString(",");
    distances.remove(distances.size()-1,1);
    ui->line_pixdist->setText(distances);
+
+   distances = "";
+   for(unsigned int i=0;i<mirrorConf.lines_length.size();i++)
+      distances+=QString::number(mirrorConf.lines_length[i])
+               + QString(",");
+   distances.remove(distances.size()-1,1);
+   ui->line_pixleng->setText(distances);
+
 
    ui->spin_framerate_3->setValue(worldConfBall.value_a);
    ui->spinBox->setValue(worldConfBall.value_b);
@@ -730,6 +844,12 @@ void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
    ui->spin_framerate_6->setValue(worldConfRLE.value_b);
    ui->spin_framerate_7->setValue(worldConfRLE.value_c);
    ui->spin_framerate_8->setValue(worldConfRLE.window);
+   
+   maskContourPoints.clear();
+   for(int i=0;i<mirrorConf.mask_contour.size();i++){
+      maskContourPoints.push_back(Point(mirrorConf.mask_contour[i].x
+      ,mirrorConf.mask_contour[i].y));
+   }
    
 }
 
@@ -1231,5 +1351,12 @@ void MainWindow::on_Rz_valueChanged(int value)
 {
    ui->lb_Rz->setText(QString::number(value));
 }
+
+void MainWindow::on_bt_setlength_clicked()
+{
+   on_bt_setdist_clicked();
+   this->centralWidget()->setFocus();
+}
+
 
 

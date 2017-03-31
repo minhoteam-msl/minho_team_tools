@@ -23,9 +23,12 @@
 #include "minho_team_ros/ControlerError.h"
 #include "minho_team_ros/ROI.h"
 #include "minho_team_ros/worldConfig.h"
+#include "minho_team_ros/position.h"
 #include "imagecalibrator.h"
 #include <QKeyEvent>
 #include <QMessageBox>
+#include "RLE.h"
+#include "ScanLines.h"
 
 
 using namespace ros;
@@ -35,6 +38,7 @@ using minho_team_ros::requestOmniVisionConf;
 using minho_team_ros::requestCamProperty;
 using minho_team_ros::requestCamPID;
 using minho_team_ros::requestROI;
+using minho_team_ros::position;
 using minho_team_ros::cameraProperty;
 using minho_team_ros::PID;
 using minho_team_ros::ControlerError;
@@ -71,6 +75,10 @@ private slots:
    /// detection allow to implement several actions without mouse usage
    /// \param event - QKeyEvent holding the data about the key press event  
    void keyPressEvent(QKeyEvent *event);
+   
+   /// \brief function that allows to add a point to the mask contour with
+   /// mouse lbutton and remove the last one with mouse rbutton
+   void mousePressEvent(QMouseEvent *event);
    
    /// \brief callback function that receives published images and converts them 
    /// into Opencv(Mat) format using cv_bridge and to Qt's QImage to be displayed.
@@ -308,6 +316,10 @@ private slots:
    void on_Qz_valueChanged(int value);
    void on_Rxy_valueChanged(int value);
    void on_Rz_valueChanged(int value);
+   void InitializeLinesDetector();
+   void on_check_draw_2_clicked(bool state);
+   void on_check_draw_3_clicked(bool state);
+   void on_bt_setlength_clicked();
 
 
 private:
@@ -318,7 +330,7 @@ private:
    /// \brief dividers to establish values correspondency
    float temp_prop_div,temp_k_div;
    /// \brief boolean variables to define current working mode
-   bool calibration_mode,draw_mode;
+   bool calibration_mode,draw_mode,draw_scan,draw_rle;
    /// \brief parent scene in QGraphicsView to draw on
    QGraphicsScene *scene_,*scene_2, *scene_3;
    /// \brief ImageCalibrator object, to do image operations and data
@@ -365,7 +377,11 @@ private:
    bool calib;
 
    worldConfig worldConfBall, worldConfObs, worldConfRLE, kalmanConf;
+   ScanLines linesRad;
+   RLE rleLinesRad;
+   Mat idxImage;
 
+   vector<Point> maskContourPoints;
 
 signals:
    /// \brief signal to make the new image be drawn in GUI

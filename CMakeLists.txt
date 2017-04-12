@@ -207,24 +207,6 @@ target_link_libraries(visualizer ${catkin_LIBRARIES} ${qt_LIBRARIES} ${opencv_LI
 add_dependencies(visualizer minho_team_ros_generate_messages_cpp)
 ######################################################################
 
-## MINI_BASESTATION CALIB ##
-######################################################################
-set(MINIBS_DIR ${PROJECT_DIRECTORY}/mini_basestation)
-set(minibs_MOC_H ${MINIBS_DIR}/include/mainwindow.h)
-qt5_wrap_cpp(minibs_CPP ${minibs_MOC_H})
-set(minibs_SRC ${MINIBS_DIR}/src/main.cpp ${MINIBS_DIR}/src/mainwindow.cpp 
-${MINIBS_DIR}/src/ball.cpp ${MINIBS_DIR}/src/customscene.cpp ${MINIBS_DIR}/src/desenharcampo.cpp 
-${MINIBS_DIR}/src/multicastpp.cpp ${MINIBS_DIR}/src/robo.cpp ${MINIBS_DIR}/src/thpool.c 
-${MINIBS_DIR}/src/velocityvector.cpp ${MINIBS_DIR}/config/rs.qrc) 
-add_executable(mini_basestation ${minibs_SRC} ${minibs_CPP}) 
-target_include_directories(mini_basestation PUBLIC
-$<BUILD_INTERFACE:${MINIBS_DIR}/include>)
-set_target_properties(mini_basestation PROPERTIES COMPILE_FLAGS "-fPIC")
-target_compile_features(mini_basestation PRIVATE cxx_range_for)
-target_link_libraries(mini_basestation ${catkin_LIBRARIES} ${qt_LIBRARIES})
-add_dependencies(mini_basestation minho_team_ros_generate_messages_cpp)
-######################################################################
-
 ## CONTROL ##
 ######################################################################
 set(CCALIB_DIR ${PROJECT_DIRECTORY}/control_calib)

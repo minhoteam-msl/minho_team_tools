@@ -171,7 +171,7 @@ void MainWindow::InitializeLinesDetector()
 {
    idxImage = Mat(480,480,CV_8UC3,Scalar(0,0,0));
    imageConfig imgconf = img_calib_->getImageConfiguration();
-   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(imgconf.center_x,imgconf.center_y), 2, 70, 235,1,1);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(imgconf.center_x,imgconf.center_y), 2, 70, 300,1,1);
 }
 
 /// \brief function to setup the graphicsscene and create the 
@@ -721,7 +721,7 @@ void MainWindow::on_spin_cx_valueChanged(int value)
    msg.center_y = ui->spin_cy->value();
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
-   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 235,1,1);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 300,1,1);
    
    this->centralWidget()->setFocus();
 }
@@ -736,7 +736,7 @@ void MainWindow::on_spin_cy_valueChanged(int value)
    msg.center_y = value;
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
-   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 235,1,1);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 300,1,1);
    
    this->centralWidget()->setFocus();
 }

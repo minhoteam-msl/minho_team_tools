@@ -216,14 +216,6 @@ void MainWindow::on_kick_type_passe_clicked(bool state)
 {
     if(state) ai.target_kick_is_pass = true;
 }
-void MainWindow::on_spin_accel_valueChanged(double value)
-{
-    ctrl_config.acceleration = value;
-}
-void MainWindow::on_spin_decel_valueChanged(double value)
-{
-    ctrl_config.deceleration = value;
-}
 
 void MainWindow::on_bt_send_parameters_clicked()
 {

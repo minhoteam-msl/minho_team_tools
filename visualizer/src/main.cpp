@@ -7,6 +7,7 @@
 #include "minho_team_ros/goalKeeperInfo.h"
 #include "minho_team_ros/interAgentInfo.h"
 #include "minho_team_ros/requestExtendedDebug.h"
+#include "std_msgs/UInt8.h"
 //Application includes
 #include <QApplication>
 #include "visualizer.h"
@@ -33,6 +34,7 @@ using minho_team_ros::goalKeeperInfo;
 using minho_team_ros::interAgentInfo;
 using minho_team_ros::requestExtendedDebug;
 using minho_team_ros::pathData;
+using std_msgs::UInt8;
 
 //Node specific objects
 /// \brief external visualizer class to draw robot's world model
@@ -149,14 +151,19 @@ void* udpReceivingThread(void *socket)
          relay_packet.packet = new uint8_t[recvlen];
          relay_packet.packet_size = recvlen;
          memcpy(relay_packet.packet,buffer,recvlen);
-         interAgentInfo msg;
-         deserializeROSMessage<interAgentInfo>(&relay_packet,&msg);
-         if(msg.agent_id==robot_id){
-            pthread_mutex_lock (&exvis_mutex); //Lock mutex
-	         exvis->setRobotInfo(msg.agent_info.robot_info);
-	         exvis->drawWorldModel(false);
-            pthread_mutex_unlock (&exvis_mutex); //Unlock mutex 
-         }
+         UInt8 msg;
+         ros::serialization::IStream istream(relay_packet.packet, sizeof(msg.data));
+         ros::serialization::deserialize(istream, msg);
+         if(msg.data==1){
+            interAgentInfo msg;
+            deserializeROSMessage<interAgentInfo>(&relay_packet,&msg);
+            if(msg.agent_id==robot_id){
+                pthread_mutex_lock (&exvis_mutex); //Lock mutex
+                exvis->setRobotInfo(msg.agent_info.robot_info);
+                exvis->drawWorldModel(false);
+                pthread_mutex_unlock (&exvis_mutex); //Unlock mutex 
+            }
+        }  
       }
    }
    

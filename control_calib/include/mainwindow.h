@@ -55,8 +55,6 @@ private slots:
     void on_targ_kstr_valueChanged(int value);
     void on_kick_type_chuto_clicked(bool state);
     void on_kick_type_passe_clicked(bool state);
-    void on_spin_accel_valueChanged(double value);
-    void on_spin_decel_valueChanged(double value);
     void on_bt_send_parameters_clicked();
     void sendInfo();
 private:

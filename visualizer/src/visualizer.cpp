@@ -28,7 +28,7 @@ void Visualizer::initField(QString file_)
     // Create view of current Field
     QFile file(file_);
     if(!file.open(QIODevice::ReadOnly)) {
-        ROS_ERROR("Error reading field.view.");
+        ROS_ERROR("Error reading field.view .");
         exit(6);
     }
     QTextStream in(&file);
@@ -186,6 +186,14 @@ void Visualizer::drawWorldModel(bool drawKeeperInfo)
       for(unsigned int i=0; i<path_points.path.size()-1; i++) {
       line(worldModel,world2WorldModel(Point2d(path_points.path[i].x,path_points.path[i].y)),
                       world2WorldModel(Point2d(path_points.path[i+1].x,path_points.path[i+1].y)),
+                      Scalar(0,0,153), 3);
+      }
+   }
+
+   if(path_points.path_interpolation.size() > 1) {
+      for(unsigned int i=0; i<path_points.path_interpolation.size()-1; i++) {
+      line(worldModel,world2WorldModel(Point2d(path_points.path_interpolation[i].x,path_points.path_interpolation[i].y)),
+                      world2WorldModel(Point2d(path_points.path_interpolation[i+1].x,path_points.path_interpolation[i+1].y)),
                       Scalar(0,0,255), 3);
       }
    }

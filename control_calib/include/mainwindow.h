@@ -28,8 +28,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_max_lin_valueChanged(int value);
-    void on_max_rot_valueChanged(int value);
+    void on_max_lin_vel_valueChanged(int value);
+    void on_max_ang_vel_valueChanged(int value);
     void on_bt_voronoi_seg_clicked();
     void on_bt_intersect_seg_clicked();
     void on_bt_dijk_path_clicked();
@@ -37,20 +37,21 @@ private slots:
     void on_bt_smooth_path_clicked();
     void on_bt_smooth_path_obst_circle_clicked();
     void on_bt_path_clicked();
+    void on_bt_path_interpolation_clicked();
     void on_bt_obstacles_circle_clicked();
-    void on_spin_p_valueChanged(double value);
-    void on_spin_i_valueChanged(double value);
-    void on_spin_d_valueChanged(double value);
+    void on_spin_Kp_rot_valueChanged(double value);
+    void on_spin_Ki_rot_valueChanged(double value);
+    void on_spin_Kd_rot_valueChanged(double value);
+    void on_spin_Kp_lin_valueChanged(double value);
+    void on_spin_Ki_lin_valueChanged(double value);
+    void on_spin_Kd_lin_valueChanged(double value);
     void on_targ_x_valueChanged(double value);
     void on_targ_y_valueChanged(double value);
     void on_targ_theta_valueChanged(double value);
     void on_targ_k_x_valueChanged(double value);
     void on_targ_k_y_valueChanged(double value);
     void on_action_0_clicked(bool state);
-    void on_action_1_clicked(bool state);
-    void on_action_2_clicked(bool state);
-    void on_action_3_clicked(bool state);
-    void on_action_4_clicked(bool state);
+    void on_action_50_clicked(bool state);
     void on_targ_kstr_valueChanged(int value);
     void on_kick_type_chuto_clicked(bool state);
     void on_kick_type_passe_clicked(bool state);

@@ -6,8 +6,8 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    on_max_lin_valueChanged(ui->max_lin->value());
-    on_max_rot_valueChanged(ui->max_rot->value());
+    on_max_lin_vel_valueChanged(ui->max_lin_vel->value());
+    on_max_ang_vel_valueChanged(ui->max_ang_vel->value());
     ui->action_0->setChecked(true);
 
     // Setup of ROS
@@ -50,11 +50,16 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
     requestControlConfig srv; 
     if(controlConfSv.call(srv)){
       ROS_INFO("Retrieved configuration from target robot.");
-      ui->spin_p->setValue(srv.response.config.P);
-      ui->spin_i->setValue(srv.response.config.I);
-      ui->spin_d->setValue(srv.response.config.D);
-      ui->max_lin->setValue(srv.response.config.max_linear_velocity);
-      ui->max_rot->setValue(srv.response.config.max_angular_velocity);
+      ui->spin_Kp_rot->setValue(srv.response.config.Kp_rot);
+      ui->spin_Ki_rot->setValue(srv.response.config.Ki_rot);
+      ui->spin_Kd_rot->setValue(srv.response.config.Kd_rot);
+      ui->spin_Kp_lin->setValue(srv.response.config.Kp_lin);
+      ui->spin_Ki_lin->setValue(srv.response.config.Ki_lin);
+      ui->spin_Kd_lin->setValue(srv.response.config.Kd_lin);
+      ui->max_lin_vel->setValue(srv.response.config.max_linear_velocity);
+      ui->lb_max_lin_vel->setText(QString::number(srv.response.config.max_linear_velocity));
+      ui->max_ang_vel->setValue(srv.response.config.max_angular_velocity);
+      ui->lb_max_ang_vel->setText(QString::number(srv.response.config.max_angular_velocity));
       ui->spin_accel->setValue(srv.response.config.acceleration);
       ui->spin_decel->setValue(srv.response.config.deceleration);
     } else ROS_ERROR("Failed to retrieve configuration from target robot.");
@@ -69,15 +74,15 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_max_lin_valueChanged(int value)
+void MainWindow::on_max_lin_vel_valueChanged(int value)
 {
-    ui->lb_maxlin->setText(QString::number(value));
+    ui->lb_max_lin_vel->setText(QString::number(value));
     ctrl_config.max_linear_velocity = value;
 }
 
-void MainWindow::on_max_rot_valueChanged(int value)
+void MainWindow::on_max_ang_vel_valueChanged(int value)
 {
-    ui->lb_maxrot->setText(QString::number(value));
+    ui->lb_max_ang_vel->setText(QString::number(value));
     ctrl_config.max_angular_velocity = value;
 }
 
@@ -123,25 +128,46 @@ void MainWindow::on_bt_path_clicked()
     cconfig_pub.publish(ctrl_config);
 }
 
+void MainWindow::on_bt_path_interpolation_clicked()
+{
+    ctrl_config.send_path_interpolation = !ctrl_config.send_path_interpolation;
+    cconfig_pub.publish(ctrl_config);
+}
+
 void MainWindow::on_bt_obstacles_circle_clicked()
 {
     ctrl_config.send_obstacles_circle = !ctrl_config.send_obstacles_circle;
     cconfig_pub.publish(ctrl_config);
 }
 
-void MainWindow::on_spin_p_valueChanged(double value)
+void MainWindow::on_spin_Kp_rot_valueChanged(double value)
 {
-    ctrl_config.P = value;
+    ctrl_config.Kp_rot = value;
 }
 
-void MainWindow::on_spin_i_valueChanged(double value)
+void MainWindow::on_spin_Ki_rot_valueChanged(double value)
 {
-    ctrl_config.I = value;
+    ctrl_config.Ki_rot = value;
 }
 
-void MainWindow::on_spin_d_valueChanged(double value)
+void MainWindow::on_spin_Kd_rot_valueChanged(double value)
 {
-    ctrl_config.D = value;
+    ctrl_config.Kd_rot = value;
+}
+
+void MainWindow::on_spin_Kp_lin_valueChanged(double value)
+{
+    ctrl_config.Kp_lin = value;
+}
+
+void MainWindow::on_spin_Ki_lin_valueChanged(double value)
+{
+    ctrl_config.Ki_lin = value;
+}
+
+void MainWindow::on_spin_Kd_lin_valueChanged(double value)
+{
+    ctrl_config.Kd_lin = value;
 }
 
 void MainWindow::on_targ_x_valueChanged(double value)
@@ -174,24 +200,9 @@ void MainWindow::on_action_0_clicked(bool state)
     if(state) ai.action = 0;
 }
 
-void MainWindow::on_action_1_clicked(bool state)
+void MainWindow::on_action_50_clicked(bool state)
 {
-    if(state) ai.action = 1;
-}
-
-void MainWindow::on_action_2_clicked(bool state)
-{
-    if(state) ai.action = 2;
-}
-
-void MainWindow::on_action_3_clicked(bool state)
-{
-    if(state) ai.action = 3;
-}
-
-void MainWindow::on_action_4_clicked(bool state)
-{
-    if(state) ai.action = 4;
+    if(state) ai.action = 50;
 }
 
 void MainWindow::on_targ_kstr_valueChanged(int value)

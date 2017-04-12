@@ -311,12 +311,10 @@ void MainWindow::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         ui->pixel_num_lb->setText(QString::number(rleLinesRad.rlData[0].lengthColor));
         ui->pixel_num_lb_2->setText(QString::number((int)sqrt((rleLinesRad.rlData[0].start%480-imgconf.center_x)*(rleLinesRad.rlData[0].start%480-imgconf.center_x)
       +(rleLinesRad.rlData[0].start/480-imgconf.center_y)*(rleLinesRad.rlData[0].start/480-imgconf.center_y))));
-        ui->bt_setlength->setEnabled(true);
      }
      else {
 	ui->pixel_num_lb->setText(QString::number(0));
 	ui->pixel_num_lb_2->setText(QString::number(0));
-	ui->bt_setlength->setEnabled(false);
      }
      
    }
@@ -502,6 +500,7 @@ void MainWindow::on_bt_setdist_clicked()
    }else {
       ROS_INFO("Correct mirror configuration sent!");
       mirrorConfig msg;
+      msg.filter_lines = ui->filter_percentage_trackbar->value();
       msg.max_distance = ui->spin_maxdist->value();
       msg.step = ui->spin_step->value();
       msg.pixel_distances = values;
@@ -845,6 +844,9 @@ void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
    ui->spin_framerate_7->setValue(worldConfRLE.value_c);
    ui->spin_framerate_8->setValue(worldConfRLE.window);
    
+   ui->filter_percentage_trackbar->setValue(mirrorConf.filter_lines);
+   ui->lb_filter_perc->setText(QString::number(mirrorConf.filter_lines));
+
    maskContourPoints.clear();
    for(int i=0;i<mirrorConf.mask_contour.size();i++){
       maskContourPoints.push_back(Point(mirrorConf.mask_contour[i].x
@@ -1352,11 +1354,50 @@ void MainWindow::on_Rz_valueChanged(int value)
    ui->lb_Rz->setText(QString::number(value));
 }
 
-void MainWindow::on_bt_setlength_clicked()
+void MainWindow::on_filter_percentage_trackbar_valueChanged(int value)
 {
-   on_bt_setdist_clicked();
-   this->centralWidget()->setFocus();
+   ui->lb_filter_perc->setText(QString::number(value));
 }
 
+void MainWindow::on_check_draw_3_stateChanged(int value)
+{
+   if(ui->check_draw_3->isChecked()){
 
+   bool multiple_send_request = ui->radio_multiple_2->isChecked();
+   minho_team_ros::requestImage srv;
+   srv.request.is_multiple = multiple_send_request;
+   srv.request.frequency = 20;
+   srv.request.type = 1;
+   imgRequest.call(srv);
+   ui->combo_aqtype_2->setEnabled(false);
+   }
+
+   else{
+   bool multiple_send_request = ui->radio_multiple_2->isChecked();
+   minho_team_ros::requestImage srv;
+   srv.request.is_multiple = multiple_send_request;
+   srv.request.frequency = 20;
+   srv.request.type = ui->combo_aqtype_2->currentIndex();
+   imgRequest.call(srv);
+   ui->combo_aqtype_2->setEnabled(true);
+   }
+}
+
+void MainWindow::on_bt_setlengstr_clicked()
+{
+   if(ui->line_pixdist->text() == "" && ui->line_pixleng->text() == ""){
+      dist_pix = "";
+      line_pix = "";
+      dist_pix += ui->pixel_num_lb_2->text();
+      line_pix += ui->pixel_num_lb->text();
+   }
+   else{
+	dist_pix += QString(",") + ui->pixel_num_lb_2->text();
+        line_pix += QString(",") + ui->pixel_num_lb->text();
+   }
+
+   ui->line_pixdist->setText(dist_pix);
+   ui->line_pixleng->setText(line_pix);
+
+}
 

@@ -319,8 +319,9 @@ private slots:
    void InitializeLinesDetector();
    void on_check_draw_2_clicked(bool state);
    void on_check_draw_3_clicked(bool state);
-   void on_bt_setlength_clicked();
-
+   void on_filter_percentage_trackbar_valueChanged(int value);
+   void on_check_draw_3_stateChanged(int value);
+   void on_bt_setlengstr_clicked();
 
 private:
    /// \brief pointer to MainWindow's GUI 
@@ -383,6 +384,7 @@ private:
 
    vector<Point> maskContourPoints;
 
+   QString dist_pix,line_pix;
 signals:
    /// \brief signal to make the new image be drawn in GUI
    void addNewImage();

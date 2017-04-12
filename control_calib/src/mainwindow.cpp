@@ -60,8 +60,6 @@ MainWindow::MainWindow(int robot_id, bool real_robot, QWidget *parent) :
       ui->lb_max_lin_vel->setText(QString::number(srv.response.config.max_linear_velocity));
       ui->max_ang_vel->setValue(srv.response.config.max_angular_velocity);
       ui->lb_max_ang_vel->setText(QString::number(srv.response.config.max_angular_velocity));
-      ui->spin_accel->setValue(srv.response.config.acceleration);
-      ui->spin_decel->setValue(srv.response.config.deceleration);
     } else ROS_ERROR("Failed to retrieve configuration from target robot.");
 
     send_timer = new QTimer();

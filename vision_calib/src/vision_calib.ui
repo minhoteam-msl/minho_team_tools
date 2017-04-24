@@ -493,7 +493,7 @@ D -&gt; Decrease FPS</string>
      </size>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="tab">
      <attribute name="title">
@@ -2910,20 +2910,6 @@ D -&gt; Decrease FPS</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0" colspan="2">
-         <widget class="QPushButton" name="bt_ROIS_w">
-          <property name="font">
-           <font>
-            <pointsize>7</pointsize>
-            <weight>50</weight>
-            <bold>false</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Set White ROI</string>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="2" colspan="2">
          <widget class="QPushButton" name="bt_ROIS_b">
           <property name="font">
@@ -2935,6 +2921,20 @@ D -&gt; Decrease FPS</string>
           </property>
           <property name="text">
            <string>Set Black ROI</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QPushButton" name="bt_ROIS_w">
+          <property name="font">
+           <font>
+            <pointsize>7</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Set White ROI</string>
           </property>
          </widget>
         </item>
@@ -2997,7 +2997,7 @@ D -&gt; Decrease FPS</string>
            </font>
           </property>
           <property name="text">
-           <string>Calibrate</string>
+           <string>Calibrating</string>
           </property>
          </widget>
         </item>
@@ -4669,17 +4669,6 @@ D -&gt; Decrease FPS</string>
      </layout>
     </widget>
    </widget>
-   <zorder>tabWidget</zorder>
-   <zorder>label_3</zorder>
-   <zorder>radio_multiple</zorder>
-   <zorder></zorder>
-   <zorder></zorder>
-   <zorder></zorder>
-   <zorder>label_4</zorder>
-   <zorder>combo_aqtype</zorder>
-   <zorder>label_40</zorder>
-   <zorder>label_50</zorder>
-   <zorder>label_58</zorder>
   </widget>
  </widget>
  <resources/>

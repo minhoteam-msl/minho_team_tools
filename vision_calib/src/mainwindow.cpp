@@ -171,7 +171,7 @@ void MainWindow::InitializeLinesDetector()
 {
    idxImage = Mat(480,480,CV_8UC3,Scalar(0,0,0));
    imageConfig imgconf = img_calib_->getImageConfiguration();
-   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(imgconf.center_x,imgconf.center_y), 2, 70, 300,1,1);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(imgconf.center_x,imgconf.center_y), 2, 70, scan_size,1,1);
 }
 
 /// \brief function to setup the graphicsscene and create the 
@@ -186,7 +186,7 @@ void MainWindow::setup()
    ui->graphicsView_2->setScene(scene_2);
    ui->graphicsView_3->setScene(scene_3);
 
-   calib=false;
+   calib=true;
    temp = Mat(480,480,CV_8UC3,Scalar(0,0,0));
 }
    
@@ -503,6 +503,7 @@ void MainWindow::on_bt_setdist_clicked()
       msg.filter_lines = ui->filter_percentage_trackbar->value();
       msg.max_distance = ui->spin_maxdist->value();
       msg.step = ui->spin_step->value();
+      msg.scanline_length = scan_size;
       msg.pixel_distances = values;
       msg.lines_length = values_2;
       msg.mask_contour.clear();
@@ -720,7 +721,7 @@ void MainWindow::on_spin_cx_valueChanged(int value)
    msg.center_y = ui->spin_cy->value();
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
-   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 300,1,1);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, scan_size,1,1);
    
    this->centralWidget()->setFocus();
 }
@@ -735,7 +736,7 @@ void MainWindow::on_spin_cy_valueChanged(int value)
    msg.center_y = value;
    msg.tilt = ui->spin_tilt->value();
    img_calib_->imageConfigFromMsg(msg);
-   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, 300,1,1);
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(msg.center_x,msg.center_y), 2, 70, scan_size,1,1);
    
    this->centralWidget()->setFocus();
 }
@@ -821,6 +822,8 @@ void MainWindow::loadMirrorValues(minho_team_ros::mirrorConfig mirrorConf)
    ui->spin_step_2->setValue(mirrorConf.step);
    ui->spin_maxdist->setValue(mirrorConf.max_distance);
    ui->spin_maxdist_2->setValue(mirrorConf.max_distance);
+   ui->scanline_trackbar->setValue(mirrorConf.scanline_length);
+   ui->lb_scanline->setText(QString::number(mirrorConf.scanline_length));
    QString distances = "";
    for(unsigned int i=0;i<mirrorConf.pixel_distances.size();i++)
       distances+=QString::number(mirrorConf.pixel_distances[i])
@@ -1029,12 +1032,12 @@ void MainWindow::LoadTargetsCal()
    srv_prop.request.property=msg;
    srv_prop.request.is_set=false;
    if(!propertyConf.call(srv_prop))ROS_ERROR("Failed to retrieve property values from target robot.");
-   else ui->sat_trackbar->setValue(srv_prop.response.property.val_a);
+   else ui->lumi_trackbar->setValue(srv_prop.response.property.val_a);
    msg.targets = true;
    msg.blue = true;
    srv_prop.request.property=msg;
    if(!propertyConf.call(srv_prop))ROS_ERROR("Failed to retrieve property values from target robot.");
-   else ui->lumi_trackbar->setValue(srv_prop.response.property.val_a);
+   else ui->sat_trackbar->setValue(srv_prop.response.property.val_a);
 }
 
 /// \brief function to set trackbar ranges of Kp,Ki,Kd,Prop
@@ -1385,19 +1388,24 @@ void MainWindow::on_check_draw_3_stateChanged(int value)
 
 void MainWindow::on_bt_setlengstr_clicked()
 {
-   if(ui->line_pixdist->text() == "" && ui->line_pixleng->text() == ""){
-      dist_pix = "";
-      line_pix = "";
-      dist_pix += ui->pixel_num_lb_2->text();
-      line_pix += ui->pixel_num_lb->text();
+   if(ui->line_pixdist->text()=="" || ui->line_pixleng->text()==""){
+      ui->line_pixdist->setText(ui->pixel_num_lb_2->text());
+      ui->line_pixleng->setText(ui->pixel_num_lb->text());
    }
-   else{
-	dist_pix += QString(",") + ui->pixel_num_lb_2->text();
-        line_pix += QString(",") + ui->pixel_num_lb->text();
+   else {
+      ui->line_pixdist->setText(ui->line_pixdist->text()+","+ui->pixel_num_lb_2->text());
+      ui->line_pixleng->setText(ui->line_pixleng->text()+","+ui->pixel_num_lb->text());
+
    }
-
-   ui->line_pixdist->setText(dist_pix);
-   ui->line_pixleng->setText(line_pix);
-
 }
+
+void MainWindow::on_scanline_trackbar_valueChanged(int value)
+{
+   ui->lb_scanline->setText(QString::number(value));
+   scan_size = value;
+   imageConfig imgconf = img_calib_->getImageConfiguration();
+   linesRad = ScanLines(idxImage,UAV_RADIAL, Point(imgconf.center_x,imgconf.center_y), 2, 70, scan_size,1,1);
+}
+
+
 

@@ -111,23 +111,46 @@ void MainWindow::saveMapConfiguration(QString file_)
         compY = ((fieldAnatomy.fieldDims.TOTAL_WIDTH/2)*scale);
     }
 
-    for(int x=0;x<=field.cols;x+=step){
-        xReal = ((double)x*(double)scale-(double)compX)/divider; //to meters/millimeters
-        for(int y=0;y<=field.rows;y+=step){
-            Point pt = Point(x,y);
-            Point3i ret = getNearestDistance(pt);
-            yReal = ((double)y*(double)scale-(double)compY)/divider; //to meters/millimeters
-            if(ui->cb_units->currentIndex()==1){ //meters
-                output = "("+QString::number(xReal,'f',2)+","+QString::number(yReal,'f',2)+"):"
-                        +QString::number(ret.z/divider,'f',3)+"\n";
-            } else {
-                output = "("+QString::number((int)xReal)+","+QString::number((int)yReal)+"):"
-                        +QString::number((int)ret.z)+"\n";
+    if(!ui->rb_fullfield->isChecked()){
+        for(int x=0;x<=field.cols;x+=step){
+            xReal = ((double)x*(double)scale-(double)compX)/divider; //to meters/millimeters
+            for(int y=0;y<=field.rows;y+=step){
+                Point pt = Point(x,y);
+                Point3i ret = getNearestDistance(pt);
+                yReal = ((double)y*(double)scale-(double)compY)/divider; //to meters/millimeters
+                if(ui->cb_units->currentIndex()==1){ //meters
+                    output = "("+QString::number(xReal,'f',2)+","+QString::number(yReal,'f',2)+"):"
+                            +QString::number(ret.z/divider,'f',3)+"\n";
+                } else {
+                    output = "("+QString::number((int)xReal)+","+QString::number((int)yReal)+"):"
+                            +QString::number((int)ret.z)+"\n";
+                }
+                out << output;
+                waitKey(1);
+                counter++;
+                ui->pb_write->setValue(counter);
             }
-            out << output;
-            waitKey(1);
-            counter++;
-            ui->pb_write->setValue(counter);
+        }
+    } else {
+    
+        for(int y=0;y<=field.rows;y+=step){
+            yReal = ((double)y*(double)scale-(double)compY)/divider; //to meters/millimeters
+            for(int x=0;x<=field.cols;x+=step){
+                Point pt = Point(x,y);
+                Point3i ret = getNearestDistance(pt);
+                xReal = ((double)x*(double)scale-(double)compX)/divider; //to meters/millimeters
+                if(ui->cb_units->currentIndex()==1){ //meters
+                    output = "("+QString::number(xReal,'f',2)+","+QString::number(yReal,'f',2)+"):"
+                            +QString::number(ret.z/divider,'f',3)+"\n";
+                } else {
+                    output = "("+QString::number((int)xReal)+","+QString::number((int)yReal)+"):"
+                            +QString::number((int)ret.z)+"\n";
+                }
+                out << output;
+                waitKey(1);
+                counter++;
+                ui->pb_write->setValue(counter);
+            }
         }
     }
 
